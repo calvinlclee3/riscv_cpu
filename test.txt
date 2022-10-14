@@ -1,1 +1,1 @@
-Test commit from GitLab web page.
+Test commit from EWS terminal.

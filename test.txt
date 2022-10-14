@@ -1,1 +1,1 @@
-Test commit from EWS terminal.
+Test SSH key.

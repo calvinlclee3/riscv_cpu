@@ -26,10 +26,20 @@ begin
     end
 end
 
+/* Transparent Register File */
 always_comb
 begin
-    reg_a = src_a ? data[src_a] : 0;
-    reg_b = src_b ? data[src_b] : 0;
+
+    if(src_a == dest && load) // CP1_possible_error
+        reg_a = src_a ? in : '0;
+    else
+        reg_a = src_a ? data[src_a] : '0;
+
+    if(src_b == dest && load) 
+        reg_b = src_b ? in : '0;
+    else
+        reg_b = src_b ? data[src_b] : '0;
+
 end
 
 endmodule : regfile

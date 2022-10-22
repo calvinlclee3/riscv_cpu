@@ -70,6 +70,72 @@ typedef enum bit [2:0] {
     alu_and = 3'b111
 } alu_ops;
 
+typedef struct packed {
+
+    rv32i_opcode opcode;
+    logic [2:0] funct3;
+    logic [6:0] funct7;
+    rv32i_reg rs1_id;
+    rv32i_reg rs2_id;
+    rv32i_reg rd_id;
+
+    alu_ops aluop;
+    branch_funct3_t cmpop;
+
+    cmpmux_sel_t cmp_MUX_sel;
+    alumux1_sel_t alu_1_MUX_sel;
+    alumux2_sel_t alu_2_MUX_sel;
+    regfilemux_sel_t regfile_MUX_sel;
+
+    logic load_regfile;
+    logic load_pc;
+    logic mem_read;
+    logic mem_write;
+
+} rv32i_control_word;
+
+typedef struct packed {
+
+    rv32i_word pc;
+    rv32i_word ir;
+
+} if_id_pipeline_reg;
+
+typedef struct packed {
+
+    rv32i_word pc;
+    rv32i_word rs1_out;
+    rv32i_word rs2_out;
+    rv32i_word imm; 
+    logic br_en;
+    rv32i_control_word ctrl;
+
+} id_ex_pipeline_reg;
+
+typedef struct packed {
+
+    rv32i_word pc;
+    rv32i_word alu_out;
+    rv32i_word alu_out_address;
+    rv32i_mem_wmask write_read_mask;
+    rv32i_word mem_data_out;
+    logic br_en;
+    rv32i_word imm; 
+    rv32i_control_word ctrl;
+
+} ex_mem_pipeline_reg;
+
+typedef struct packed {
+
+    rv32i_word pc;
+    rv32i_word alu_out;
+    rv32i_word MDR;
+    rv32i_mem_wmask write_read_mask;  
+    logic br_en;
+    rv32i_word imm; 
+    rv32i_control_word ctrl;
+
+} mem_wb_pipeline_reg;
 
 endpackage : rv32i_types
 

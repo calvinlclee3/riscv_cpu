@@ -1,3 +1,5 @@
+`define BAD_MUX_SEL $display("%0d: %s:  %0t: Illegal MUX Select", `__LINE__, `__FILE__, $time)
+
 module immediate_gen
 import rv32i_types::*;
 (
@@ -63,6 +65,11 @@ always_comb begin
             imm = i_imm;
         end
 
+        default:
+        begin
+            
+            // $display("%0b", opcode);
+        end 
     endcase
 
 end

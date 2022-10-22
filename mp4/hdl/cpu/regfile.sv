@@ -30,7 +30,7 @@ end
 always_comb
 begin
 
-    if(src_a == dest && load) // CP1_possible_error
+    if(src_a == dest && load) // CP1_possible_error: transparent logic
         reg_a = src_a ? in : '0;
     else
         reg_a = src_a ? data[src_a] : '0;

@@ -27,8 +27,8 @@ typedef enum bit {
 } alumux1_sel_t;
 
 typedef enum bit {
-    imm      = 1'b0;
-    ,rs2_out = 1'b1;
+    imm      = 1'b0
+    ,rs2_out = 1'b1
 } alumux2_sel_t;
 endpackage
 

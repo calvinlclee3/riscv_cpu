@@ -5,7 +5,7 @@ import rv32i_types::*;
     input clk,
     input rst,
 	
-	//Remove after CP1
+	// Remove after CP1
     input 					instr_mem_resp,
     input rv32i_word 	instr_mem_rdata,
 	input 					data_mem_resp,
@@ -30,6 +30,29 @@ import rv32i_types::*;
     output rv32i_word pmem_address,
     output [63:0] pmem_wdata
 	*/
+);
+
+cpu cpu (
+
+    .clk(clk),
+    .rst(rst),
+	
+    /* I-Cache Ports */
+    .instr_read(instr_read),
+    .instr_mem_address(instr_mem_address),
+    .instr_mem_rdata(instr_mem_rdata),
+    .instr_mem_resp(instr_mem_resp),
+
+
+    /* D-Cache Ports */
+    .data_read(data_read),
+    .data_write(data_write),
+    .data_mem_address(data_mem_address),
+    .data_mem_rdata(data_mem_rdata), 
+    .data_mbe(data_mbe),
+    .data_mem_wdata(data_mem_wdata),
+	.data_mem_resp(data_mem_resp)
+
 );
 
 endmodule : mp4

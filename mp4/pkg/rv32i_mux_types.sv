@@ -42,3 +42,10 @@ typedef enum bit [2:0] {
 } regfilemux_sel_t;
 endpackage
 
+package targetaddressmux;
+typedef enum bit {
+    pc       = 1'b0
+    ,rs1_out = 1'b1
+} targetaddressmux_sel_t;
+endpackage
+

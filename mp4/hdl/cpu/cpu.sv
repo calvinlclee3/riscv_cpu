@@ -30,6 +30,7 @@ rv32i_word alu_out;
 rv32i_word target_address;
 
 rv32i_word pc_mux_out;
+rv32i_word target_address_mux_out;
 rv32i_word cmp_mux_out;
 rv32i_word alu_1_mux_out;
 rv32i_word alu_2_mux_out;
@@ -200,8 +201,8 @@ assign pc_MUX_sel[1] = (rv32i_opcode'(if_id_out.ir[6:0]) == op_jalr) ? 1'b1 : 1'
 
 /****************************** MUXES ******************************/ 
 
-// possible_error: Not supporting JALR.
-assign target_address = if_id_out.pc + id_ex_in.imm;
+
+assign target_address = target_address_mux_out + id_ex_in.imm;
 always_comb begin : PCMUX
 
     pc_mux_out = '0;
@@ -214,6 +215,16 @@ always_comb begin : PCMUX
     endcase
 end
 
+always_comb begin : TARGETADDRESSMUX
+
+    target_address_mux_out = '0;
+
+    unique case(id_ex_in.ctrl.target_address_MUX_sel)
+        targetaddressmux::pc       : target_address_mux_out = if_id_out.pc;
+        targetaddressmux::rs1_out  : target_address_mux_out = id_ex_in.rs1_out;
+        default: ;
+    endcase
+end
 
 always_comb begin : CMPMUX
 

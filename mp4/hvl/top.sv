@@ -28,6 +28,7 @@ end
 
 assign rvfi.commit = 0; // Set high when a valid instruction is modifying regfile or PC
 assign rvfi.halt = 0; // Set high when target PC == Current PC for a branch
+// assign rvfi.halt = dut.cpu.PC.load && (dut.cpu.if_id_out.pc == dut.cpu.target_address) && (dut.cpu.if_id_out.ir[6:0] == 7'b1100011); 
 initial rvfi.order = 0;
 always @(posedge itf.clk iff rvfi.commit) rvfi.order <= rvfi.order + 1; // Modify for OoO
 

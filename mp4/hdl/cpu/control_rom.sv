@@ -32,6 +32,7 @@ function void set_defaults();
     ctrl.alu_1_MUX_sel = alumux::rs1_out;
     ctrl.alu_2_MUX_sel = alumux::imm;
     ctrl.regfile_MUX_sel = regfilemux::alu_out;
+    ctrl.target_address_MUX_sel = targetaddressmux::pc;
     ctrl.load_regfile = 1'b0;
     ctrl.load_pc = 1'b1;
     ctrl.mem_read = 1'b0;
@@ -88,6 +89,7 @@ always_comb begin
         op_jalr  : begin
             setALU(alumux::rs1_out, alumux::imm, 1, alu_add);
             loadRegfile(regfilemux::pc_plus4);
+            ctrl.target_address_MUX_sel = targetaddressmux::rs1_out;
         end
         op_br    : begin
             setCMP(cmpmux::rs2_out, branch_funct3);

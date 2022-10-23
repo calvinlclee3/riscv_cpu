@@ -14,7 +14,7 @@ always_comb begin
 
     write_read_mask = '0; 
 
-    case (funct3)
+    unique case (funct3)
 
         3'b000, 3'b100: // SB, LB, LBU
         begin
@@ -38,6 +38,7 @@ always_comb begin
         begin
             write_read_mask = 4'b1111;
         end
+        default: ;
     endcase
 
 end

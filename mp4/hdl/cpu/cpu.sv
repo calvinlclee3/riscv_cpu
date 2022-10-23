@@ -289,10 +289,10 @@ always_comb begin : REGFILEMUX
         regfilemux::imm     : regfile_mux_out = mem_wb_out.imm;
         regfilemux::load    : 
         begin
-            case (load_funct3_t'(mem_wb_out.ctrl.funct3))
+            unique case (load_funct3_t'(mem_wb_out.ctrl.funct3))
                 lb: 
                 begin  
-                    unique case(mem_wb_out.write_read_mask)
+                    case(mem_wb_out.write_read_mask)
                         4'b0001: regfile_mux_out = {{24{mem_wb_out.MDR[7]}}, mem_wb_out.MDR[7:0]};
                         4'b0010: regfile_mux_out = {{24{mem_wb_out.MDR[15]}}, mem_wb_out.MDR[15:8]};
                         4'b0100: regfile_mux_out = {{24{mem_wb_out.MDR[23]}}, mem_wb_out.MDR[23:16]};
@@ -301,7 +301,7 @@ always_comb begin : REGFILEMUX
                 end
                 lbu:
                 begin
-                    unique case(mem_wb_out.write_read_mask)
+                    case(mem_wb_out.write_read_mask)
                         4'b0001: regfile_mux_out = {24'b0, mem_wb_out.MDR[7:0]};
                         4'b0010: regfile_mux_out = {24'b0, mem_wb_out.MDR[15:8]};
                         4'b0100: regfile_mux_out = {24'b0, mem_wb_out.MDR[23:16]};
@@ -310,19 +310,20 @@ always_comb begin : REGFILEMUX
                 end
                 lh:
                 begin
-                    unique case(mem_wb_out.write_read_mask)
+                    case(mem_wb_out.write_read_mask)
                         4'b0011: regfile_mux_out = {{16{mem_wb_out.MDR[15]}}, mem_wb_out.MDR[15:0]};
                         4'b1100: regfile_mux_out = {{16{mem_wb_out.MDR[31]}}, mem_wb_out.MDR[31:16]};
                     endcase
                 end
                 lhu: 
                 begin
-                    unique case(mem_wb_out.write_read_mask)
+                    case(mem_wb_out.write_read_mask)
                         4'b0011: regfile_mux_out = {16'b0, mem_wb_out.MDR[15:0]};
                         4'b1100: regfile_mux_out = {16'b0, mem_wb_out.MDR[31:16]};
                     endcase
                 end
                 lw: regfile_mux_out = mem_wb_out.MDR;
+                default:;
             endcase
         end
         regfilemux::pc_plus4    : regfile_mux_out = mem_wb_out.pc + 4;

@@ -29,13 +29,13 @@ pcmux::pcmux_sel_t pc_MUX_sel;
 rv32i_word alu_out;
 rv32i_word target_address;
 
-rv32i_word pc_mux_out;
-rv32i_word target_address_mux_out;
-rv32i_word cmp_mux_out;
-rv32i_word alu_1_mux_out;
-rv32i_word alu_2_mux_out;
+rv32i_word pc_MUX_out;
+rv32i_word target_address_MUX_out;
+rv32i_word cmp_MUX_out;
+rv32i_word alu_1_MUX_out;
+rv32i_word alu_2_MUX_out;
 
-rv32i_word regfile_mux_out;
+rv32i_word regfile_MUX_out;
 
 /* Pipeline Register I/O */
 if_id_pipeline_reg if_id_in;
@@ -54,7 +54,7 @@ pc_register PC(
     .clk(clk),
     .rst(rst),
     .load(1'b1),  // possible_error
-    .in(pc_mux_out),
+    .in(pc_MUX_out),
     .out(if_id_in.pc)
 );
 
@@ -75,7 +75,7 @@ regfile regfile (
     .clk(clk),
     .rst(rst),
     .load(mem_wb_out.ctrl.load_regfile), // from WB stage
-    .in(regfile_mux_out), // from regfilemux
+    .in(regfile_MUX_out), // from regfilemux
     .src_a(if_id_out.ir[19:15]), //from decode stage reading 
     .src_b(if_id_out.ir[24:20]), //from decode reading 
     .dest(mem_wb_out.ctrl.rd_id),  //from decode stage reading 
@@ -101,7 +101,7 @@ control_rom control_rom (
 cmp cmp (
     .cmpop(id_ex_in.ctrl.cmpop),   // comes from control_word generation
     .a(id_ex_in.rs1_out), 
-    .b(cmp_mux_out),
+    .b(cmp_MUX_out),
     .f(id_ex_in.br_en)     // output to id_ex stage
 );
 
@@ -119,8 +119,8 @@ id_ex_reg id_ex_reg (
 
 alu alu (
     .aluop(id_ex_out.ctrl.aluop),
-    .a(alu_1_mux_out), 
-    .b(alu_2_mux_out),
+    .a(alu_1_MUX_out), 
+    .b(alu_2_MUX_out),
     .f(alu_out)
 );
 
@@ -202,59 +202,59 @@ assign pc_MUX_sel[1] = (rv32i_opcode'(if_id_out.ir[6:0]) == op_jalr) ? 1'b1 : 1'
 /****************************** MUXES ******************************/ 
 
 
-assign target_address = target_address_mux_out + id_ex_in.imm;
+assign target_address = target_address_MUX_out + id_ex_in.imm;
 always_comb begin : PCMUX
 
-    pc_mux_out = '0;
+    pc_MUX_out = '0;
 
     unique case (pc_MUX_sel)
-        pcmux::pc_plus4      : pc_mux_out = if_id_in.pc + 4;
-        pcmux::adder_out     : pc_mux_out = target_address;
-        pcmux::adder_mod2    : pc_mux_out = {target_address[31:1], 1'b0};
+        pcmux::pc_plus4      : pc_MUX_out = if_id_in.pc + 4;
+        pcmux::adder_out     : pc_MUX_out = target_address;
+        pcmux::adder_mod2    : pc_MUX_out = {target_address[31:1], 1'b0};
         default: ;
     endcase
 end
 
 always_comb begin : TARGETADDRESSMUX
 
-    target_address_mux_out = '0;
+    target_address_MUX_out = '0;
 
     unique case(id_ex_in.ctrl.target_address_MUX_sel)
-        targetaddressmux::pc       : target_address_mux_out = if_id_out.pc;
-        targetaddressmux::rs1_out  : target_address_mux_out = id_ex_in.rs1_out;
+        targetaddressmux::pc       : target_address_MUX_out = if_id_out.pc;
+        targetaddressmux::rs1_out  : target_address_MUX_out = id_ex_in.rs1_out;
         default: ;
     endcase
 end
 
 always_comb begin : CMPMUX
 
-    cmp_mux_out = '0;
+    cmp_MUX_out = '0;
 
     unique case(id_ex_in.ctrl.cmp_MUX_sel)
-        cmpmux::rs2_out : cmp_mux_out = id_ex_in.rs2_out;
-        cmpmux::imm     : cmp_mux_out = id_ex_in.imm;
+        cmpmux::rs2_out : cmp_MUX_out = id_ex_in.rs2_out;
+        cmpmux::imm     : cmp_MUX_out = id_ex_in.imm;
         default: ;
     endcase
 end
 
 always_comb begin : ALU1MUX 
 
-    alu_1_mux_out = '0;
+    alu_1_MUX_out = '0;
 
     unique case (id_ex_out.ctrl.alu_1_MUX_sel)
-        alumux::rs1_out :     alu_1_mux_out = id_ex_out.rs1_out;
-        alumux::pc_out  :     alu_1_mux_out = id_ex_out.pc;
+        alumux::rs1_out :     alu_1_MUX_out = id_ex_out.rs1_out;
+        alumux::pc_out  :     alu_1_MUX_out = id_ex_out.pc;
         default: ;
     endcase
 end
 
 always_comb begin : ALU2MUX
 
-    alu_2_mux_out = '0;
+    alu_2_MUX_out = '0;
     
     unique case (id_ex_out.ctrl.alu_2_MUX_sel)
-        alumux::imm     : alu_2_mux_out = id_ex_out.imm;
-        alumux::rs2_out : alu_2_mux_out = id_ex_out.rs2_out;
+        alumux::imm     : alu_2_MUX_out = id_ex_out.imm;
+        alumux::rs2_out : alu_2_MUX_out = id_ex_out.rs2_out;
         default: ;
     endcase
 end
@@ -281,52 +281,52 @@ end
 
 always_comb begin : REGFILEMUX
 
-    regfile_mux_out = '0;
+    regfile_MUX_out = '0;
     
     unique case (mem_wb_out.ctrl.regfile_MUX_sel)
-        regfilemux::alu_out : regfile_mux_out = mem_wb_out.alu_out;
-        regfilemux::br_en   : regfile_mux_out = {{31{1'b0}}, mem_wb_out.br_en};
-        regfilemux::imm     : regfile_mux_out = mem_wb_out.imm;
+        regfilemux::alu_out : regfile_MUX_out = mem_wb_out.alu_out;
+        regfilemux::br_en   : regfile_MUX_out = {{31{1'b0}}, mem_wb_out.br_en};
+        regfilemux::imm     : regfile_MUX_out = mem_wb_out.imm;
         regfilemux::load    : 
         begin
             unique case (load_funct3_t'(mem_wb_out.ctrl.funct3))
                 lb: 
                 begin  
                     case(mem_wb_out.write_read_mask)
-                        4'b0001: regfile_mux_out = {{24{mem_wb_out.MDR[7]}}, mem_wb_out.MDR[7:0]};
-                        4'b0010: regfile_mux_out = {{24{mem_wb_out.MDR[15]}}, mem_wb_out.MDR[15:8]};
-                        4'b0100: regfile_mux_out = {{24{mem_wb_out.MDR[23]}}, mem_wb_out.MDR[23:16]};
-                        4'b1000: regfile_mux_out = {{24{mem_wb_out.MDR[31]}}, mem_wb_out.MDR[31:24]};
+                        4'b0001: regfile_MUX_out = {{24{mem_wb_out.MDR[7]}}, mem_wb_out.MDR[7:0]};
+                        4'b0010: regfile_MUX_out = {{24{mem_wb_out.MDR[15]}}, mem_wb_out.MDR[15:8]};
+                        4'b0100: regfile_MUX_out = {{24{mem_wb_out.MDR[23]}}, mem_wb_out.MDR[23:16]};
+                        4'b1000: regfile_MUX_out = {{24{mem_wb_out.MDR[31]}}, mem_wb_out.MDR[31:24]};
                     endcase
                 end
                 lbu:
                 begin
                     case(mem_wb_out.write_read_mask)
-                        4'b0001: regfile_mux_out = {24'b0, mem_wb_out.MDR[7:0]};
-                        4'b0010: regfile_mux_out = {24'b0, mem_wb_out.MDR[15:8]};
-                        4'b0100: regfile_mux_out = {24'b0, mem_wb_out.MDR[23:16]};
-                        4'b1000: regfile_mux_out = {24'b0, mem_wb_out.MDR[31:24]};
+                        4'b0001: regfile_MUX_out = {24'b0, mem_wb_out.MDR[7:0]};
+                        4'b0010: regfile_MUX_out = {24'b0, mem_wb_out.MDR[15:8]};
+                        4'b0100: regfile_MUX_out = {24'b0, mem_wb_out.MDR[23:16]};
+                        4'b1000: regfile_MUX_out = {24'b0, mem_wb_out.MDR[31:24]};
                     endcase
                 end
                 lh:
                 begin
                     case(mem_wb_out.write_read_mask)
-                        4'b0011: regfile_mux_out = {{16{mem_wb_out.MDR[15]}}, mem_wb_out.MDR[15:0]};
-                        4'b1100: regfile_mux_out = {{16{mem_wb_out.MDR[31]}}, mem_wb_out.MDR[31:16]};
+                        4'b0011: regfile_MUX_out = {{16{mem_wb_out.MDR[15]}}, mem_wb_out.MDR[15:0]};
+                        4'b1100: regfile_MUX_out = {{16{mem_wb_out.MDR[31]}}, mem_wb_out.MDR[31:16]};
                     endcase
                 end
                 lhu: 
                 begin
                     case(mem_wb_out.write_read_mask)
-                        4'b0011: regfile_mux_out = {16'b0, mem_wb_out.MDR[15:0]};
-                        4'b1100: regfile_mux_out = {16'b0, mem_wb_out.MDR[31:16]};
+                        4'b0011: regfile_MUX_out = {16'b0, mem_wb_out.MDR[15:0]};
+                        4'b1100: regfile_MUX_out = {16'b0, mem_wb_out.MDR[31:16]};
                     endcase
                 end
-                lw: regfile_mux_out = mem_wb_out.MDR;
+                lw: regfile_MUX_out = mem_wb_out.MDR;
                 default:;
             endcase
         end
-        regfilemux::pc_plus4    : regfile_mux_out = mem_wb_out.pc + 4;
+        regfilemux::pc_plus4    : regfile_MUX_out = mem_wb_out.pc + 4;
         default: ;
     endcase
 end

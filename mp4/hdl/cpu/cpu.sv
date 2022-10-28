@@ -53,7 +53,7 @@ mem_wb_pipeline_reg mem_wb_out;
 pc_register PC(
     .clk(clk),
     .rst(rst),
-    .load(1'b1),  // possible_error
+    .load(1'b1),  // possible_error: stalling require not loading PC register
     .in(pc_MUX_out),
     .out(if_id_in.pc)
 );
@@ -161,7 +161,7 @@ mem_wb_reg mem_wb_reg (
 
 
 /* assign ports for I-cache */
-assign instr_read = 1'b1; // possible_error: eval later
+assign instr_read = 1'b1; // possible_error: eval later (it is possible to always read as long as we dont store the read value)
 assign instr_mem_address = if_id_in.pc;
 assign if_id_in.ir = instr_mem_rdata; //IR value from I-Cache
 // possible_error: ignore instr_mem_resp for magic memory.

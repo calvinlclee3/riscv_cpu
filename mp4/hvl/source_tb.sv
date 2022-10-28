@@ -4,8 +4,10 @@
 `define MAGIC_MEM 0
 `define PARAM_MEM 1
 `define MEMORY `MAGIC_MEM
+// possible_error_CP2: probably should change this MACRO to go from Magic to Param Mem
 
 // Set these to 1 to enable the feature for CP2
+// possible_error_CP2: enable/disable SM and RVFI
 `define USE_SHADOW_MEMORY 0
 `define USE_RVFI_MONITOR 0
 

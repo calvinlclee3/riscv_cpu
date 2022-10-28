@@ -9,7 +9,7 @@ OBJDUMP=/class/ece411/software/riscv-tools/bin/riscv32-unknown-elf-objdump
 
 # CHANGE FOR CP2
 ADDRESSABILITY=1
-
+# possible_error: change addressability.
 
 # Command line parameters
 ASM_FILE=$1

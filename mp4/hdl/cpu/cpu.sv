@@ -26,15 +26,22 @@ import rv32i_types::*;
 
 pcmux::pcmux_sel_t pc_MUX_sel;
 
+rv32i_word reg_a_out;
+rv32i_word reg_b_out;
 rv32i_word alu_out;
 rv32i_word target_address;
 
 rv32i_word pc_MUX_out;
+rv32i_word ir_MUX_out;
+rv32i_word id_forward_A_MUX_out;
+rv32i_word id_forward_B_MUX_out;
 rv32i_word target_address_MUX_out;
 rv32i_word cmp_MUX_out;
+rv32i_word ex_forward_A_MUX_out;
+rv32i_word ex_forward_B_MUX_out;
 rv32i_word alu_1_MUX_out;
 rv32i_word alu_2_MUX_out;
-
+rv32i_word wb_mem_forward_MUX_out;
 rv32i_word regfile_MUX_out;
 
 /* Pipeline Register I/O */
@@ -47,6 +54,16 @@ if_id_pipeline_reg if_id_out;
 id_ex_pipeline_reg id_ex_out;
 ex_mem_pipeline_reg ex_mem_out;
 mem_wb_pipeline_reg mem_wb_out;
+
+// logic load_pc;
+// assign load_pc = instr_mem_resp;
+// //for now, will need to add stalling
+
+// //I-Cache Miss
+
+// assign ir
+
+
 
 /****************************** FETCH ******************************/ 
 
@@ -79,8 +96,8 @@ regfile regfile (
     .src_a(if_id_out.ir[19:15]), //from decode stage reading 
     .src_b(if_id_out.ir[24:20]), //from decode reading 
     .dest(mem_wb_out.ctrl.rd_id),  //from decode stage reading 
-    .reg_a(id_ex_in.rs1_out), //output ---> input into id_ex
-    .reg_b(id_ex_in.rs2_out) //output ----> input into id_ex
+    .reg_a(reg_a_out), //output ---> input into id_ex
+    .reg_b(reg_b_out) //output ----> input into id_ex
 );
 
 immediate_gen immediate_gen (
@@ -100,7 +117,7 @@ control_rom control_rom (
 
 cmp cmp (
     .cmpop(id_ex_in.ctrl.cmpop),   // comes from control_word generation
-    .a(id_ex_in.rs1_out), 
+    .a(id_forward_A_MUX_out), 
     .b(cmp_MUX_out),
     .f(id_ex_in.br_en)     // output to id_ex stage
 );
@@ -163,7 +180,7 @@ mem_wb_reg mem_wb_reg (
 /* assign ports for I-cache */
 assign instr_read = 1'b1; // possible_error: eval later (it is possible to always read as long as we dont store the read value)
 assign instr_mem_address = if_id_in.pc;
-assign if_id_in.ir = instr_mem_rdata; //IR value from I-Cache
+assign if_id_in.ir = ir_MUX_out; //IR value from I-Cache
 // possible_error: ignore instr_mem_resp for magic memory.
 
 /* assign ports for D-cache */
@@ -172,11 +189,12 @@ assign data_write = ex_mem_out.ctrl.mem_write;
 assign data_mem_address = ex_mem_out.alu_out_address;
 assign mem_wb_in.MDR = data_mem_rdata;
 assign data_mbe = ex_mem_out.write_read_mask;
-assign data_mem_wdata = ex_mem_out.mem_data_out;
 // possible_error: ignore data_mem_resp for magic memory.
 
 /* id_ex pipeline reg assignments */
 assign id_ex_in.pc = if_id_out.pc;
+assign id_ex_in.rs1_out = id_forward_A_MUX_out;
+assign id_ex_in.rs2_out = id_forward_B_MUX_out;
 
 /* ex_mem pipeline reg assignments */
 assign ex_mem_in.pc = id_ex_out.pc;
@@ -185,6 +203,7 @@ assign ex_mem_in.alu_out_address = {alu_out[31:2], 2'b0};
 assign ex_mem_in.br_en = id_ex_out.br_en;
 assign ex_mem_in.imm = id_ex_out.imm;
 assign ex_mem_in.ctrl = id_ex_out.ctrl;
+assign ex_mem_in.mem_data_out = ex_forward_B_MUX_out;
 
 /* mem_wb pipeline reg assignments */
 assign mem_wb_in.pc = ex_mem_out.pc;
@@ -215,13 +234,50 @@ always_comb begin : PCMUX
     endcase
 end
 
+always_comb begin : IRMUX
+
+    ir_MUX_out = '0;
+
+    unique case (irmux::instr_mem_rdata)
+        irmux::instr_mem_rdata : ir_MUX_out = instr_mem_rdata;
+        irmux::nop             : ir_MUX_out = 32'h00000013;    // NOP
+        default:;
+    endcase
+end
+
+always_comb begin: IDFORWARDAMUX
+
+    id_forward_A_MUX_out = '0;
+
+    unique case (idforwardamux::no_forward) // possible_error
+        idforwardamux::no_forward      : id_forward_A_MUX_out = reg_a_out;
+        idforwardamux::ex_br_en        : id_forward_A_MUX_out = {31'b0, id_ex_out.br_en};
+        idforwardamux::mem_pc_plus4    : id_forward_A_MUX_out = ex_mem_out.pc + 4;
+        idforwardamux::mem_alu_out     : id_forward_A_MUX_out = ex_mem_out.alu_out;
+        default:;
+    endcase
+end
+
+always_comb begin: IDFORWARDBMUX
+
+    id_forward_B_MUX_out = '0;
+
+    unique case (idforwardbmux::no_forward) // possible_error
+        idforwardbmux::no_forward      : id_forward_B_MUX_out = reg_b_out;
+        idforwardbmux::ex_br_en        : id_forward_B_MUX_out = {31'b0, id_ex_out.br_en};
+        idforwardbmux::mem_pc_plus4    : id_forward_B_MUX_out = ex_mem_out.pc + 4;
+        idforwardbmux::mem_alu_out     : id_forward_B_MUX_out = ex_mem_out.alu_out;
+        default:;
+    endcase
+end
+
 always_comb begin : TARGETADDRESSMUX
 
     target_address_MUX_out = '0;
 
     unique case(id_ex_in.ctrl.target_address_MUX_sel)
         targetaddressmux::pc       : target_address_MUX_out = if_id_out.pc;
-        targetaddressmux::rs1_out  : target_address_MUX_out = id_ex_in.rs1_out;
+        targetaddressmux::rs1_out  : target_address_MUX_out = id_forward_A_MUX_out;
         default: ;
     endcase
 end
@@ -231,9 +287,33 @@ always_comb begin : CMPMUX
     cmp_MUX_out = '0;
 
     unique case(id_ex_in.ctrl.cmp_MUX_sel)
-        cmpmux::rs2_out : cmp_MUX_out = id_ex_in.rs2_out;
+        cmpmux::rs2_out : cmp_MUX_out = id_forward_B_MUX_out;
         cmpmux::imm     : cmp_MUX_out = id_ex_in.imm;
         default: ;
+    endcase
+end
+
+always_comb begin: EXFORWARDAMUX
+
+    ex_forward_A_MUX_out = '0;    
+
+    unique case (exforwardamux::no_forward)
+        exforwardamux::no_forward       : ex_forward_A_MUX_out = id_ex_out.rs1_out;
+        exforwardamux::mem_alu_out      : ex_forward_A_MUX_out = ex_mem_out.alu_out;
+        exforwardamux::regfile_MUX_out  : ex_forward_A_MUX_out = regfile_MUX_out;
+        default:;
+    endcase
+end
+
+always_comb begin: EXFORWARDBMUX
+
+    ex_forward_B_MUX_out = '0;
+
+    unique case (exforwardbmux::no_forward)
+        exforwardbmux::no_forward       : ex_forward_B_MUX_out = id_ex_out.rs2_out;
+        exforwardbmux::mem_alu_out      : ex_forward_B_MUX_out = ex_mem_out.alu_out;
+        exforwardbmux::regfile_MUX_out  : ex_forward_B_MUX_out = regfile_MUX_out;
+        default:;
     endcase
 end
 
@@ -242,7 +322,7 @@ always_comb begin : ALU1MUX
     alu_1_MUX_out = '0;
 
     unique case (id_ex_out.ctrl.alu_1_MUX_sel)
-        alumux::rs1_out :     alu_1_MUX_out = id_ex_out.rs1_out;
+        alumux::rs1_out :     alu_1_MUX_out = ex_forward_A_MUX_out;
         alumux::pc_out  :     alu_1_MUX_out = id_ex_out.pc;
         default: ;
     endcase
@@ -254,25 +334,37 @@ always_comb begin : ALU2MUX
     
     unique case (id_ex_out.ctrl.alu_2_MUX_sel)
         alumux::imm     : alu_2_MUX_out = id_ex_out.imm;
-        alumux::rs2_out : alu_2_MUX_out = id_ex_out.rs2_out;
+        alumux::rs2_out : alu_2_MUX_out = ex_forward_B_MUX_out;
         default: ;
     endcase
 end
 
 
+always_comb begin : WBMEMFORWARDMUX
+
+    wb_mem_forward_MUX_out = '0;
+
+    unique case (wbmemforwardmux::no_forward)
+        wbmemforwardmux::no_forward         : wb_mem_forward_MUX_out = ex_mem_out.mem_data_out;
+        wbmemforwardmux::regfile_MUX_out    : wb_mem_forward_MUX_out = regfile_MUX_out;
+        default:;
+    endcase
+
+end
+
 always_comb begin : MEMWDATAMUX
 
-    ex_mem_in.mem_data_out = '0;
+    data_mem_wdata = '0;
 
-    unique case (ex_mem_in.write_read_mask)
+    unique case (ex_mem_out.write_read_mask)
 
-        4'b0001 : ex_mem_in.mem_data_out = {24'b0, id_ex_out.rs2_out[7:0]};
-        4'b0010 : ex_mem_in.mem_data_out = {16'b0, id_ex_out.rs2_out[7:0], 8'b0};
-        4'b0100 : ex_mem_in.mem_data_out = {8'b0, id_ex_out.rs2_out[7:0], 16'b0};
-        4'b1000 : ex_mem_in.mem_data_out = {id_ex_out.rs2_out[7:0], 24'b0};
-        4'b0011 : ex_mem_in.mem_data_out = {16'b0, id_ex_out.rs2_out[15:0]};
-        4'b1100 : ex_mem_in.mem_data_out = {id_ex_out.rs2_out[15:0], 16'b0};
-        4'b1111 : ex_mem_in.mem_data_out = id_ex_out.rs2_out;
+        4'b0001 : data_mem_wdata = {24'b0, wb_mem_forward_MUX_out[7:0]};
+        4'b0010 : data_mem_wdata = {16'b0, wb_mem_forward_MUX_out[7:0], 8'b0};
+        4'b0100 : data_mem_wdata = {8'b0, wb_mem_forward_MUX_out[7:0], 16'b0};
+        4'b1000 : data_mem_wdata = {wb_mem_forward_MUX_out[7:0], 24'b0};
+        4'b0011 : data_mem_wdata = {16'b0, wb_mem_forward_MUX_out[15:0]};
+        4'b1100 : data_mem_wdata = {wb_mem_forward_MUX_out[15:0], 16'b0};
+        4'b1111 : data_mem_wdata = wb_mem_forward_MUX_out;
         default: ;
     endcase
 

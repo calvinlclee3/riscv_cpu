@@ -1,4 +1,5 @@
 module mp4_tb;
+import rv32i_types::*;
 `timescale 1ns/10ps
 
 /********************* Do not touch for proper compilation *******************/
@@ -26,36 +27,49 @@ end
 /************************ Signals necessary for monitor **********************/
 // This section not required until CP2
 
-assign rvfi.commit = 0; // Set high when a valid instruction is modifying regfile or PC
-assign rvfi.halt = 0; // Set high when target PC == Current PC for a branch
-// assign rvfi.halt = dut.cpu.PC.load && (dut.cpu.if_id_out.pc == dut.cpu.target_address) && (dut.cpu.if_id_out.ir[6:0] == 7'b1100011); 
+// Set high when a valid instruction is modifying regfile or PC
+assign rvfi.commit = 0; 
+// Set high when target PC == Current PC for a branch
+assign rvfi.halt = dut.cpu.PC.load && (dut.cpu.mem_wb_out.pc == dut.cpu.mem_wb_out.target_address) && (rv32i_opcode'(dut.cpu.mem_wb_out.ctrl.opcode) == op_br); 
 initial rvfi.order = 0;
 always @(posedge itf.clk iff rvfi.commit) rvfi.order <= rvfi.order + 1; // Modify for OoO
 
+
+assign rvfi.rs1_addr = dut.cpu.mem_wb_out.ctrl.rs1_id;
+assign rvfi.rs2_addr = dut.cpu.mem_wb_out.ctrl.rs2_id;
+assign rvfi.rd_addr = dut.cpu.mem_wb_out.ctrl.rd_id;
+assign rvfi.load_regfile = dut.cpu.mem_wb_out.ctrl.load_regfile;
+assign rvfi.rd_wdata = dut.cpu.regfile_MUX_out;
+assign rvfi.pc_rdata = dut.cpu.mem_wb_out.pc;
+assign rvfi.mem_addr = {dut.cpu.mem_wb_out.alu_out[31:1], 2'b0};
+assign rvfi.mem_rmask = dut.cpu.mem_wb_out.write_read_mask;
+assign rvfi.mem_wmask = dut.cpu.mem_wb_out.write_read_mask;
+assign rvfi.mem_rdata = dut.cpu.mem_wb_out.MDR;
+// possible_error: For an instruction that reads no rs1/rs2 register, this output can have an arbitrary value. However, if this output is nonzero then rvfi_rs1_rdata must carry the value stored in that register in the pre-state.
 /*
 Instruction and trap:
-    rvfi.inst
-    rvfi.trap
+    rvfi.inst  [instruction word for the retired instruction: not avail at WB]
+    rvfi.trap  [This honestly not that useful]
 
 Regfile:
-    rvfi.rs1_addr
-    rvfi.rs2_add
-    rvfi.rs1_rdata
-    rvfi.rs2_rdata
-    rvfi.load_regfile
-    rvfi.rd_addr
-    rvfi.rd_wdata
+    rvfi.rs1_addr [DONE]
+    rvfi.rs2_addr [DONE]
+    rvfi.rs1_rdata [value of register rs1 before execution of instruction: not avail at WB]
+    rvfi.rs2_rdata [value of register rs2 before execution of instruction: not avail at WB]
+    rvfi.load_regfile [DONE]
+    rvfi.rd_addr [DONE]
+    rvfi.rd_wdata [DONE]
 
 PC:
-    rvfi.pc_rdata
-    rvfi.pc_wdata
+    rvfi.pc_rdata [DONE]
+    rvfi.pc_wdata [addr of the next instruction, but we might not know because the instr in ex_mem might be a hardware inserted NOP, not the actual next instr]
 
 Memory:
-    rvfi.mem_addr
-    rvfi.mem_rmask
-    rvfi.mem_wmask
-    rvfi.mem_rdata
-    rvfi.mem_wdata
+    rvfi.mem_addr [DONE]
+    rvfi.mem_rmask [DONE]
+    rvfi.mem_wmask [DONE]
+    rvfi.mem_rdata [DONE]
+    rvfi.mem_wdata [data written to memory: not avail at WB]
 
 Please refer to rvfi_itf.sv for more information.
 */

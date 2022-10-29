@@ -204,6 +204,7 @@ assign ex_mem_in.br_en = id_ex_out.br_en;
 assign ex_mem_in.imm = id_ex_out.imm;
 assign ex_mem_in.ctrl = id_ex_out.ctrl;
 assign ex_mem_in.mem_data_out = ex_forward_B_MUX_out;
+assign ex_mem_in.target_address = id_ex_out.target_address;
 
 /* mem_wb pipeline reg assignments */
 assign mem_wb_in.pc = ex_mem_out.pc;
@@ -212,6 +213,7 @@ assign mem_wb_in.write_read_mask = ex_mem_out.write_read_mask;
 assign mem_wb_in.br_en = ex_mem_out.br_en;
 assign mem_wb_in.imm = ex_mem_out.imm;
 assign mem_wb_in.ctrl = ex_mem_out.ctrl;
+assign mem_wb_in.target_address = ex_mem_out.target_address;
 
 /* Assign PC MUX selection signal in ID stage */
 assign pc_MUX_sel[0] = (id_ex_in.br_en && (rv32i_opcode'(if_id_out.ir[6:0]) == op_br) ) || (rv32i_opcode'(if_id_out.ir[6:0]) == op_jal);
@@ -221,15 +223,15 @@ assign pc_MUX_sel[1] = (rv32i_opcode'(if_id_out.ir[6:0]) == op_jalr) ? 1'b1 : 1'
 /****************************** MUXES ******************************/ 
 
 
-assign target_address = target_address_MUX_out + id_ex_in.imm;
+assign id_ex_in.target_address = target_address_MUX_out + id_ex_in.imm;
 always_comb begin : PCMUX
 
     pc_MUX_out = '0;
 
     unique case (pc_MUX_sel)
         pcmux::pc_plus4      : pc_MUX_out = if_id_in.pc + 4;
-        pcmux::adder_out     : pc_MUX_out = target_address;
-        pcmux::adder_mod2    : pc_MUX_out = {target_address[31:1], 1'b0};
+        pcmux::adder_out     : pc_MUX_out = id_ex_in.target_address;
+        pcmux::adder_mod2    : pc_MUX_out = {id_ex_in.target_address[31:1], 1'b0};
         default: ;
     endcase
 end

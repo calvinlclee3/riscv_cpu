@@ -116,6 +116,7 @@ typedef struct packed {
     rv32i_word rs2_out;
     rv32i_word imm; 
     logic br_en;
+    rv32i_word target_address;
     rv32i_control_word ctrl;
 
 } id_ex_pipeline_reg;
@@ -129,6 +130,7 @@ typedef struct packed {
     rv32i_word mem_data_out;
     logic br_en;
     rv32i_word imm; 
+    rv32i_word target_address;
     rv32i_control_word ctrl;
 
 } ex_mem_pipeline_reg;
@@ -140,7 +142,8 @@ typedef struct packed {
     rv32i_word MDR;
     rv32i_mem_wmask write_read_mask;  
     logic br_en;
-    rv32i_word imm; 
+    rv32i_word imm;
+    rv32i_word target_address;
     rv32i_control_word ctrl;
 
 } mem_wb_pipeline_reg;

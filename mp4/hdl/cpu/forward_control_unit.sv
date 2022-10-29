@@ -82,33 +82,33 @@ always_comb begin : MEM_EX_AND_WB_EX
 end
 
 
-always_comb : WB_MEM_FORWARD
-begin
+// always_comb : WB_MEM_FORWARD
+// begin
 
-    if(mem_wb_out_ctrl.load_regfile && (mem_wb_out_ctrl.rd_id == ex_mem_out_ctrl.rs2_id) && mem_wb_out_ctrl.rd_id != 0)
-    begin
-        if(mem_wb_out_ctrl.opcode == op_load && ex_mem_out_ctrl.opcode == op_store)
-            wb_mem_forward_MUX_sel = wbmemforwardmux::regfile_MUX_out;
+//     if(mem_wb_out_ctrl.load_regfile && (mem_wb_out_ctrl.rd_id == ex_mem_out_ctrl.rs2_id) && mem_wb_out_ctrl.rd_id != 0)
+//     begin
+//         if(mem_wb_out_ctrl.opcode == op_load && ex_mem_out_ctrl.opcode == op_store)
+//             wb_mem_forward_MUX_sel = wbmemforwardmux::regfile_MUX_out;
 
-    end
+//     end
 
-end
+// end
 
-always_comb : MEM_ID_AND_EX_ID_FORWARD
-begin
-    /* MEM-ID Forward Path */
-    if (ex_mem_out_ctrl.load_regfile && (ex_mem_out_ctrl.rd_id == id_ex_in_ctrl.rs1_id) && ex_mem_out_ctrl.rd_id != 0) 
-    begin
-        if(ex_mem_out_ctrl.opcode == op_reg || ex_mem_out_ctrl.opcode == op_imm || ex_mem_out_ctrl.opcode == op_auipc)
-        begin
-            if(id_ex_in_ctrl.opcode == op_br || id_ex_in_ctrl.opcode == op_jalr || 
-            (id_ex_in_ctrl.opcode == op_reg && arith_funct3_t'(id_ex_in_ctrl.funct3) == slt) ||
-            (id_ex_in_ctrl.opcode == op_reg && arith_funct3_t'(id_ex_in_ctrl.funct3) == sltu) || 
-            (id_ex_in_ctrl.opcode == op_imm && arith_funct3_t'(id_ex_in_ctrl.funct3) == slt) ||
-            (id_ex_in_ctrl.opcode == op_imm && arith_funct3_t'(id_ex_in_ctrl.funct3) == slt)
-        end
-    end
+// always_comb : MEM_ID_AND_EX_ID_FORWARD
+// begin
+//     /* MEM-ID Forward Path */
+//     if (ex_mem_out_ctrl.load_regfile && (ex_mem_out_ctrl.rd_id == id_ex_in_ctrl.rs1_id) && ex_mem_out_ctrl.rd_id != 0) 
+//     begin
+//         if(ex_mem_out_ctrl.opcode == op_reg || ex_mem_out_ctrl.opcode == op_imm || ex_mem_out_ctrl.opcode == op_auipc)
+//         begin
+//             if(id_ex_in_ctrl.opcode == op_br || id_ex_in_ctrl.opcode == op_jalr || 
+//             (id_ex_in_ctrl.opcode == op_reg && arith_funct3_t'(id_ex_in_ctrl.funct3) == slt) ||
+//             (id_ex_in_ctrl.opcode == op_reg && arith_funct3_t'(id_ex_in_ctrl.funct3) == sltu) || 
+//             (id_ex_in_ctrl.opcode == op_imm && arith_funct3_t'(id_ex_in_ctrl.funct3) == slt) ||
+//             (id_ex_in_ctrl.opcode == op_imm && arith_funct3_t'(id_ex_in_ctrl.funct3) == slt)
+//         end
+//     end
     
-end
+// end
 
 endmodule : forward_control_unit

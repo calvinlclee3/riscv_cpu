@@ -25,6 +25,11 @@ import rv32i_types::*;
 );
 
 pcmux::pcmux_sel_t pc_MUX_sel;
+idforwardamux::idforwardamux_sel_t id_forward_A_MUX_sel;
+idforwardbmux::idforwardbmux_sel_t id_forward_B_MUX_sel;
+exforwardamux::exforwardamux_sel_t ex_forward_A_MUX_sel;
+exforwardbmux::exforwardbmux_sel_t ex_forward_B_MUX_sel;
+wbmemforwardmux::wbmemforwardmux_sel_t wb_mem_forward_MUX_sel;
 
 rv32i_word reg_a_out;
 rv32i_word reg_b_out;
@@ -170,8 +175,21 @@ mem_wb_reg mem_wb_reg (
 /****************************** WRITEBACK ******************************/ 
 
 
+/****************************** GLOBAL ******************************/ 
 
+forward_control_unit forward_control_unit (
 
+    .id_ex_in_ctrl(id_ex_in.ctrl),
+    .id_ex_out_ctrl(id_ex_out.ctrl),
+    .ex_mem_out_ctrl(ex_mem_out.ctrl),
+    .mem_wb_out_ctrl(mem_wb_out.ctrl),
+    
+    .id_forward_A_MUX_sel(id_forward_A_MUX_sel),
+    .id_forward_B_MUX_sel(id_forward_B_MUX_sel),
+    .ex_forward_A_MUX_sel(ex_forward_A_MUX_sel),
+    .ex_forward_B_MUX_sel(ex_forward_B_MUX_sel),
+    .wb_mem_forward_MUX_sel(wb_mem_forward_MUX_sel) 
+);
 
 
 /****************************** ASSIGNMENTS ******************************/ 
@@ -251,11 +269,13 @@ always_comb begin: IDFORWARDAMUX
 
     id_forward_A_MUX_out = '0;
 
-    unique case (idforwardamux::no_forward) // possible_error
+    unique case (id_forward_A_MUX_sel) // possible_error
         idforwardamux::no_forward      : id_forward_A_MUX_out = reg_a_out;
         idforwardamux::ex_br_en        : id_forward_A_MUX_out = {31'b0, id_ex_out.br_en};
+        idforwardamux::ex_imm          : id_forward_A_MUX_out = id_ex_out.imm;
         idforwardamux::mem_pc_plus4    : id_forward_A_MUX_out = ex_mem_out.pc + 4;
         idforwardamux::mem_alu_out     : id_forward_A_MUX_out = ex_mem_out.alu_out;
+        idforwardamux::mem_imm         : id_forward_A_MUX_out = ex_mem_out.imm;
         default:;
     endcase
 end
@@ -264,11 +284,13 @@ always_comb begin: IDFORWARDBMUX
 
     id_forward_B_MUX_out = '0;
 
-    unique case (idforwardbmux::no_forward) // possible_error
+    unique case (id_forward_B_MUX_sel) // possible_error
         idforwardbmux::no_forward      : id_forward_B_MUX_out = reg_b_out;
         idforwardbmux::ex_br_en        : id_forward_B_MUX_out = {31'b0, id_ex_out.br_en};
+        idforwardbmux::ex_imm          : id_forward_B_MUX_out = id_ex_out.imm;
         idforwardbmux::mem_pc_plus4    : id_forward_B_MUX_out = ex_mem_out.pc + 4;
         idforwardbmux::mem_alu_out     : id_forward_B_MUX_out = ex_mem_out.alu_out;
+        idforwardbmux::mem_imm         : id_forward_B_MUX_out = ex_mem_out.imm;
         default:;
     endcase
 end
@@ -299,10 +321,11 @@ always_comb begin: EXFORWARDAMUX
 
     ex_forward_A_MUX_out = '0;    
 
-    unique case (exforwardamux::no_forward)
-        exforwardamux::no_forward       : ex_forward_A_MUX_out = id_ex_out.rs1_out;
-        exforwardamux::mem_alu_out      : ex_forward_A_MUX_out = ex_mem_out.alu_out;
-        exforwardamux::regfile_MUX_out  : ex_forward_A_MUX_out = regfile_MUX_out;
+    unique case (ex_forward_A_MUX_sel)
+        exforwardamux::no_forward          : ex_forward_A_MUX_out = id_ex_out.rs1_out;
+        exforwardamux::mem_alu_out         : ex_forward_A_MUX_out = ex_mem_out.alu_out;
+        exforwardamux::mem_imm             : ex_forward_A_MUX_out = ex_mem_out.imm;
+        exforwardamux::wb_regfile_MUX_out  : ex_forward_A_MUX_out = regfile_MUX_out;       
         default:;
     endcase
 end
@@ -311,10 +334,11 @@ always_comb begin: EXFORWARDBMUX
 
     ex_forward_B_MUX_out = '0;
 
-    unique case (exforwardbmux::no_forward)
-        exforwardbmux::no_forward       : ex_forward_B_MUX_out = id_ex_out.rs2_out;
-        exforwardbmux::mem_alu_out      : ex_forward_B_MUX_out = ex_mem_out.alu_out;
-        exforwardbmux::regfile_MUX_out  : ex_forward_B_MUX_out = regfile_MUX_out;
+    unique case (ex_forward_B_MUX_sel)
+        exforwardbmux::no_forward          : ex_forward_B_MUX_out = id_ex_out.rs2_out;
+        exforwardbmux::mem_alu_out         : ex_forward_B_MUX_out = ex_mem_out.alu_out;
+        exforwardbmux::mem_imm             : ex_forward_B_MUX_out = ex_mem_out.imm;
+        exforwardbmux::wb_regfile_MUX_out  : ex_forward_B_MUX_out = regfile_MUX_out;
         default:;
     endcase
 end
@@ -346,7 +370,7 @@ always_comb begin : WBMEMFORWARDMUX
 
     wb_mem_forward_MUX_out = '0;
 
-    unique case (wbmemforwardmux::no_forward)
+    unique case (wb_mem_forward_MUX_sel)
         wbmemforwardmux::no_forward         : wb_mem_forward_MUX_out = ex_mem_out.mem_data_out;
         wbmemforwardmux::regfile_MUX_out    : wb_mem_forward_MUX_out = regfile_MUX_out;
         default:;

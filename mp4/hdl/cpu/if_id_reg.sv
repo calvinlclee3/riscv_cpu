@@ -13,12 +13,15 @@ if_id_pipeline_reg data;
 
 
 always_ff @ (posedge clk) begin
-    if (rst | flush) begin
+    if (rst) begin
         data <= '0;
     end
 
     else if (load) begin
-        data <= in;
+        if(flush)
+            data <= '0;
+        else
+            data <= in;
     end
 end
 

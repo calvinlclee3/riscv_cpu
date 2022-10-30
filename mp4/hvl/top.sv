@@ -30,7 +30,7 @@ end
 // Set high when a valid instruction is modifying regfile or PC
 assign rvfi.commit = 0; 
 // Set high when target PC == Current PC for a branch
-assign rvfi.halt = dut.cpu.PC.load && (dut.cpu.mem_wb_out.pc == dut.cpu.mem_wb_out.target_address) && (rv32i_opcode'(dut.cpu.mem_wb_out.ctrl.opcode) == op_br); 
+assign rvfi.halt = dut.cpu.PC.load && (dut.cpu.mem_wb_out.pc == dut.cpu.mem_wb_out.target_address) && (rv32i_opcode'(dut.cpu.mem_wb_out.ctrl.opcode) == op_br || rv32i_opcode'(dut.cpu.mem_wb_out.ctrl.opcode) == op_jal || rv32i_opcode'(dut.cpu.mem_wb_out.ctrl.opcode) == op_jalr) ; 
 initial rvfi.order = 0;
 always @(posedge itf.clk iff rvfi.commit) rvfi.order <= rvfi.order + 1; // Modify for OoO
 

@@ -112,6 +112,7 @@ typedef struct packed {
 typedef struct packed {
 
     rv32i_word pc;
+    rv32i_word ir;
     rv32i_word rs1_out;
     rv32i_word rs2_out;
     rv32i_word imm; 
@@ -124,6 +125,7 @@ typedef struct packed {
 typedef struct packed {
 
     rv32i_word pc;
+    rv32i_word ir;
     rv32i_word alu_out;
     rv32i_word alu_out_address;
     rv32i_mem_wmask write_read_mask;
@@ -138,6 +140,7 @@ typedef struct packed {
 typedef struct packed {
 
     rv32i_word pc;
+    rv32i_word ir;
     rv32i_word alu_out;
     rv32i_word MDR;
     rv32i_mem_wmask write_read_mask;  

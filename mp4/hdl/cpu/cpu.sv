@@ -24,7 +24,10 @@ import rv32i_types::*;
 
 );
 
+logic load_pc;
+
 pcmux::pcmux_sel_t pc_MUX_sel;
+irmux::irmux_sel_t ir_MUX_sel;
 idforwardamux::idforwardamux_sel_t id_forward_A_MUX_sel;
 idforwardbmux::idforwardbmux_sel_t id_forward_B_MUX_sel;
 exforwardamux::exforwardamux_sel_t ex_forward_A_MUX_sel;
@@ -50,6 +53,17 @@ rv32i_word wb_mem_forward_MUX_out;
 rv32i_word regfile_MUX_out;
 
 /* Pipeline Register I/O */
+
+logic if_id_reg_load;
+logic id_ex_reg_load;
+logic ex_mem_reg_load;
+logic mem_wb_reg_load;
+
+logic if_id_reg_flush;
+logic id_ex_reg_flush;
+logic ex_mem_reg_flush;
+logic mem_wb_reg_flush;
+
 if_id_pipeline_reg if_id_in;
 id_ex_pipeline_reg id_ex_in;
 ex_mem_pipeline_reg ex_mem_in;
@@ -60,14 +74,26 @@ id_ex_pipeline_reg id_ex_out;
 ex_mem_pipeline_reg ex_mem_out;
 mem_wb_pipeline_reg mem_wb_out;
 
-// logic load_pc;
-// assign load_pc = instr_mem_resp;
-// //for now, will need to add stalling
+/****************************** DEBUG ******************************/ 
 
-// //I-Cache Miss
-
-// assign ir
-
+rv32i_word debug_ID_PC;
+rv32i_word debug_EX_PC;
+rv32i_word debug_MEM_PC;
+rv32i_word debug_WB_PC;
+rv32i_word debug_ID_IR;
+rv32i_word debug_EX_IR;
+rv32i_word debug_MEM_IR;
+rv32i_word debug_WB_IR;
+rv32i_word debug_WB_target_address;
+assign debug_ID_PC = if_id_out.pc;
+assign debug_EX_PC = id_ex_out.pc;
+assign debug_MEM_PC = ex_mem_out.pc;
+assign debug_WB_PC = mem_wb_out.pc;
+assign debug_ID_IR = if_id_out.ir;
+assign debug_EX_IR = id_ex_out.ir;
+assign debug_MEM_IR = ex_mem_out.ir;
+assign debug_WB_IR = mem_wb_out.ir;
+assign debug_WB_target_address = mem_wb_out.target_address;
 
 
 /****************************** FETCH ******************************/ 
@@ -75,7 +101,7 @@ mem_wb_pipeline_reg mem_wb_out;
 pc_register PC(
     .clk(clk),
     .rst(rst),
-    .load(1'b1),  // possible_error: stalling require not loading PC register
+    .load(load_pc),  
     .in(pc_MUX_out),
     .out(if_id_in.pc)
 );
@@ -83,8 +109,8 @@ pc_register PC(
 if_id_reg if_id_reg (
     .clk(clk),
     .rst(rst),
-    .flush(1'b0),
-    .load(1'b1),
+    .flush(if_id_reg_flush),
+    .load(if_id_reg_load),
     .in(if_id_in),//come from instruction fetch
     .out(if_id_out)
 );
@@ -130,8 +156,8 @@ cmp cmp (
 id_ex_reg id_ex_reg (
     .clk(clk),
     .rst(rst),
-    .flush(1'b0),
-    .load(1'b1),
+    .flush(id_ex_reg_flush),
+    .load(id_ex_reg_load),
     .in(id_ex_in), //come from decode combinational + passed along values
     .out(id_ex_out) 
 );
@@ -155,8 +181,8 @@ mask_gen mask_gen (
 ex_mem_reg ex_mem_reg (
     .clk(clk),
     .rst(rst),
-    .flush(1'b0),
-    .load(1'b1),
+    .flush(ex_mem_reg_flush),
+    .load(ex_mem_reg_load),
     .in(ex_mem_in), //come from ex combinational + passed along values
     .out(ex_mem_out)
 );
@@ -166,8 +192,8 @@ ex_mem_reg ex_mem_reg (
 mem_wb_reg mem_wb_reg (
     .clk(clk),
     .rst(rst),
-    .flush(1'b0),
-    .load(1'b1),
+    .flush(mem_wb_reg_flush),
+    .load(mem_wb_reg_load),
     .in(mem_wb_in), //come from mem + passed along values
     .out(mem_wb_out) //to wb combinational
 );
@@ -175,7 +201,38 @@ mem_wb_reg mem_wb_reg (
 /****************************** WRITEBACK ******************************/ 
 
 
-/****************************** GLOBAL ******************************/ 
+/******************************  GLOBAL  ******************************/ 
+
+stall_control_unit stall_control_unit (
+
+    /* Cache Responses */
+    .instr_mem_resp(instr_mem_resp),
+    .data_mem_resp(data_mem_resp),
+
+    /* Control Words*/
+    .id_ex_in_ctrl(id_ex_in.ctrl),
+    .id_ex_in_br_en(id_ex_in.br_en),
+    .id_ex_out_ctrl(id_ex_out.ctrl),
+    .ex_mem_out_ctrl(ex_mem_out.ctrl),
+    .mem_wb_out_ctrl(mem_wb_out.ctrl),
+
+    /* Pipeline Register Load Signals*/
+    .load_pc(load_pc),
+    .if_id_reg_load(if_id_reg_load),
+    .id_ex_reg_load(id_ex_reg_load),
+    .ex_mem_reg_load(ex_mem_reg_load),
+    .mem_wb_reg_load(mem_wb_reg_load),
+    
+    /* Pipeline Register Flush Signals*/
+    .if_id_reg_flush(if_id_reg_flush),
+    .id_ex_reg_flush(id_ex_reg_flush),
+    .ex_mem_reg_flush(ex_mem_reg_flush),
+    .mem_wb_reg_flush(mem_wb_reg_flush),
+
+    /* MUX Selection */
+    .ir_MUX_sel(ir_MUX_sel)
+
+);
 
 forward_control_unit forward_control_unit (
 
@@ -199,7 +256,6 @@ forward_control_unit forward_control_unit (
 assign instr_read = 1'b1; // possible_error: eval later (it is possible to always read as long as we dont store the read value)
 assign instr_mem_address = if_id_in.pc;
 assign if_id_in.ir = ir_MUX_out; //IR value from I-Cache
-// possible_error: ignore instr_mem_resp for magic memory.
 
 /* assign ports for D-cache */
 assign data_read = ex_mem_out.ctrl.mem_read;
@@ -207,12 +263,12 @@ assign data_write = ex_mem_out.ctrl.mem_write;
 assign data_mem_address = ex_mem_out.alu_out_address;
 assign mem_wb_in.MDR = data_mem_rdata;
 assign data_mbe = ex_mem_out.write_read_mask;
-// possible_error: ignore data_mem_resp for magic memory.
 
 /* id_ex pipeline reg assignments */
 assign id_ex_in.pc = if_id_out.pc;
 assign id_ex_in.rs1_out = id_forward_A_MUX_out;
 assign id_ex_in.rs2_out = id_forward_B_MUX_out;
+assign id_ex_in.ir = if_id_out.ir;
 
 /* ex_mem pipeline reg assignments */
 assign ex_mem_in.pc = id_ex_out.pc;
@@ -223,6 +279,7 @@ assign ex_mem_in.imm = id_ex_out.imm;
 assign ex_mem_in.ctrl = id_ex_out.ctrl;
 assign ex_mem_in.mem_data_out = ex_forward_B_MUX_out;
 assign ex_mem_in.target_address = id_ex_out.target_address;
+assign ex_mem_in.ir = id_ex_out.ir;
 
 /* mem_wb pipeline reg assignments */
 assign mem_wb_in.pc = ex_mem_out.pc;
@@ -232,6 +289,7 @@ assign mem_wb_in.br_en = ex_mem_out.br_en;
 assign mem_wb_in.imm = ex_mem_out.imm;
 assign mem_wb_in.ctrl = ex_mem_out.ctrl;
 assign mem_wb_in.target_address = ex_mem_out.target_address;
+assign mem_wb_in.ir = ex_mem_out.ir;
 
 /* Assign PC MUX selection signal in ID stage */
 assign pc_MUX_sel[0] = (id_ex_in.br_en && (rv32i_opcode'(if_id_out.ir[6:0]) == op_br) ) || (rv32i_opcode'(if_id_out.ir[6:0]) == op_jal);
@@ -258,7 +316,7 @@ always_comb begin : IRMUX
 
     ir_MUX_out = '0;
 
-    unique case (irmux::instr_mem_rdata)
+    unique case (ir_MUX_sel)
         irmux::instr_mem_rdata : ir_MUX_out = instr_mem_rdata;
         irmux::nop             : ir_MUX_out = 32'h00000013;    // NOP
         default:;

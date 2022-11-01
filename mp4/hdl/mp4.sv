@@ -5,32 +5,26 @@ import rv32i_types::*;
     input clk,
     input rst,
 	
-	// Remove after CP1
-    input 					instr_mem_resp,
-    input rv32i_word 	instr_mem_rdata,
-	input 					data_mem_resp,
-    input rv32i_word 	data_mem_rdata, 
-    output logic 			instr_read,
-	output rv32i_word 	instr_mem_address,
-    output logic 			data_read,
-    output logic 			data_write,
-    output logic [3:0] 	data_mbe,
-    output rv32i_word 	data_mem_address,
-    output rv32i_word 	data_mem_wdata
-
-	
-	// For CP2
-	/* 
     input pmem_resp,
-    input [63:0] pmem_rdata,
-
-	To physical memory
     output logic pmem_read,
     output logic pmem_write,
     output rv32i_word pmem_address,
+    input [63:0] pmem_rdata,
     output [63:0] pmem_wdata
-	*/
+
 );
+
+logic instr_mem_resp;
+rv32i_word instr_mem_rdata;
+logic data_mem_resp;
+rv32i_word data_mem_rdata;
+logic instr_read;
+rv32i_word instr_mem_address;
+logic data_read;
+logic data_write;
+logic [3:0] data_mbe;
+rv32i_word data_mem_address;
+rv32i_word data_mem_wdata;
 
 cpu cpu (
 
@@ -51,6 +45,38 @@ cpu cpu (
     .data_mem_rdata(data_mem_rdata), 
     .data_mbe(data_mbe),
     .data_mem_wdata(data_mem_wdata),
+	.data_mem_resp(data_mem_resp)
+
+);
+
+cache_sys cache_sys (
+
+    .clk(clk),
+    .rst(rst),
+
+    /* Physical Memory Signals */
+    .pmem_read(pmem_read),
+    .pmem_write(pmem_write),
+    .pmem_address(pmem_address),
+    .pmem_wdata(pmem_wdata),
+    .pmem_rdata(pmem_rdata),
+    .pmem_resp(pmem_resp),
+    
+
+    /* CPU Memory Signals: I-Cache */
+    .instr_read(instr_read),
+    .instr_mem_address(instr_mem_address),
+    .instr_mem_rdata(instr_mem_rdata),
+    .instr_mem_resp(instr_mem_resp),
+
+
+    /* CPU Memory Signals: D-Cache */
+    .data_read(data_read),
+    .data_write(data_write),
+    .data_mem_address(data_mem_address),
+    .data_mbe(data_mbe),
+    .data_mem_wdata(data_mem_wdata),
+    .data_mem_rdata(data_mem_rdata), 
 	.data_mem_resp(data_mem_resp)
 
 );

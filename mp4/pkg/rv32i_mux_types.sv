@@ -97,3 +97,11 @@ typedef enum bit {
     ,regfile_MUX_out    = 1'b1
 } wbmemforwardmux_sel_t;
 endpackage
+
+package arbiteraddressmux;
+typedef enum bit {
+    d_cache          = 1'b0
+    ,i_cache         = 1'b1
+} arbiteraddressmux_sel_t;
+endpackage
+

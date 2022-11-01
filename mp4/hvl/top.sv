@@ -139,28 +139,25 @@ mp4 dut(
     .clk(itf.clk),
     .rst(itf.rst),
     
-     // Remove after CP1
-    .instr_mem_resp(itf.inst_resp),
-    .instr_mem_rdata(itf.inst_rdata),
-	.data_mem_resp(itf.data_resp),
-    .data_mem_rdata(itf.data_rdata),
-    .instr_read(itf.inst_read),
-	.instr_mem_address(itf.inst_addr),
-    .data_read(itf.data_read),
-    .data_write(itf.data_write),
-    .data_mbe(itf.data_mbe),
-    .data_mem_address(itf.data_addr),
-    .data_mem_wdata(itf.data_wdata)
+    //  // Remove after CP1
+    // .instr_mem_resp(itf.inst_resp),
+    // .instr_mem_rdata(itf.inst_rdata),
+	// .data_mem_resp(itf.data_resp),
+    // .data_mem_rdata(itf.data_rdata),
+    // .instr_read(itf.inst_read),
+	// .instr_mem_address(itf.inst_addr),
+    // .data_read(itf.data_read),
+    // .data_write(itf.data_write),
+    // .data_mbe(itf.data_mbe),
+    // .data_mem_address(itf.data_addr),
+    // .data_mem_wdata(itf.data_wdata)
 
-
-    /* Use for CP2 onwards
     .pmem_read(itf.mem_read),
     .pmem_write(itf.mem_write),
     .pmem_wdata(itf.mem_wdata),
     .pmem_rdata(itf.mem_rdata),
     .pmem_address(itf.mem_addr),
     .pmem_resp(itf.mem_resp)
-    */
 );
 /***************************** End Instantiation *****************************/
 

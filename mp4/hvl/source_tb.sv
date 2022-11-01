@@ -3,7 +3,7 @@
 
 `define MAGIC_MEM 0
 `define PARAM_MEM 1
-`define MEMORY `MAGIC_MEM
+`define MEMORY `PARAM_MEM
 // possible_error_CP2: probably should change this MACRO to go from Magic to Param Mem
 
 // Set these to 1 to enable the feature for CP2

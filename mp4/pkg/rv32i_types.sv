@@ -13,6 +13,7 @@ import idforwardbmux::*;
 import exforwardamux::*;
 import exforwardbmux::*;
 import wbmemforwardmux::*;
+import arbiteraddressmux::*;
 
 typedef logic [31:0] rv32i_word;
 typedef logic [4:0] rv32i_reg;

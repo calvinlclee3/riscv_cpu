@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi_R-2020.12-SP1-1
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 0 25 1920 403 255 65
+viewPort 0 25 5120 405 255 65
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -25,7 +25,7 @@ marker 0.000000
 ; visible top row signal index
 top 0
 ; marker line index
-markerPos 9
+markerPos 10
 
 ; event list
 ; addEvent event_name event_expression
@@ -56,6 +56,7 @@ addSignal -h 15 -holdScope debug_MEM_IR[31:0]
 addSignal -h 15 -holdScope debug_WB_PC[31:0]
 addSignal -h 15 -holdScope debug_WB_IR[31:0]
 addSignal -h 15 -holdScope debug_WB_target_address[31:0]
+addSignal -h 15 -holdScope debug_halt
 addGroup "G2"
 
 ; getSignalForm Scope Hierarchy Status

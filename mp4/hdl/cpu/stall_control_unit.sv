@@ -24,10 +24,8 @@ import rv32i_types::*;
     output logic if_id_reg_flush,
     output logic id_ex_reg_flush,
     output logic ex_mem_reg_flush,
-    output logic mem_wb_reg_flush,
+    output logic mem_wb_reg_flush
 
-    /* MUX Selection */
-    output irmux::irmux_sel_t ir_MUX_sel
 );
 
 
@@ -37,7 +35,6 @@ logic branch_mispredict;
 assign branch_mispredict = id_ex_in_br_en && (id_ex_in_ctrl.opcode == op_br);
 
 function void set_defaults();
-    ir_MUX_sel = irmux::instr_mem_rdata;
     load_pc = 1'b1;
 
     if_id_reg_load = 1'b1;
@@ -72,23 +69,6 @@ endfunction
 always_comb
 begin
     set_defaults();
-    
-    /* Instruction Cache Miss */ 
-    if(~instr_mem_resp)
-    begin
-        load_pc = 1'b0;
-        pipeline_load(1'b1, 1'b1, 1'b1, 1'b1);
-        pipeline_flush(1'b0, 1'b0, 1'b0, 1'b0);
-        ir_MUX_sel = irmux::nop;
-    end
-
-    /* Data Cache Miss */
-    if(data_mem_resp == 1'b0 && (ex_mem_out_ctrl.mem_read == 1'b1 || ex_mem_out_ctrl.mem_write == 1'b1))
-    begin
-        load_pc = 1'b0;
-        //Halt pipeline
-        pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
-    end
 
     /* (Need CMP/ADDR Adder) after (Need ALU) */
     if((id_ex_out_ctrl.opcode == op_reg && arith_funct3_t'(id_ex_out_ctrl.funct3) != slt)  ||
@@ -229,8 +209,23 @@ begin
     /* Branch Mispredict or Unconditional Jumps */
     if(branch_mispredict || id_ex_in_ctrl.opcode == op_jal || id_ex_in_ctrl.opcode == op_jalr)
     begin
-        ir_MUX_sel = irmux::nop;
+        if_id_reg_flush = 1'b1;
     end
+
+    /* Instruction Cache Miss */ 
+    if(~instr_mem_resp)
+    begin
+        load_pc = 1'b0;
+        if_id_reg_flush = 1'b1;
+    end
+
+    /* Data Cache Miss */
+    if(data_mem_resp == 1'b0 && (ex_mem_out_ctrl.mem_read == 1'b1 || ex_mem_out_ctrl.mem_write == 1'b1))
+    begin
+        load_pc = 1'b0;
+        pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
+    end
+
 end
 
 endmodule : stall_control_unit

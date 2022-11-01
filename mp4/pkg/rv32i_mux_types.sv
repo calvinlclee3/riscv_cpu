@@ -72,20 +72,22 @@ typedef enum bit [2:0] {
 endpackage
 
 package exforwardamux;
-typedef enum bit [1:0] {
-    no_forward             = 2'b00 //
-    ,mem_alu_out           = 2'b01 //
-    ,mem_imm               = 2'b10 // 
-    ,wb_regfile_MUX_out    = 2'b11 //
+typedef enum bit [2:0] {
+    no_forward             = 3'b000 
+    ,mem_alu_out           = 3'b001 
+    ,mem_imm               = 3'b010 
+    ,wb_regfile_MUX_out    = 3'b011
+    ,mem_br_en             = 3'b100
 } exforwardamux_sel_t;
 endpackage 
 
 package exforwardbmux;
-typedef enum bit [1:0] {
-    no_forward             = 2'b00
-    ,mem_alu_out           = 2'b01
-    ,mem_imm               = 2'b10
-    ,wb_regfile_MUX_out    = 2'b11
+typedef enum bit [2:0] {
+    no_forward             = 3'b000 
+    ,mem_alu_out           = 3'b001 
+    ,mem_imm               = 3'b010 
+    ,wb_regfile_MUX_out    = 3'b011
+    ,mem_br_en             = 3'b100
 } exforwardbmux_sel_t;
 endpackage
 
@@ -94,11 +96,4 @@ typedef enum bit {
     no_forward          = 1'b0
     ,regfile_MUX_out    = 1'b1
 } wbmemforwardmux_sel_t;
-endpackage
-
-package irmux;
-typedef enum bit {
-    instr_mem_rdata  = 1'b0
-    ,nop             = 1'b1
-} irmux_sel_t;
 endpackage

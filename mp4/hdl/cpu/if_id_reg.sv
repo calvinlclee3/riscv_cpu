@@ -19,7 +19,10 @@ always_ff @ (posedge clk) begin
 
     else if (load) begin
         if(flush)
-            data <= '0;
+        begin
+            data.pc <= '0;
+            data.ir <= 32'h00000013;
+        end
         else
             data <= in;
     end

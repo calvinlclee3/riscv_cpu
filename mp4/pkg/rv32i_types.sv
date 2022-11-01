@@ -13,7 +13,6 @@ import idforwardbmux::*;
 import exforwardamux::*;
 import exforwardbmux::*;
 import wbmemforwardmux::*;
-import irmux::*;
 
 typedef logic [31:0] rv32i_word;
 typedef logic [4:0] rv32i_reg;
@@ -148,6 +147,8 @@ typedef struct packed {
     rv32i_word imm;
     rv32i_word target_address;
     rv32i_control_word ctrl;
+    rv32i_word alu_out_address;
+    rv32i_word mem_data_out;
 
 } mem_wb_pipeline_reg;
 

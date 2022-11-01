@@ -27,7 +27,6 @@ import rv32i_types::*;
 logic load_pc;
 
 pcmux::pcmux_sel_t pc_MUX_sel;
-irmux::irmux_sel_t ir_MUX_sel;
 idforwardamux::idforwardamux_sel_t id_forward_A_MUX_sel;
 idforwardbmux::idforwardbmux_sel_t id_forward_B_MUX_sel;
 exforwardamux::exforwardamux_sel_t ex_forward_A_MUX_sel;
@@ -85,6 +84,7 @@ rv32i_word debug_EX_IR;
 rv32i_word debug_MEM_IR;
 rv32i_word debug_WB_IR;
 rv32i_word debug_WB_target_address;
+logic debug_halt;
 assign debug_ID_PC = if_id_out.pc;
 assign debug_EX_PC = id_ex_out.pc;
 assign debug_MEM_PC = ex_mem_out.pc;
@@ -94,6 +94,7 @@ assign debug_EX_IR = id_ex_out.ir;
 assign debug_MEM_IR = ex_mem_out.ir;
 assign debug_WB_IR = mem_wb_out.ir;
 assign debug_WB_target_address = mem_wb_out.target_address;
+assign debug_halt = load_pc && (mem_wb_out.pc == mem_wb_out.target_address) && (rv32i_opcode'(mem_wb_out.ctrl.opcode) == op_br || rv32i_opcode'(mem_wb_out.ctrl.opcode) == op_jal || rv32i_opcode'(mem_wb_out.ctrl.opcode) == op_jalr); 
 
 
 /****************************** FETCH ******************************/ 
@@ -227,10 +228,7 @@ stall_control_unit stall_control_unit (
     .if_id_reg_flush(if_id_reg_flush),
     .id_ex_reg_flush(id_ex_reg_flush),
     .ex_mem_reg_flush(ex_mem_reg_flush),
-    .mem_wb_reg_flush(mem_wb_reg_flush),
-
-    /* MUX Selection */
-    .ir_MUX_sel(ir_MUX_sel)
+    .mem_wb_reg_flush(mem_wb_reg_flush)
 
 );
 
@@ -255,7 +253,7 @@ forward_control_unit forward_control_unit (
 /* assign ports for I-cache */
 assign instr_read = 1'b1; // possible_error: eval later (it is possible to always read as long as we dont store the read value)
 assign instr_mem_address = if_id_in.pc;
-assign if_id_in.ir = ir_MUX_out; //IR value from I-Cache
+assign if_id_in.ir = instr_mem_rdata; //IR value from I-Cache
 
 /* assign ports for D-cache */
 assign data_read = ex_mem_out.ctrl.mem_read;
@@ -290,6 +288,8 @@ assign mem_wb_in.imm = ex_mem_out.imm;
 assign mem_wb_in.ctrl = ex_mem_out.ctrl;
 assign mem_wb_in.target_address = ex_mem_out.target_address;
 assign mem_wb_in.ir = ex_mem_out.ir;
+assign mem_wb_in.mem_data_out = data_mem_wdata;
+assign mem_wb_in.alu_out_address = ex_mem_out.alu_out_address;
 
 /* Assign PC MUX selection signal in ID stage */
 assign pc_MUX_sel[0] = (id_ex_in.br_en && (rv32i_opcode'(if_id_out.ir[6:0]) == op_br) ) || (rv32i_opcode'(if_id_out.ir[6:0]) == op_jal);
@@ -309,17 +309,6 @@ always_comb begin : PCMUX
         pcmux::adder_out     : pc_MUX_out = id_ex_in.target_address;
         pcmux::adder_mod2    : pc_MUX_out = {id_ex_in.target_address[31:1], 1'b0};
         default: ;
-    endcase
-end
-
-always_comb begin : IRMUX
-
-    ir_MUX_out = '0;
-
-    unique case (ir_MUX_sel)
-        irmux::instr_mem_rdata : ir_MUX_out = instr_mem_rdata;
-        irmux::nop             : ir_MUX_out = 32'h00000013;    // NOP
-        default:;
     endcase
 end
 
@@ -383,7 +372,8 @@ always_comb begin: EXFORWARDAMUX
         exforwardamux::no_forward          : ex_forward_A_MUX_out = id_ex_out.rs1_out;
         exforwardamux::mem_alu_out         : ex_forward_A_MUX_out = ex_mem_out.alu_out;
         exforwardamux::mem_imm             : ex_forward_A_MUX_out = ex_mem_out.imm;
-        exforwardamux::wb_regfile_MUX_out  : ex_forward_A_MUX_out = regfile_MUX_out;       
+        exforwardamux::wb_regfile_MUX_out  : ex_forward_A_MUX_out = regfile_MUX_out;     
+        exforwardamux::mem_br_en           : ex_forward_A_MUX_out = {31'b0, ex_mem_out.br_en};  
         default:;
     endcase
 end
@@ -397,6 +387,7 @@ always_comb begin: EXFORWARDBMUX
         exforwardbmux::mem_alu_out         : ex_forward_B_MUX_out = ex_mem_out.alu_out;
         exforwardbmux::mem_imm             : ex_forward_B_MUX_out = ex_mem_out.imm;
         exforwardbmux::wb_regfile_MUX_out  : ex_forward_B_MUX_out = regfile_MUX_out;
+        exforwardbmux::mem_br_en           : ex_forward_B_MUX_out = {31'b0, ex_mem_out.br_en};    
         default:;
     endcase
 end

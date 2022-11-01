@@ -83,7 +83,7 @@ generate
             .rvfi_rs2_addr(rvfi.rs2_addr),
             .rvfi_rs1_rdata(rvfi.rs1_addr ? rvfi.rs1_rdata : 0),
             .rvfi_rs2_rdata(rvfi.rs2_addr ? rvfi.rs2_rdata : 0),
-            .rvfi_rd_addr(rvfi.load_regfile ? rvfi.rd_addr : 0),
+            .rvfi_rd_addr(rvfi.load_regfile ? rvfi.rd_addr : 5'b0),
             .rvfi_rd_wdata(rvfi.load_regfile ? rvfi.rd_wdata : 0),
             .rvfi_pc_rdata(rvfi.pc_rdata),
             .rvfi_pc_wdata(rvfi.pc_wdata),

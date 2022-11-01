@@ -50,6 +50,8 @@ always_comb begin: MEM_EX_AND_WB_EX
         begin
             if(ex_mem_out_ctrl.opcode == op_lui)
                 ex_forward_A_MUX_sel = exforwardamux::mem_imm;
+            else if (ex_mem_out_ctrl.regfile_MUX_sel == regfilemux::br_en)
+                ex_forward_A_MUX_sel = exforwardamux::mem_br_en;
             else
                 ex_forward_A_MUX_sel = exforwardamux::mem_alu_out;
         end
@@ -61,6 +63,8 @@ always_comb begin: MEM_EX_AND_WB_EX
         begin
             if (ex_mem_out_ctrl.opcode == op_lui)
                 ex_forward_B_MUX_sel = exforwardbmux::mem_imm;
+            else if (ex_mem_out_ctrl.regfile_MUX_sel == regfilemux::br_en)
+                ex_forward_B_MUX_sel = exforwardbmux::mem_br_en;
             else
                 ex_forward_B_MUX_sel = exforwardbmux::mem_alu_out;
         end

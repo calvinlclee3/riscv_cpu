@@ -167,5 +167,8 @@ always_comb begin
         end
 
     endcase
+
+    if(rd_id == 5'b0)
+        ctrl.load_regfile = 1'b0;
 end
 endmodule : control_rom

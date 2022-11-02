@@ -97,7 +97,19 @@ Please refer to rvfi_itf.sv for more information.
 /**************************** End RVFIMON signals ****************************/
 
 /********************* Assign Shadow Memory Signals Here *********************/
-// This section not required until CP2
+
+assign itf.inst_read = dut.instr_read;
+assign itf.inst_addr = dut.instr_mem_address;
+assign itf.inst_resp = dut.instr_mem_resp;
+assign itf.inst_rdata = dut.instr_mem_rdata;
+
+assign itf.data_read = dut.data_read;
+assign itf.data_write = dut.data_write;
+assign itf.data_mbe = dut.data_mbe;
+assign itf.data_addr = dut.data_mem_address;
+assign itf.data_wdata = dut.data_mem_wdata;
+assign itf.data_resp = dut.data_mem_resp;
+assign itf.data_rdata = dut.data_mem_rdata;
 /*
 The following signals need to be set:
 icache signals:
@@ -121,7 +133,7 @@ Please refer to tb_itf.sv for more information.
 /*********************** End Shadow Memory Assignments ***********************/
 
 // Set this to the proper value
-assign itf.registers = '{default: '0};
+assign itf.registers = dut.cpu.regfile.data;
 
 /*********************** Instantiate your design here ************************/
 /*
@@ -140,19 +152,6 @@ Please refer to tb_itf.sv for more information.
 mp4 dut(
     .clk(itf.clk),
     .rst(itf.rst),
-    
-    //  // Remove after CP1
-    // .instr_mem_resp(itf.inst_resp),
-    // .instr_mem_rdata(itf.inst_rdata),
-	// .data_mem_resp(itf.data_resp),
-    // .data_mem_rdata(itf.data_rdata),
-    // .instr_read(itf.inst_read),
-	// .instr_mem_address(itf.inst_addr),
-    // .data_read(itf.data_read),
-    // .data_write(itf.data_write),
-    // .data_mbe(itf.data_mbe),
-    // .data_mem_address(itf.data_addr),
-    // .data_mem_wdata(itf.data_wdata)
 
     .pmem_read(itf.mem_read),
     .pmem_write(itf.mem_write),

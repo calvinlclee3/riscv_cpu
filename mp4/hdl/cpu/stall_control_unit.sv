@@ -31,6 +31,9 @@ import rv32i_types::*;
 
 
 logic branch_mispredict;
+logic i_cache_miss_event;
+logic d_cache_miss_event;
+// logic remember;
 
 assign branch_mispredict = id_ex_in_br_en && (id_ex_in_ctrl.opcode == op_br);
 
@@ -46,6 +49,9 @@ function void set_defaults();
     id_ex_reg_flush = 1'b0;
     ex_mem_reg_flush = 1'b0;
     mem_wb_reg_flush = 1'b0;
+
+    i_cache_miss_event = 1'b0;
+    d_cache_miss_event = 1'b0;
 endfunction
 
 
@@ -215,17 +221,48 @@ begin
     /* Instruction Cache Miss */ 
     if(~instr_mem_resp)
     begin
+        i_cache_miss_event = 1'b1;
         load_pc = 1'b0;
-        if_id_reg_flush = 1'b1;
+        // if_id_reg_flush = 1'b1;
+        pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
     end
 
     /* Data Cache Miss */
     if(data_mem_resp == 1'b0 && (ex_mem_out_ctrl.mem_read == 1'b1 || ex_mem_out_ctrl.mem_write == 1'b1))
     begin
+        d_cache_miss_event = 1'b1;
         load_pc = 1'b0;
         pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
+        // if(remember == 1'b1)
+        //     if_id_reg_load = 1'b1;
     end
 
+    // if(i_cache_miss_event == 1'b1 && d_cache_miss_event == 1'b0)
+    // begin
+    //     load_pc = 1'b0;
+    //     if_id_reg_flush = 1'b1;
+    // end
+    // else if(i_cache_miss_event == 1'b0 && d_cache_miss_event == 1'b1)
+    // begin
+    //     load_pc = 1'b0;
+    //     pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
+    // end
+    // else if(i_cache_miss_event == 1'b1 && d_cache_miss_event == 1'b1)
+    // begin
+    //     load_pc = 1'b0;
+    //     if_id_reg_flush = 1'b0;
+    //     pipeline_load(1'b1, 1'b0, 1'b0, 1'b0);
+    // end
 end
+
+// always_ff @(posedge clk)
+// begin 
+//     if (rst)
+//         remember <= 1'b0;
+//     else if (i_cache_miss_event == 1'b1 && d_cache_miss_event == 1'b1)
+//         remember <= 1'b1;
+//     else
+//         remember <= 1'b0;
+// end
 
 endmodule : stall_control_unit

@@ -27,7 +27,7 @@ end
 /************************ Signals necessary for monitor **********************/
 
 // Set high when a valid instruction is modifying regfile or PC
-assign rvfi.commit = (dut.cpu.mem_wb_out.ctrl.load_regfile || dut.cpu.load_pc) && (dut.cpu.debug_WB_IR != 32'h00000013); 
+assign rvfi.commit = (dut.cpu.mem_wb_out.ctrl.load_regfile || dut.cpu.load_pc || dut.cpu.mem_wb_reg_load) && (dut.cpu.debug_WB_IR != 32'h00000013) && (dut.cpu.mem_wb_out.ctrl != '0); 
 // Set high when target PC == Current PC for a branch
 assign rvfi.halt = dut.cpu.debug_halt;
 initial rvfi.order = 0;
@@ -48,13 +48,15 @@ always_comb
 begin
     rvfi.pc_wdata = dut.cpu.debug_MEM_PC;
 
-
     if(dut.cpu.debug_MEM_IR == 32'h00000013 || dut.cpu.ex_mem_out.ctrl == '0)
         rvfi.pc_wdata = dut.cpu.debug_EX_PC;
     if((dut.cpu.debug_MEM_IR == 32'h00000013 || dut.cpu.ex_mem_out.ctrl == '0) &&
-        (dut.cpu.debug_EX_IR == 32'h00000013 || dut.cpu.id_ex_out.ctrl == '0))
+       (dut.cpu.debug_EX_IR == 32'h00000013 || dut.cpu.id_ex_out.ctrl == '0))
         rvfi.pc_wdata = dut.cpu.debug_ID_PC;
-
+    if((dut.cpu.debug_MEM_IR == 32'h00000013 || dut.cpu.ex_mem_out.ctrl == '0) &&
+       (dut.cpu.debug_EX_IR == 32'h00000013 || dut.cpu.id_ex_out.ctrl == '0)   &&
+       (dut.cpu.debug_ID_IR == 32'h00000013))
+        rvfi.pc_wdata = dut.cpu.if_id_in.pc;
 end
 
 assign rvfi.mem_rmask = ((dut.cpu.mem_wb_out.ctrl.opcode == op_load) || (dut.cpu.mem_wb_out.ctrl.mem_read)) ? dut.cpu.mem_wb_out.write_read_mask : 4'b0;

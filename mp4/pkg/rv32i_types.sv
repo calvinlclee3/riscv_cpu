@@ -77,6 +77,21 @@ typedef enum bit [2:0] {
     alu_and = 3'b111
 } alu_ops;
 
+
+typedef enum bit [1:0] {
+    br  = 2'b00
+    ,jal  = 2'b01
+    ,jalr = 2'b10
+} btb_ops;
+
+typedef struct packed {
+
+    rv32i_word pc;
+    rv32i_word target_address;
+    btb_ops br_jal_jalr;
+
+} btb_entry;
+
 typedef struct packed {
 
     rv32i_opcode opcode;
@@ -159,19 +174,6 @@ typedef struct packed {
 
 } mem_wb_pipeline_reg;
 
-typedef enum bit [1:0] {
-    op_br  = 2'b00
-    ,op_jal  = 2'b01
-    ,op_jalr = 2'b10
-} btb_ops;
-
-typedef struct packed {
-
-    rv32i_word pc;
-    rv32i_word target_address;
-    btb_ops br_jal_jalr;
-
-} btb_entry;
 
 endpackage : rv32i_types
 

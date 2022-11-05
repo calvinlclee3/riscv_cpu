@@ -1,8 +1,10 @@
 package pcmux;
-typedef enum bit [1:0] {
-    pc_plus4  = 2'b00
-    ,adder_out  = 2'b01
-    ,adder_mod2 = 2'b10
+typedef enum bit [2:0] {
+    pc_plus4  = 3'b000
+    ,adder_out  = 3'b001
+    ,adder_mod2 = 3'b010
+    ,btb_out    = 3'b011
+    ,if_id_out_pc_plus4 = 3'b100
 } pcmux_sel_t;
 endpackage
 

@@ -106,6 +106,12 @@ typedef struct packed {
 
     rv32i_word pc;
     rv32i_word ir;
+    logic btb_hit;
+    btb_entry btb_out;
+    logic [3:0] local_pht_index;
+    logic [3:0] global_pht_index;
+    logic local_pr;
+    logic global_pr;
 
 } if_id_pipeline_reg;
 
@@ -152,6 +158,20 @@ typedef struct packed {
     rv32i_word mem_data_out;
 
 } mem_wb_pipeline_reg;
+
+typedef enum bit [1:0] {
+    op_br  = 2'b00
+    ,op_jal  = 2'b01
+    ,op_jalr = 2'b10
+} btb_ops;
+
+typedef struct packed {
+
+    rv32i_word pc;
+    rv32i_word target_address;
+    btb_ops br_jal_jalr;
+
+} btb_entry;
 
 endpackage : rv32i_types
 

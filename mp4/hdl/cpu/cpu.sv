@@ -73,6 +73,8 @@ id_ex_pipeline_reg id_ex_out;
 ex_mem_pipeline_reg ex_mem_out;
 mem_wb_pipeline_reg mem_wb_out;
 
+logic global_stall;
+
 /****************************** DEBUG ******************************/ 
 
 rv32i_word debug_ID_PC;
@@ -228,7 +230,9 @@ stall_control_unit stall_control_unit (
     .if_id_reg_flush(if_id_reg_flush),
     .id_ex_reg_flush(id_ex_reg_flush),
     .ex_mem_reg_flush(ex_mem_reg_flush),
-    .mem_wb_reg_flush(mem_wb_reg_flush)
+    .mem_wb_reg_flush(mem_wb_reg_flush),
+
+    .global_stall(global_stall)
 
 );
 

@@ -24,7 +24,9 @@ import rv32i_types::*;
     output logic if_id_reg_flush,
     output logic id_ex_reg_flush,
     output logic ex_mem_reg_flush,
-    output logic mem_wb_reg_flush
+    output logic mem_wb_reg_flush,
+
+    output logic global_stall
 
 );
 
@@ -52,6 +54,8 @@ function void set_defaults();
 
     i_cache_miss_event = 1'b0;
     d_cache_miss_event = 1'b0;
+
+    global_stall = 1'b0;
 endfunction
 
 
@@ -225,6 +229,7 @@ begin
         load_pc = 1'b0;
         // if_id_reg_flush = 1'b1;
         pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
+        global_stall = 1'b1;
     end
 
     /* Data Cache Miss */
@@ -233,6 +238,7 @@ begin
         d_cache_miss_event = 1'b1;
         load_pc = 1'b0;
         pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
+        global_stall = 1'b1;
         // if(remember == 1'b1)
         //     if_id_reg_load = 1'b1;
     end

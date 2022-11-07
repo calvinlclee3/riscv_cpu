@@ -24,6 +24,9 @@ import rv32i_types::*;
 
 );
 
+/* Specify the width of performance counters. */
+localparam perf_counter_width = 32;
+
 logic load_pc;
 
 pcmux::pcmux_sel_t pc_MUX_sel;
@@ -87,6 +90,11 @@ rv32i_word debug_MEM_IR;
 rv32i_word debug_WB_IR;
 rv32i_word debug_WB_target_address;
 logic debug_halt;
+logic [perf_counter_width-1:0] num_control_flow_instr;
+logic num_control_flow_instr_overflow;
+logic [perf_counter_width-1:0] num_correct_branch_predict;
+logic num_correct_branch_predict_overflow;
+
 assign debug_ID_PC = if_id_out.pc;
 assign debug_EX_PC = id_ex_out.pc;
 assign debug_MEM_PC = ex_mem_out.pc;
@@ -250,6 +258,23 @@ forward_control_unit forward_control_unit (
     .wb_mem_forward_MUX_sel(wb_mem_forward_MUX_sel) 
 );
 
+/* Count the total number of control flow instructions executed. */
+perf_counter #(.width(perf_counter_width)) pf0 (
+    .clk(clk),
+    .rst(rst),
+    .count(if_id_reg_load && (id_ex_in.ctrl.opcode == op_br || id_ex_in.ctrl.opcode == op_jal || id_ex_in.ctrl.opcode == op_jalr)),
+    .overflow(num_control_flow_instr_overflow),
+    .out(num_control_flow_instr)
+);
+
+/* Count the number of correctly predicted branches for Static-Not-Taken branch predictor. */
+perf_counter #(.width(perf_counter_width)) pf1 (
+    .clk(clk),
+    .rst(rst),
+    .count(if_id_reg_load && (id_ex_in.ctrl.opcode == op_br && id_ex_in.br_en == 1'b0)),
+    .overflow(num_correct_branch_predict_overflow),
+    .out(num_correct_branch_predict)
+);
 
 /****************************** ASSIGNMENTS ******************************/ 
 

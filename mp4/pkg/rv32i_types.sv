@@ -127,6 +127,7 @@ typedef struct packed {
     logic [3:0] global_pht_index;
     logic local_pr;
     logic global_pr;
+    logic br_pr;
 
 } if_id_pipeline_reg;
 

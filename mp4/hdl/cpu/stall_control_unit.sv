@@ -46,13 +46,6 @@ import rv32i_types::*;
 );
 
 
-
-logic branch_mispredict;
-logic i_cache_miss_event;
-logic d_cache_miss_event;
-
-
-
 function void set_defaults();
     load_pc = 1'b1;
 
@@ -65,9 +58,6 @@ function void set_defaults();
     id_ex_reg_flush = 1'b0;
     ex_mem_reg_flush = 1'b0;
     mem_wb_reg_flush = 1'b0;
-
-    i_cache_miss_event = 1'b0;
-    d_cache_miss_event = 1'b0;
 
     pc_MUX_sel = pcmux::pc_plus4;
 
@@ -82,12 +72,10 @@ endfunction
 
 
 function void pipeline_load(logic load_if_id, logic load_id_ex, logic load_ex_mem, logic load_mem_wb);
-    //Specify pipeline reg load values 
     if_id_reg_load = load_if_id;
     id_ex_reg_load = load_id_ex;
     ex_mem_reg_load = load_ex_mem;
     mem_wb_reg_load = load_mem_wb;
-
 endfunction
 
 
@@ -120,9 +108,6 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
-                // if_id_reg_load = 1'b0;
-                // id_ex_reg_flush = 1'b1;
-                
             end
         end
 
@@ -133,8 +118,6 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
-                // if_id_reg_load = 1'b0;
-                // id_ex_reg_flush = 1'b1;
             end
         end
 
@@ -156,8 +139,6 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
-                // if_id_reg_load = 1'b0;
-                // id_ex_reg_flush = 1'b1;
             end
         end
 
@@ -168,8 +149,6 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
-                // if_id_reg_load = 1'b0;
-                // id_ex_reg_flush = 1'b1;
             end
         end
     end
@@ -187,8 +166,6 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
-                // if_id_reg_load = 1'b0;
-                // id_ex_reg_flush = 1'b1;
             end
         end
 
@@ -199,8 +176,6 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
-                // if_id_reg_load = 1'b0;
-                // id_ex_reg_flush = 1'b1;
             end
         end
     end
@@ -218,9 +193,6 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b0, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b0, 1'b1, 1'b0);
-                // if_id_reg_load = 1'b0;
-                // id_ex_reg_load = 1'b0;
-                // ex_mem_reg_flush = 1'b1;
             end
         end
         if (id_ex_out_ctrl.opcode == op_store)
@@ -230,15 +202,12 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b0, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b0, 1'b1, 1'b0);
-                // if_id_reg_load = 1'b0;
-                // id_ex_reg_load = 1'b0;
-                // ex_mem_reg_flush = 1'b1;
             end
         end
 
     end
 
-    /* Drive pc_MUX_sel by IF stage first */
+    /* Drive pc_MUX_sel by IF stage first. */
     if (if_btb_read_hit == 1'b1)
     begin 
         if (if_btb_out.br_jal_jalr == br)
@@ -253,7 +222,8 @@ begin
         else if (if_btb_out.br_jal_jalr == jalr)
             pc_MUX_sel = pcmux::btb_out;	
     end
-    else // BTB Miss
+    /* BTB Miss */
+    else 
         pc_MUX_sel = pcmux::pc_plus4;
 
 
@@ -300,13 +270,13 @@ begin
         end 
     end
 
-    // GHR
+    /* Update GHR */
     if((id_ex_in_ctrl.opcode == op_br) && (if_id_reg_load == 1'b1))
         ghr_load = 1'b1;
 
 
 
-    // Global PHT
+    /* Update Global PHT */
     if(id_ex_in_ctrl.opcode == op_br)
     begin	
         if(id_ex_in_br_en == 1'b1)
@@ -319,9 +289,7 @@ begin
     /* Instruction Cache Miss */ 
     if(~instr_mem_resp)
     begin
-        i_cache_miss_event = 1'b1;
         load_pc = 1'b0;
-        // if_id_reg_flush = 1'b1;
         pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
         global_stall = 1'b1;
     end
@@ -329,7 +297,6 @@ begin
     /* Data Cache Miss */
     if(data_mem_resp == 1'b0 && (ex_mem_out_ctrl.mem_read == 1'b1 || ex_mem_out_ctrl.mem_write == 1'b1))
     begin
-        d_cache_miss_event = 1'b1;
         load_pc = 1'b0;
         pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
         global_stall = 1'b1;

@@ -24,17 +24,8 @@ import rv32i_types::*;
 
 );
 
-/* Specify the width of performance counters. */
-localparam perf_counter_width = 32;
-localparam history_depth = 4;
 
 logic load_pc;
-
-/* Branch Prediction Signals */
-logic ghr_load;
-logic [history_depth-1:0] ghr_out;
-
-
 pcmux::pcmux_sel_t pc_MUX_sel;
 idforwardamux::idforwardamux_sel_t id_forward_A_MUX_sel;
 idforwardbmux::idforwardbmux_sel_t id_forward_B_MUX_sel;
@@ -82,12 +73,16 @@ id_ex_pipeline_reg id_ex_out;
 ex_mem_pipeline_reg ex_mem_out;
 mem_wb_pipeline_reg mem_wb_out;
 
-logic global_stall;
+/* Branch Prediction Signals */
+logic ghr_load;
+logic [history_depth-1:0] ghr_out;
 logic btb_load;
 btb_entry btb_datain;
 logic jalr_wrong_target;
 logic increment_pht;
 logic decrement_pht;
+
+logic global_stall;
 
 /****************************** DEBUG ******************************/ 
 
@@ -149,7 +144,7 @@ btb #(.s_index(3)) btb (
     .read_hit(if_id_in.btb_read_hit)
 );
 
-ghr #(.depth(4)) ghr (
+ghr #(.depth(history_depth)) ghr (
     .clk(clk),
     .rst(rst),
     .load(ghr_load), 
@@ -157,7 +152,7 @@ ghr #(.depth(4)) ghr (
     .out(ghr_out)
 );
 
-pht #(.s_index(4)) global_pht (
+pht #(.s_index(history_depth)) global_pht (
     .clk(clk),
     .rst(rst),
     .increment(increment_pht),
@@ -323,7 +318,7 @@ perf_counter #(.width(perf_counter_width)) pf0 (
     .out(num_control_flow_instr)
 );
 
-/* Count the number of correctly predicted branches for Static-Not-Taken branch predictor. */
+/* Count the number of correctly predicted branches. */
 perf_counter #(.width(perf_counter_width)) pf1 (
     .clk(clk),
     .rst(rst),

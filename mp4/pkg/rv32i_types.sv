@@ -15,6 +15,11 @@ import exforwardbmux::*;
 import wbmemforwardmux::*;
 import arbiteraddressmux::*;
 
+/* Specify the width of performance counters. */
+localparam perf_counter_width = 32;
+/* Specify the depth of branch history recorded. */
+localparam history_depth = 4;
+
 typedef logic [31:0] rv32i_word;
 typedef logic [4:0] rv32i_reg;
 typedef logic [3:0] rv32i_mem_wmask;
@@ -122,8 +127,8 @@ typedef struct packed {
     rv32i_word ir;
     logic btb_read_hit;
     btb_entry btb_out;
-    logic [3:0] local_pht_index;
-    logic [3:0] global_pht_index;
+    logic [history_depth-1:0] local_pht_index;
+    logic [history_depth-1:0] global_pht_index;
     logic local_pr;
     logic global_pr;
     logic br_pr;

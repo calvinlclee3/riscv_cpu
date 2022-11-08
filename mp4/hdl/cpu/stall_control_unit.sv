@@ -7,11 +7,19 @@ import rv32i_types::*;
     input logic data_mem_resp,
 
     /* Control Words*/
+    input logic if_btb_read_hit,
+    input btb_entry if_btb_out,
+    input logic if_br_pr,
+    input logic id_btb_read_hit,
+    input btb_entry id_btb_out,
+    input logic id_br_pr,
+    input logic jalr_wrong_target,
     input rv32i_control_word id_ex_in_ctrl,
     input logic id_ex_in_br_en,
     input rv32i_control_word id_ex_out_ctrl,
     input rv32i_control_word ex_mem_out_ctrl,
     input rv32i_control_word mem_wb_out_ctrl,
+    
 
     /* Pipeline Register Load Signals*/
     output logic load_pc,
@@ -26,6 +34,13 @@ import rv32i_types::*;
     output logic ex_mem_reg_flush,
     output logic mem_wb_reg_flush,
 
+    output pcmux::pcmux_sel_t pc_MUX_sel,
+    output logic btb_load,
+    output logic ghr_load,
+
+    output logic increment_pht,
+    output logic decrement_pht,
+
     output logic global_stall
 
 );
@@ -35,9 +50,8 @@ import rv32i_types::*;
 logic branch_mispredict;
 logic i_cache_miss_event;
 logic d_cache_miss_event;
-// logic remember;
 
-assign branch_mispredict = id_ex_in_br_en && (id_ex_in_ctrl.opcode == op_br);
+
 
 function void set_defaults();
     load_pc = 1'b1;
@@ -54,6 +68,14 @@ function void set_defaults();
 
     i_cache_miss_event = 1'b0;
     d_cache_miss_event = 1'b0;
+
+    pc_MUX_sel = pcmux::pc_plus4;
+
+    btb_load = 1'b0;
+    ghr_load = 1'b0;
+
+    increment_pht = 1'b0;
+    decrement_pht = 1'b0;
 
     global_stall = 1'b0;
 endfunction
@@ -216,11 +238,83 @@ begin
 
     end
 
-    /* Branch Mispredict or Unconditional Jumps */
-    if(branch_mispredict || id_ex_in_ctrl.opcode == op_jal || id_ex_in_ctrl.opcode == op_jalr)
-    begin
-        if_id_reg_flush = 1'b1;
+    /* Drive pc_MUX_sel by IF stage first */
+    if (if_btb_read_hit == 1'b1)
+    begin 
+        if (if_btb_out.br_jal_jalr == br)
+        begin
+            if (if_br_pr == 1'b1) 
+                pc_MUX_sel = pcmux::btb_out;
+            else
+                pc_MUX_sel = pcmux::pc_plus4;
+        end 
+        else if (if_btb_out.br_jal_jalr == jal)
+            pc_MUX_sel = pcmux::btb_out;
+        else if (if_btb_out.br_jal_jalr == jalr)
+            pc_MUX_sel = pcmux::btb_out;	
     end
+    else // BTB Miss
+        pc_MUX_sel = pcmux::pc_plus4;
+
+
+    /* Drive pc_MUX_sel by ID stage  (Overwrite pc_MUX_sel) */
+    if(id_ex_in_ctrl.opcode == op_br)
+    begin 
+        if(id_btb_read_hit == 1'b1 && (id_br_pr != id_ex_in_br_en))
+        begin
+            if_id_reg_flush = 1'b1;
+            if(id_ex_in_br_en == 1'b1)
+                pc_MUX_sel = pcmux::adder_out;  
+            if(id_ex_in_br_en == 1'b0)
+                pc_MUX_sel = pcmux::if_id_out_pc_plus4; 
+        end
+        if(id_btb_read_hit == 1'b0 && id_ex_in_br_en == 1'b1)  // whenever BTB is a miss, always fetch PC+4
+        begin 
+            if_id_reg_flush = 1'b1;
+            btb_load = 1'b1;
+            pc_MUX_sel = pcmux::adder_out;
+        end
+    end 
+    else if(id_ex_in_ctrl.opcode == op_jal)
+    begin 
+        if(id_btb_read_hit == 1'b0)
+        begin 
+            if_id_reg_flush = 1'b1;
+            btb_load = 1'b1;
+            pc_MUX_sel = pcmux::adder_out;
+        end
+    end
+    else if(id_ex_in_ctrl.opcode == op_jalr)
+    begin 
+        if(id_btb_read_hit == 1'b1 && (jalr_wrong_target == 1'b1))
+        begin
+            if_id_reg_flush = 1'b1;
+            btb_load = 1'b1;
+            pc_MUX_sel = pcmux::adder_mod2;
+        end 
+        if(id_btb_read_hit == 1'b0)
+        begin 
+            if_id_reg_flush = 1'b1;
+            btb_load = 1'b1;
+            pc_MUX_sel = pcmux::adder_mod2;
+        end 
+    end
+
+    // GHR
+    if((id_ex_in_ctrl.opcode == op_br) && (if_id_reg_load == 1'b1))
+        ghr_load = 1'b1;
+
+
+
+    // Global PHT
+    if(id_ex_in_ctrl.opcode == op_br)
+    begin	
+        if(id_ex_in_br_en == 1'b1)
+            increment_pht = 1'b1;
+        else
+            decrement_pht = 1'b1;
+    end 
+
 
     /* Instruction Cache Miss */ 
     if(~instr_mem_resp)
@@ -239,36 +333,9 @@ begin
         load_pc = 1'b0;
         pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
         global_stall = 1'b1;
-        // if(remember == 1'b1)
-        //     if_id_reg_load = 1'b1;
+
     end
 
-    // if(i_cache_miss_event == 1'b1 && d_cache_miss_event == 1'b0)
-    // begin
-    //     load_pc = 1'b0;
-    //     if_id_reg_flush = 1'b1;
-    // end
-    // else if(i_cache_miss_event == 1'b0 && d_cache_miss_event == 1'b1)
-    // begin
-    //     load_pc = 1'b0;
-    //     pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
-    // end
-    // else if(i_cache_miss_event == 1'b1 && d_cache_miss_event == 1'b1)
-    // begin
-    //     load_pc = 1'b0;
-    //     if_id_reg_flush = 1'b0;
-    //     pipeline_load(1'b1, 1'b0, 1'b0, 1'b0);
-    // end
 end
-
-// always_ff @(posedge clk)
-// begin 
-//     if (rst)
-//         remember <= 1'b0;
-//     else if (i_cache_miss_event == 1'b1 && d_cache_miss_event == 1'b1)
-//         remember <= 1'b1;
-//     else
-//         remember <= 1'b0;
-// end
 
 endmodule : stall_control_unit

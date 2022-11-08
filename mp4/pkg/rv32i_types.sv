@@ -86,7 +86,6 @@ typedef enum bit [1:0] {
 
 typedef struct packed {
 
-    rv32i_word pc;
     rv32i_word target_address;
     btb_ops br_jal_jalr;
 
@@ -121,7 +120,7 @@ typedef struct packed {
 
     rv32i_word pc;
     rv32i_word ir;
-    logic btb_hit;
+    logic btb_read_hit;
     btb_entry btb_out;
     logic [3:0] local_pht_index;
     logic [3:0] global_pht_index;

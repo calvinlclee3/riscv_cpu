@@ -1,4 +1,6 @@
-module pht #(
+module pht 
+import rv32i_types::*; 
+#(
     parameter s_index = 4
 )
 (
@@ -10,6 +12,10 @@ module pht #(
     input logic [s_index-1:0] windex,
     output logic out
 );
+
+/* Increment when the branch is taken. Decrement otherwise. */
+/* If the counter is 10 or 11, the branch predictor determines taken. */
+/* Initialized to Weakly Taken. */
 
 localparam num_sets = 2**s_index;
 

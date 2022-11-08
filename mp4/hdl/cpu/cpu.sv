@@ -26,8 +26,14 @@ import rv32i_types::*;
 
 /* Specify the width of performance counters. */
 localparam perf_counter_width = 32;
+localparam history_depth = 4;
 
 logic load_pc;
+
+/* Branch Prediction Signals */
+logic ghr_load;
+logic [history_depth-1:0] ghr_out;
+
 
 pcmux::pcmux_sel_t pc_MUX_sel;
 idforwardamux::idforwardamux_sel_t id_forward_A_MUX_sel;
@@ -77,6 +83,11 @@ ex_mem_pipeline_reg ex_mem_out;
 mem_wb_pipeline_reg mem_wb_out;
 
 logic global_stall;
+logic btb_load;
+btb_entry btb_datain;
+logic jalr_wrong_target;
+logic increment_pht;
+logic decrement_pht;
 
 /****************************** DEBUG ******************************/ 
 
@@ -127,8 +138,40 @@ if_id_reg if_id_reg (
 );
 
 
+btb #(.s_index(3)) btb (
+    .clk(clk),
+    .rst(rst),
+    .read_address(if_id_in.pc),
+    .write_address(if_id_out.pc),
+    .load(btb_load),
+    .in(btb_datain),
+    .out(if_id_in.btb_out),
+    .read_hit(if_id_in.btb_read_hit)
+);
+
+ghr #(.depth(4)) ghr (
+    .clk(clk),
+    .rst(rst),
+    .load(ghr_load), 
+    .in(id_ex_in.br_en),
+    .out(ghr_out)
+);
+
+pht #(.s_index(4)) global_pht (
+    .clk(clk),
+    .rst(rst),
+    .increment(increment_pht),
+    .decrement(decrement_pht),
+    .rindex(ghr_out),
+    .windex(if_id_out.global_pht_index),
+    .out(if_id_in.global_pr)
+);
+
+
 
 /****************************** DECODE ******************************/ 
+
+
 
 regfile regfile (
     .clk(clk),
@@ -221,6 +264,13 @@ stall_control_unit stall_control_unit (
     .data_mem_resp(data_mem_resp),
 
     /* Control Words*/
+    .if_btb_read_hit(if_id_in.btb_read_hit),
+    .if_btb_out(if_id_in.btb_out),
+    .if_br_pr(if_id_in.br_pr),
+    .id_btb_read_hit(if_id_out.btb_read_hit),
+    .id_btb_out(if_id_out.btb_out),
+    .id_br_pr(if_id_out.br_pr),
+    .jalr_wrong_target(jalr_wrong_target),
     .id_ex_in_ctrl(id_ex_in.ctrl),
     .id_ex_in_br_en(id_ex_in.br_en),
     .id_ex_out_ctrl(id_ex_out.ctrl),
@@ -239,6 +289,12 @@ stall_control_unit stall_control_unit (
     .id_ex_reg_flush(id_ex_reg_flush),
     .ex_mem_reg_flush(ex_mem_reg_flush),
     .mem_wb_reg_flush(mem_wb_reg_flush),
+
+    .pc_MUX_sel(pc_MUX_sel),
+    .btb_load(btb_load),
+    .ghr_load(ghr_load),
+    .increment_pht(increment_pht),
+    .decrement_pht(decrement_pht),
 
     .global_stall(global_stall)
 
@@ -271,7 +327,9 @@ perf_counter #(.width(perf_counter_width)) pf0 (
 perf_counter #(.width(perf_counter_width)) pf1 (
     .clk(clk),
     .rst(rst),
-    .count(if_id_reg_load && (id_ex_in.ctrl.opcode == op_br && id_ex_in.br_en == 1'b0)),
+    .count(if_id_reg_load && ((id_ex_in.ctrl.opcode == op_br  && if_id_out.br_pr == id_ex_in.br_en) ||
+                              (id_ex_in.ctrl.opcode == op_jal && if_id_out.btb_read_hit)            ||
+                              (id_ex_in.ctrl.opcode == op_jalr && if_id_out.btb_read_hit && ~jalr_wrong_target))),
     .overflow(num_correct_branch_predict_overflow),
     .out(num_correct_branch_predict)
 );
@@ -290,6 +348,10 @@ assign data_write = ex_mem_out.ctrl.mem_write;
 assign data_mem_address = ex_mem_out.alu_out_address;
 assign mem_wb_in.MDR = data_mem_rdata;
 assign data_mbe = ex_mem_out.write_read_mask;
+
+/* if_id pipeline reg assignments */
+assign if_id_in.br_pr = if_id_in.global_pr;
+assign if_id_in.global_pht_index = ghr_out;
 
 /* id_ex pipeline reg assignments */
 assign id_ex_in.pc = if_id_out.pc;
@@ -320,23 +382,51 @@ assign mem_wb_in.ir = ex_mem_out.ir;
 assign mem_wb_in.mem_data_out = data_mem_wdata;
 assign mem_wb_in.alu_out_address = ex_mem_out.alu_out_address;
 
-/* Assign PC MUX selection signal in ID stage */
-assign pc_MUX_sel[0] = (id_ex_in.br_en && (rv32i_opcode'(if_id_out.ir[6:0]) == op_br) ) || (rv32i_opcode'(if_id_out.ir[6:0]) == op_jal);
-assign pc_MUX_sel[1] = (rv32i_opcode'(if_id_out.ir[6:0]) == op_jalr) ? 1'b1 : 1'b0;
+// /* Assign PC MUX selection signal in ID stage */
+// assign pc_MUX_sel[0] = (id_ex_in.br_en && (rv32i_opcode'(if_id_out.ir[6:0]) == op_br) ) || (rv32i_opcode'(if_id_out.ir[6:0]) == op_jal);
+// assign pc_MUX_sel[1] = (rv32i_opcode'(if_id_out.ir[6:0]) == op_jalr) ? 1'b1 : 1'b0;
 
 
 /****************************** MUXES ******************************/ 
 
 
 assign id_ex_in.target_address = target_address_MUX_out + id_ex_in.imm;
+assign jalr_wrong_target = {id_ex_in.target_address[31:1], 1'b0} != if_id_out.btb_out.target_address;
+
 always_comb begin : PCMUX
 
     pc_MUX_out = '0;
 
     unique case (pc_MUX_sel)
-        pcmux::pc_plus4      : pc_MUX_out = if_id_in.pc + 4;
-        pcmux::adder_out     : pc_MUX_out = id_ex_in.target_address;
-        pcmux::adder_mod2    : pc_MUX_out = {id_ex_in.target_address[31:1], 1'b0};
+        pcmux::pc_plus4             : pc_MUX_out = if_id_in.pc + 4;
+        pcmux::adder_out            : pc_MUX_out = id_ex_in.target_address;
+        pcmux::adder_mod2           : pc_MUX_out = {id_ex_in.target_address[31:1], 1'b0};
+        pcmux::btb_out              : pc_MUX_out = if_id_in.btb_out.target_address;
+        pcmux::if_id_out_pc_plus4   : pc_MUX_out = if_id_out.pc + 4;
+        default: ;
+    endcase
+end
+
+always_comb begin : BTBDATAINMUX
+
+    btb_datain = '0;
+
+    unique case (id_ex_in.ctrl.opcode)
+        op_br       : 
+        begin
+            btb_datain.target_address = id_ex_in.target_address;
+            btb_datain.br_jal_jalr = br;
+        end
+        op_jal      : 
+        begin
+            btb_datain.target_address = id_ex_in.target_address;
+            btb_datain.br_jal_jalr = jal;
+        end
+        op_jalr     : 
+        begin
+            btb_datain.target_address = {id_ex_in.target_address[31:1], 1'b0};
+            btb_datain.br_jal_jalr = jalr;
+        end
         default: ;
     endcase
 end

@@ -32,6 +32,7 @@ idforwardbmux::idforwardbmux_sel_t id_forward_B_MUX_sel;
 exforwardamux::exforwardamux_sel_t ex_forward_A_MUX_sel;
 exforwardbmux::exforwardbmux_sel_t ex_forward_B_MUX_sel;
 wbmemforwardmux::wbmemforwardmux_sel_t wb_mem_forward_MUX_sel;
+logic tournament_MUX_sel;
 
 rv32i_word reg_a_out;
 rv32i_word reg_b_out;
@@ -81,6 +82,10 @@ logic jalr_wrong_target;
 logic br_jal_wrong_target;
 logic increment_pht;
 logic decrement_pht;
+logic bht_load;
+logic [history_depth-1:0] bht_out;
+logic increment_tournament_pht;
+logic decrement_tournament_pht;
 
 logic global_stall;
 logic num_correct_branch_predict_count;
@@ -163,7 +168,36 @@ pht #(.s_index(history_depth)) global_pht (
     .out(if_id_in.global_pr)
 );
 
+bht #(.s_index(bht_s_index), .depth(history_depth)) bht (
+    .clk(clk),
+    .rst(rst),
+    .load(bht_load), 
+    .rindex(if_id_in.pc[bht_s_index+1:2]),
+    .windex(if_id_out.pc[bht_s_index+1:2]),
+    .in(id_ex_in.br_en),
+    .out(bht_out)
+);
 
+
+pht #(.s_index(history_depth)) local_pht (
+    .clk(clk),
+    .rst(rst),
+    .increment(increment_pht),
+    .decrement(decrement_pht),
+    .rindex(bht_out),
+    .windex(if_id_out.local_pht_index),
+    .out(if_id_in.local_pr)
+);
+
+pht #(.s_index(tournament_pht_s_index)) tournament_pht (
+    .clk(clk),
+    .rst(rst),
+    .increment(increment_tournament_pht),
+    .decrement(decrement_tournament_pht),
+    .rindex(if_id_in.pc[tournament_pht_s_index+1:2]),
+    .windex(if_id_out.pc[tournament_pht_s_index+1:2]),
+    .out(tournament_MUX_sel)
+);
 
 /****************************** DECODE ******************************/ 
 
@@ -265,6 +299,8 @@ stall_control_unit stall_control_unit (
     .if_br_pr(if_id_in.br_pr),
     .id_btb_read_hit(if_id_out.btb_read_hit),
     .id_btb_out(if_id_out.btb_out),
+    .id_local_pr(if_id_out.local_pr),
+    .id_global_pr(if_id_out.global_pr),
     .id_br_pr(if_id_out.br_pr),
     .br_jal_wrong_target(br_jal_wrong_target),
     .jalr_wrong_target(jalr_wrong_target),
@@ -290,8 +326,11 @@ stall_control_unit stall_control_unit (
     .pc_MUX_sel(pc_MUX_sel),
     .btb_load(btb_load),
     .ghr_load(ghr_load),
+    .bht_load(bht_load),
     .increment_pht(increment_pht),
     .decrement_pht(decrement_pht),
+    .increment_tournament_pht(increment_tournament_pht),
+    .decrement_tournament_pht(decrement_tournament_pht),
 
     .global_stall(global_stall)
 
@@ -345,8 +384,8 @@ assign mem_wb_in.MDR = data_mem_rdata;
 assign data_mbe = ex_mem_out.write_read_mask;
 
 /* if_id pipeline reg assignments */
-assign if_id_in.br_pr = if_id_in.global_pr;
 assign if_id_in.global_pht_index = ghr_out;
+assign if_id_in.local_pht_index = bht_out;
 
 /* id_ex pipeline reg assignments */
 assign id_ex_in.pc = if_id_out.pc;
@@ -448,6 +487,18 @@ always_comb begin : BTBDATAINMUX
         default:;
     endcase
 end
+
+always_comb begin : TOURNAMENTMUX
+
+    if_id_in.br_pr = '0;
+
+    unique case (tournamentmux::tournamentmux_sel_t'(tournament_MUX_sel))
+        tournamentmux::local_pred: if_id_in.br_pr = if_id_in.local_pr;
+        tournamentmux::global_pred: if_id_in.br_pr = if_id_in.global_pr; 
+        default:;
+    endcase
+end
+
 
 always_comb begin: IDFORWARDAMUX
 

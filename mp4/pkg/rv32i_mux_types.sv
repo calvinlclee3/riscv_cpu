@@ -107,3 +107,9 @@ typedef enum bit {
 } arbiteraddressmux_sel_t;
 endpackage
 
+package tournamentmux;
+typedef enum bit {
+    local_pred           = 1'b0
+    ,global_pred         = 1'b1
+} tournamentmux_sel_t;
+endpackage

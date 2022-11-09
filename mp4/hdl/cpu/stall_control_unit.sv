@@ -12,6 +12,8 @@ import rv32i_types::*;
     input logic if_br_pr,
     input logic id_btb_read_hit,
     input btb_entry id_btb_out,
+    input logic id_local_pr,
+    input logic id_global_pr,
     input logic id_br_pr,
     input logic br_jal_wrong_target,
     input logic jalr_wrong_target,
@@ -38,14 +40,19 @@ import rv32i_types::*;
     output pcmux::pcmux_sel_t pc_MUX_sel,
     output logic btb_load,
     output logic ghr_load,
+    output logic bht_load,
 
     output logic increment_pht,
     output logic decrement_pht,
+    output logic increment_tournament_pht,
+    output logic decrement_tournament_pht,
 
     output logic global_stall
 
 );
 
+logic local_c;
+logic global_c;
 
 function void set_defaults();
     load_pc = 1'b1;
@@ -64,9 +71,15 @@ function void set_defaults();
 
     btb_load = 1'b0;
     ghr_load = 1'b0;
+    bht_load = 1'b0;
 
     increment_pht = 1'b0;
     decrement_pht = 1'b0;
+    increment_tournament_pht = 1'b0;
+    decrement_tournament_pht = 1'b0;
+
+    local_c = 1'b0;
+    global_c = 1'b0;
 
     global_stall = 1'b0;
 endfunction
@@ -294,19 +307,37 @@ begin
         end 
     end
 
-    /* Update GHR */
+    /* Update GHR/BHT */
     if((id_ex_in_ctrl.opcode == op_br) && (if_id_reg_load == 1'b1))
+    begin
         ghr_load = 1'b1;
+        bht_load = 1'b1;
+    end
 
 
-
-    /* Update Global PHT */
-    if(id_ex_in_ctrl.opcode == op_br)
+    /* Update PHT */
+    if(id_ex_in_ctrl.opcode == op_br && (if_id_reg_load == 1'b1))
     begin	
         if(id_ex_in_br_en == 1'b1)
             increment_pht = 1'b1;
         else
             decrement_pht = 1'b1;
+    end 
+
+    /* Update Tournament PHT */
+    if(id_ex_in_ctrl.opcode == op_br && (if_id_reg_load == 1'b1))
+    begin	
+        if(id_ex_in_br_en == id_local_pr)
+            local_c = 1'b1;
+        if(id_ex_in_br_en == id_global_pr)
+            global_c = 1'b1;
+        if(local_c != global_c)
+        begin
+            if(local_c == 1'b1)
+                decrement_tournament_pht = 1'b1;  // local predictor is RIGHT, global predictor is WRONG, and we let the number go DOWN, so if the counter value is low, it means local is right a lot recently
+            else if(global_c == 1'b1)
+                increment_tournament_pht = 1'b1;
+        end
     end 
 
 

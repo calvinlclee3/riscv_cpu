@@ -1,6 +1,3 @@
-/* MODIFY. The cache controller. It is a state machine
-that controls the behavior of the cache. */
-
 module l2_cache_control (
 	          input clk,
     		  input rst,
@@ -13,9 +10,18 @@ module l2_cache_control (
 			  input logic	 dirty1,
 			  input logic	 dirty0,
 		      output logic 	 load_mem_address_reg,
+		      output logic 	 read_way0_tag,
+		      output logic 	 read_way1_tag,
+		      output logic 	 read_way0_valid,
+		      output logic 	 read_way1_valid,
+		      output logic 	 read_way0_dirty,
+		      output logic 	 read_way1_dirty,
+		      output logic 	 read_lru,
 		      output logic 	 lru_mux,
 		      output logic 	 load_lru,
 		      output logic 	 mem_resp,
+		      output logic 	 read_way1_data,
+		      output logic 	 read_way0_data,
 		      output logic [1:0] data_array0_mux,
 		      output logic 	 datain0_mux,
 		      output logic 	 dirty_mux,
@@ -37,9 +43,18 @@ module l2_cache_control (
    function void set_defaults();
 
       load_mem_address_reg = 1'b0;
+      read_way0_tag = 1'b0;
+      read_way1_tag = 1'b0;
+      read_way0_valid = 1'b0;
+      read_way1_valid = 1'b0;
+      read_way0_dirty = 1'b0;
+      read_way1_dirty = 1'b0;
+      read_lru = 1'b0;
       lru_mux = 1'b0;
       load_lru = 1'b0;
       mem_resp = 1'b0;
+      read_way1_data = 1'b0;
+      read_way0_data = 1'b0;
       data_array0_mux = 2'b00;
       datain0_mux = 1'b0;
       dirty_mux = 1'b0;
@@ -151,9 +166,17 @@ module l2_cache_control (
 
 		Cache: begin
 			load_mem_address_reg = 1'b1;
+			read_way0_tag = 1'b1;
+			read_way1_tag = 1'b1;
+			read_way1_valid = 1'b1;
+			read_way0_valid = 1'b1;
+			read_way0_dirty = 1'b1;
+			read_way1_dirty = 1'b1;
+			read_lru = 1'b1;
 
 			if (hit_way0 & mem_read)
 			begin
+				read_way0_data = 1'b1;
 				lru_mux = 1'b1;
 				load_lru = 1'b1;
 				mem_resp = 1'b1;
@@ -161,6 +184,7 @@ module l2_cache_control (
 
 			if (hit_way1 & mem_read)
 			begin
+				read_way1_data = 1'b1;
 				lru_mux = 1'b0;
 				load_lru = 1'b1;
 				mem_resp = 1'b1;
@@ -191,6 +215,7 @@ module l2_cache_control (
 
 		Allocate: begin
 			pmem_read = 1'b1;
+			read_lru = 1'b1;
 			valid_mux = 1'b1;
 			dirty_mux = 1'b0;
 				load_pmem_reg = 1'b1;
@@ -216,6 +241,9 @@ module l2_cache_control (
 		end
 
 		WriteBack: begin
+			read_lru = 1'b1;
+			read_way0_data = 1'b1;
+			read_way1_data = 1'b1;
 			pmem_control = 1'b1;
 			pmem_write = 1'b1;
 		end

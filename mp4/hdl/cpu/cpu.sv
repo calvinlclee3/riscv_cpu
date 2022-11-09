@@ -81,6 +81,8 @@ logic jalr_wrong_target;
 logic br_jal_wrong_target;
 logic increment_pht;
 logic decrement_pht;
+logic bht_load;
+logic [history_depth-1:0] bht_out;
 
 logic global_stall;
 logic num_correct_branch_predict_count;
@@ -163,7 +165,26 @@ pht #(.s_index(history_depth)) global_pht (
     .out(if_id_in.global_pr)
 );
 
+bht #(.s_index(bht_s_index), .depth(history_depth)) bht (
+    .clk(clk),
+    .rst(rst),
+    .load(bht_load), 
+    .rindex(if_id_in.pc[bht_s_index+1:2]),
+    .windex(if_id_out.pc[bht_s_index+1:2]),
+    .in(id_ex_in.br_en),
+    .out(bht_out)
+);
 
+
+pht #(.s_index(history_depth)) local_pht (
+    .clk(clk),
+    .rst(rst),
+    .increment(increment_pht),
+    .decrement(decrement_pht),
+    .rindex(bht_out),
+    .windex(if_id_out.local_pht_index),
+    .out(if_id_in.local_pr)
+);
 
 /****************************** DECODE ******************************/ 
 
@@ -290,6 +311,7 @@ stall_control_unit stall_control_unit (
     .pc_MUX_sel(pc_MUX_sel),
     .btb_load(btb_load),
     .ghr_load(ghr_load),
+    .bht_load(bht_load),
     .increment_pht(increment_pht),
     .decrement_pht(decrement_pht),
 
@@ -347,6 +369,7 @@ assign data_mbe = ex_mem_out.write_read_mask;
 /* if_id pipeline reg assignments */
 assign if_id_in.br_pr = if_id_in.global_pr;
 assign if_id_in.global_pht_index = ghr_out;
+assign if_id_in.local_pht_index = bht_out;
 
 /* id_ex pipeline reg assignments */
 assign id_ex_in.pc = if_id_out.pc;

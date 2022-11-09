@@ -24,6 +24,9 @@ localparam history_depth = 6;
 /* Specify the number of sets in BTB. */
 localparam btb_s_index = 4;
 
+/* Specify the number of sets in BHT. */
+localparam bht_s_index = 8;
+
 typedef logic [31:0] rv32i_word;
 typedef logic [4:0] rv32i_reg;
 typedef logic [3:0] rv32i_mem_wmask;

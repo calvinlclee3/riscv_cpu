@@ -38,6 +38,7 @@ import rv32i_types::*;
     output pcmux::pcmux_sel_t pc_MUX_sel,
     output logic btb_load,
     output logic ghr_load,
+    output logic bht_load,
 
     output logic increment_pht,
     output logic decrement_pht,
@@ -64,6 +65,7 @@ function void set_defaults();
 
     btb_load = 1'b0;
     ghr_load = 1'b0;
+    bht_load = 1'b0;
 
     increment_pht = 1'b0;
     decrement_pht = 1'b0;
@@ -294,14 +296,16 @@ begin
         end 
     end
 
-    /* Update GHR */
+    /* Update GHR/BHT */
     if((id_ex_in_ctrl.opcode == op_br) && (if_id_reg_load == 1'b1))
+    begin
         ghr_load = 1'b1;
+        bht_load = 1'b1;
+    end
 
 
-
-    /* Update Global PHT */
-    if(id_ex_in_ctrl.opcode == op_br)
+    /* Update PHT */
+    if(id_ex_in_ctrl.opcode == op_br && (if_id_reg_load == 1'b1))
     begin	
         if(id_ex_in_br_en == 1'b1)
             increment_pht = 1'b1;

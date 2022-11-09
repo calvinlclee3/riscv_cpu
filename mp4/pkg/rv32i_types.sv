@@ -14,6 +14,7 @@ import exforwardamux::*;
 import exforwardbmux::*;
 import wbmemforwardmux::*;
 import arbiteraddressmux::*;
+import tournamentmux::*;
 
 /* Specify the width of performance counters. */
 localparam perf_counter_width = 32;
@@ -23,6 +24,12 @@ localparam history_depth = 6;
 
 /* Specify the number of sets in BTB. */
 localparam btb_s_index = 4;
+
+/* Specify the number of sets in BHT. */
+localparam bht_s_index = 8;
+
+/* Specify the number of sets in Tournament PHT. */
+localparam tournament_pht_s_index = 8;
 
 typedef logic [31:0] rv32i_word;
 typedef logic [4:0] rv32i_reg;

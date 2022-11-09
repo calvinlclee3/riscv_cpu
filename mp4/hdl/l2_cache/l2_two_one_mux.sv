@@ -1,5 +1,4 @@
-
-module two_one_mux
+module l2_two_one_mux
 (
 input logic selection, 
 input logic A, 

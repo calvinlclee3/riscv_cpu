@@ -78,6 +78,7 @@ logic [history_depth-1:0] ghr_out;
 logic btb_load;
 btb_entry btb_datain;
 logic jalr_wrong_target;
+logic br_jal_wrong_target;
 logic increment_pht;
 logic decrement_pht;
 
@@ -265,6 +266,7 @@ stall_control_unit stall_control_unit (
     .id_btb_read_hit(if_id_out.btb_read_hit),
     .id_btb_out(if_id_out.btb_out),
     .id_br_pr(if_id_out.br_pr),
+    .br_jal_wrong_target(br_jal_wrong_target),
     .jalr_wrong_target(jalr_wrong_target),
     .id_ex_in_ctrl(id_ex_in.ctrl),
     .id_ex_in_br_en(id_ex_in.br_en),
@@ -377,6 +379,7 @@ assign mem_wb_in.mem_data_out = data_mem_wdata;
 assign mem_wb_in.alu_out_address = ex_mem_out.alu_out_address;
 
 /* branch predictor assignments */
+assign br_jal_wrong_target = id_ex_in.target_address != if_id_out.btb_out.target_address;
 assign jalr_wrong_target = {id_ex_in.target_address[31:1], 1'b0} != if_id_out.btb_out.target_address;
 
 // This logic is to ensure performance counters are incremented properly.
@@ -388,16 +391,14 @@ always_comb begin: BRANCH_PREDICTION_CORRECT_OR_INCORRECT
     begin
         if(id_ex_in.ctrl.opcode == op_br)
         begin
-            if((if_id_out.btb_read_hit == 1'b1) && (id_ex_in.br_en == if_id_out.br_pr))
+            if((if_id_out.btb_read_hit == 1'b1) && (id_ex_in.br_en == if_id_out.br_pr) && (br_jal_wrong_target == 1'b0))
                 num_correct_branch_predict_count = 1'b1;
             if((if_id_out.btb_read_hit == 1'b0) && (id_ex_in.br_en == 1'b0))
                 num_correct_branch_predict_count = 1'b1;
-            // if(if_id_out.br_pr == id_ex_in.br_en)
-            //     num_correct_branch_predict_count = 1'b1;
         end
         else if(id_ex_in.ctrl.opcode == op_jal)
         begin
-            if(if_id_out.btb_read_hit == 1'b1)
+            if((if_id_out.btb_read_hit == 1'b1) && (br_jal_wrong_target == 1'b0))
                 num_correct_branch_predict_count = 1'b1;
         end
         else if(id_ex_in.ctrl.opcode == op_jalr)

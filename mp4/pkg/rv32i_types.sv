@@ -17,8 +17,12 @@ import arbiteraddressmux::*;
 
 /* Specify the width of performance counters. */
 localparam perf_counter_width = 32;
+
 /* Specify the depth of branch history recorded. */
-localparam history_depth = 4;
+localparam history_depth = 6;
+
+/* Specify the number of sets in BTB. */
+localparam btb_s_index = 4;
 
 typedef logic [31:0] rv32i_word;
 typedef logic [4:0] rv32i_reg;

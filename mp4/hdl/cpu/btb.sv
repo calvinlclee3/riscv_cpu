@@ -14,7 +14,6 @@ import rv32i_types::*;
     output logic read_hit
 );
 
-localparam num_sets = 2**s_index;
 localparam s_tag = 32 - s_index - 2;
 
 logic read_way_0_hit;

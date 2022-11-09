@@ -36,7 +36,6 @@ wbmemforwardmux::wbmemforwardmux_sel_t wb_mem_forward_MUX_sel;
 rv32i_word reg_a_out;
 rv32i_word reg_b_out;
 rv32i_word alu_out;
-rv32i_word target_address;
 
 rv32i_word pc_MUX_out;
 rv32i_word ir_MUX_out;
@@ -83,6 +82,7 @@ logic increment_pht;
 logic decrement_pht;
 
 logic global_stall;
+logic num_correct_branch_predict_count;
 
 /****************************** DEBUG ******************************/ 
 
@@ -133,7 +133,7 @@ if_id_reg if_id_reg (
 );
 
 
-btb #(.s_index(3)) btb (
+btb #(.s_index(btb_s_index)) btb (
     .clk(clk),
     .rst(rst),
     .read_address(if_id_in.pc),
@@ -322,9 +322,7 @@ perf_counter #(.width(perf_counter_width)) pf0 (
 perf_counter #(.width(perf_counter_width)) pf1 (
     .clk(clk),
     .rst(rst),
-    .count(if_id_reg_load && ((id_ex_in.ctrl.opcode == op_br  && if_id_out.br_pr == id_ex_in.br_en) ||
-                              (id_ex_in.ctrl.opcode == op_jal && if_id_out.btb_read_hit)            ||
-                              (id_ex_in.ctrl.opcode == op_jalr && if_id_out.btb_read_hit && ~jalr_wrong_target))),
+    .count(num_correct_branch_predict_count),
     .overflow(num_correct_branch_predict_overflow),
     .out(num_correct_branch_predict)
 );
@@ -353,6 +351,7 @@ assign id_ex_in.pc = if_id_out.pc;
 assign id_ex_in.rs1_out = id_forward_A_MUX_out;
 assign id_ex_in.rs2_out = id_forward_B_MUX_out;
 assign id_ex_in.ir = if_id_out.ir;
+assign id_ex_in.target_address = target_address_MUX_out + id_ex_in.imm;
 
 /* ex_mem pipeline reg assignments */
 assign ex_mem_in.pc = id_ex_out.pc;
@@ -377,16 +376,39 @@ assign mem_wb_in.ir = ex_mem_out.ir;
 assign mem_wb_in.mem_data_out = data_mem_wdata;
 assign mem_wb_in.alu_out_address = ex_mem_out.alu_out_address;
 
-// /* Assign PC MUX selection signal in ID stage */
-// assign pc_MUX_sel[0] = (id_ex_in.br_en && (rv32i_opcode'(if_id_out.ir[6:0]) == op_br) ) || (rv32i_opcode'(if_id_out.ir[6:0]) == op_jal);
-// assign pc_MUX_sel[1] = (rv32i_opcode'(if_id_out.ir[6:0]) == op_jalr) ? 1'b1 : 1'b0;
-
-
-/****************************** MUXES ******************************/ 
-
-
-assign id_ex_in.target_address = target_address_MUX_out + id_ex_in.imm;
+/* branch predictor assignments */
 assign jalr_wrong_target = {id_ex_in.target_address[31:1], 1'b0} != if_id_out.btb_out.target_address;
+
+// This logic is to ensure performance counters are incremented properly.
+// Note that branch predictor being "correct" and the correct instruction being fetched are two different things.
+always_comb begin: BRANCH_PREDICTION_CORRECT_OR_INCORRECT
+
+    num_correct_branch_predict_count = 1'b0;
+    if(if_id_reg_load)
+    begin
+        if(id_ex_in.ctrl.opcode == op_br)
+        begin
+            if((if_id_out.btb_read_hit == 1'b1) && (id_ex_in.br_en == if_id_out.br_pr))
+                num_correct_branch_predict_count = 1'b1;
+            if((if_id_out.btb_read_hit == 1'b0) && (id_ex_in.br_en == 1'b0))
+                num_correct_branch_predict_count = 1'b1;
+            // if(if_id_out.br_pr == id_ex_in.br_en)
+            //     num_correct_branch_predict_count = 1'b1;
+        end
+        else if(id_ex_in.ctrl.opcode == op_jal)
+        begin
+            if(if_id_out.btb_read_hit == 1'b1)
+                num_correct_branch_predict_count = 1'b1;
+        end
+        else if(id_ex_in.ctrl.opcode == op_jalr)
+        begin
+            if((if_id_out.btb_read_hit == 1'b1) && (jalr_wrong_target == 1'b0))
+                num_correct_branch_predict_count = 1'b1;
+        end
+    end
+
+end
+/****************************** MUXES ******************************/ 
 
 always_comb begin : PCMUX
 
@@ -407,22 +429,22 @@ always_comb begin : BTBDATAINMUX
     btb_datain = '0;
 
     unique case (id_ex_in.ctrl.opcode)
-        op_br       : 
+        op_br: 
         begin
             btb_datain.target_address = id_ex_in.target_address;
             btb_datain.br_jal_jalr = br;
         end
-        op_jal      : 
+        op_jal: 
         begin
             btb_datain.target_address = id_ex_in.target_address;
             btb_datain.br_jal_jalr = jal;
         end
-        op_jalr     : 
+        op_jalr: 
         begin
             btb_datain.target_address = {id_ex_in.target_address[31:1], 1'b0};
             btb_datain.br_jal_jalr = jalr;
         end
-        default: ;
+        default:;
     endcase
 end
 

@@ -367,7 +367,7 @@ assign mem_wb_in.MDR = data_mem_rdata;
 assign data_mbe = ex_mem_out.write_read_mask;
 
 /* if_id pipeline reg assignments */
-assign if_id_in.br_pr = if_id_in.global_pr;
+assign if_id_in.br_pr = if_id_in.local_pr;
 assign if_id_in.global_pht_index = ghr_out;
 assign if_id_in.local_pht_index = bht_out;
 

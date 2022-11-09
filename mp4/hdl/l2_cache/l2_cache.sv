@@ -12,11 +12,10 @@ module l2_cache #(
 
     /* CPU memory signals */
     input   logic [31:0]    mem_address,
-    output  logic [31:0]    mem_rdata,
-    input   logic [31:0]    mem_wdata,
+    output  logic [255:0]   mem_rdata256,
+    input   logic [255:0]   mem_wdata256,
     input   logic           mem_read,
     input   logic           mem_write,
-    input   logic [3:0]     mem_byte_enable,
     output  logic           mem_resp,
 
     /* Physical memory signals */
@@ -62,16 +61,14 @@ logic 	 load_way1_valid;
 logic 	 load_way0_valid;
 logic 	 pmem_control;
 
-logic [255:0] mem_wdata256, mem_rdata256;
 logic [31:0] mem_byte_enable256, address;
+
+assign mem_byte_enable256 = '1;
 
 l2_cache_control control
 (.*);
 
 l2_cache_datapath datapath
-(.*);
-
-l2_bus_adapter bus_adapter
 (.*);
 
 endmodule : l2_cache

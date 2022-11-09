@@ -66,23 +66,23 @@ assign index = mem_address[7:5];
 assign aligned_addr = {mem_address[31:5], 5'b0};
 assign address = mem_address;
 
-   array #(3, s_tag) tag_way0(.clk, .rst, .read(1'b1), .load(load_way0_tag), .rindex(index), .windex(index), .datain(tag), .dataout(tagway0out));
-array #(3, s_tag) tag_way1(.clk, .rst, .read(1'b1), .load(load_way1_tag), .rindex(index), .windex(index), .datain(tag), .dataout(tagway1out));
-array valid_way0(.clk, .rst, .read(1'b1), .load(load_way0_valid), .rindex(index), .windex(index), .datain(valid_in), .dataout(valid0_out));
-   array valid_way1(.clk, .rst, .read(1'b1), .load(load_way1_valid), .rindex(index), .windex(index), .datain(valid_in), .dataout(valid1_out));
-array dirty_way0(.clk, .rst, .read(1'b1), .load(load_way0_dirty), .rindex(index), .windex(index), .datain(dirty_in), .dataout(dirty0));
-array dirty_way1(.clk, .rst, .read(1'b1), .load(load_way1_dirty), .rindex(index), .windex(index), .datain(dirty_in), .dataout(dirty1));
-array lru_array(.clk, .rst, .read(1'b1), .load(load_lru), .rindex(index), .windex(index), .datain(lru_in), .dataout(lru));
+   l2_array #(3, s_tag) tag_way0(.clk, .rst, .read(1'b1), .load(load_way0_tag), .rindex(index), .windex(index), .datain(tag), .dataout(tagway0out));
+l2_array #(3, s_tag) tag_way1(.clk, .rst, .read(1'b1), .load(load_way1_tag), .rindex(index), .windex(index), .datain(tag), .dataout(tagway1out));
+l2_array valid_way0(.clk, .rst, .read(1'b1), .load(load_way0_valid), .rindex(index), .windex(index), .datain(valid_in), .dataout(valid0_out));
+   l2_array valid_way1(.clk, .rst, .read(1'b1), .load(load_way1_valid), .rindex(index), .windex(index), .datain(valid_in), .dataout(valid1_out));
+l2_array dirty_way0(.clk, .rst, .read(1'b1), .load(load_way0_dirty), .rindex(index), .windex(index), .datain(dirty_in), .dataout(dirty0));
+l2_array dirty_way1(.clk, .rst, .read(1'b1), .load(load_way1_dirty), .rindex(index), .windex(index), .datain(dirty_in), .dataout(dirty1));
+l2_array lru_array(.clk, .rst, .read(1'b1), .load(load_lru), .rindex(index), .windex(index), .datain(lru_in), .dataout(lru));
 
 
 //tag, valid, dirty, lru muxes
 
 //valid_mux
-two_one_mux valid_m (.selection(valid_mux), .A(1'b0), .B(1'b1), .dataout(valid_in));
+l2_two_one_mux valid_m (.selection(valid_mux), .A(1'b0), .B(1'b1), .dataout(valid_in));
 //dirty_mux
-two_one_mux dirty_m (.selection(dirty_mux), .A(1'b0), .B(1'b1), .dataout(dirty_in));
+l2_two_one_mux dirty_m (.selection(dirty_mux), .A(1'b0), .B(1'b1), .dataout(dirty_in));
 //lru_mux
-two_one_mux lru_m (.selection(lru_mux), .A(1'b0), .B(1'b1), .dataout(lru_in));
+l2_two_one_mux lru_m (.selection(lru_mux), .A(1'b0), .B(1'b1), .dataout(lru_in));
 
 
 logic [s_line-1:0] datain1_mux_out, datain0_mux_out, data0_out, data1_out;
@@ -140,8 +140,8 @@ end
 
 
 
-data_array data_way0(.clk, .read(1'b1), .write_en(data_array0_mux_out), .rindex(index), .windex(index), .datain(datain0_mux_out), .dataout(data0_out));
-data_array data_way1(.clk, .read(1'b1), .write_en(data_array1_mux_out), .rindex(index), .windex(index), .datain(datain1_mux_out), .dataout(data1_out));
+l2_data_array data_way0(.clk, .read(1'b1), .write_en(data_array0_mux_out), .rindex(index), .windex(index), .datain(datain0_mux_out), .dataout(data0_out));
+l2_data_array data_way1(.clk, .read(1'b1), .write_en(data_array1_mux_out), .rindex(index), .windex(index), .datain(datain1_mux_out), .dataout(data1_out));
 
 logic hit_way1_out, hit_way0_out;
 assign hit_way1 = hit_way1_out;

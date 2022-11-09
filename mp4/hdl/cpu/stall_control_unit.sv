@@ -13,6 +13,7 @@ import rv32i_types::*;
     input logic id_btb_read_hit,
     input btb_entry id_btb_out,
     input logic id_br_pr,
+    input logic br_jal_wrong_target,
     input logic jalr_wrong_target,
     input rv32i_control_word id_ex_in_ctrl,
     input logic id_ex_in_br_en,
@@ -230,15 +231,29 @@ begin
     /* Drive pc_MUX_sel by ID stage  (Overwrite pc_MUX_sel) */
     if(id_ex_in_ctrl.opcode == op_br)
     begin 
-        if(id_btb_read_hit == 1'b1 && (id_br_pr != id_ex_in_br_en))
+        if(id_btb_read_hit == 1'b1 && (id_br_pr == id_ex_in_br_en))
+        begin
+            if(br_jal_wrong_target)
+            begin
+                if_id_reg_flush = 1'b1;
+                if(id_ex_in_br_en == 1'b1)
+                    pc_MUX_sel = pcmux::adder_out;  
+                if(id_ex_in_br_en == 1'b0)
+                    pc_MUX_sel = pcmux::if_id_out_pc_plus4; 
+                btb_load = 1'b1;
+            end
+        end
+        else if(id_btb_read_hit == 1'b1 && (id_br_pr != id_ex_in_br_en))
         begin
             if_id_reg_flush = 1'b1;
             if(id_ex_in_br_en == 1'b1)
                 pc_MUX_sel = pcmux::adder_out;  
             if(id_ex_in_br_en == 1'b0)
                 pc_MUX_sel = pcmux::if_id_out_pc_plus4; 
+            if(br_jal_wrong_target)
+                btb_load = 1'b1;
         end
-        if(id_btb_read_hit == 1'b0 && id_ex_in_br_en == 1'b1)  // whenever BTB is a miss, always fetch PC+4
+        else if(id_btb_read_hit == 1'b0 && id_ex_in_br_en == 1'b1)  // whenever BTB is a miss, always fetch PC+4
         begin 
             if_id_reg_flush = 1'b1;
             btb_load = 1'b1;
@@ -247,7 +262,16 @@ begin
     end 
     else if(id_ex_in_ctrl.opcode == op_jal)
     begin 
-        if(id_btb_read_hit == 1'b0)
+        if(id_btb_read_hit == 1'b1)
+        begin
+            if(br_jal_wrong_target)
+            begin
+                if_id_reg_flush = 1'b1;
+                pc_MUX_sel = pcmux::adder_out;
+                btb_load = 1'b1;
+            end
+        end
+        else if(id_btb_read_hit == 1'b0)
         begin 
             if_id_reg_flush = 1'b1;
             btb_load = 1'b1;

@@ -34,7 +34,7 @@ import cache_mux_types::*;
 );
 
 logic [31:0]  mem_byte_enable256;
-assign mem_byte_enable256 = 32'b1;
+assign mem_byte_enable256 = '1;
 
 /* Datapath to Control */
 logic hit;

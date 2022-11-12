@@ -1,4 +1,4 @@
-`define BAD_MUX_SEL $display("Illegal mux select")
+`define BAD_MUX_SEL $display("%0d: %s:  %0t: Illegal MUX Select", `__LINE__, `__FILE__, $time)
 
 /* MODIFY. The cache datapath. It contains the data,
 valid, dirty, tag, and LRU arrays, comparators, muxes,

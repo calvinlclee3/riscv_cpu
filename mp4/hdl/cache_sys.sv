@@ -1,4 +1,3 @@
-
 module cache_sys
 import rv32i_types::*;
 (
@@ -52,6 +51,13 @@ logic [31:0] a_pmem_address;
 logic [255:0] a_pmem_wdata;
 logic a_pmem_read;
 logic a_pmem_write;
+
+logic cla_pmem_resp;
+logic [255:0] cla_pmem_rdata;
+logic [31:0] cla_pmem_address;
+logic [255:0] cla_pmem_wdata;
+logic cla_pmem_read;
+logic cla_pmem_write;
 
 
 cache i_cache (
@@ -147,6 +153,26 @@ arbiter_control arbiter_control (
 	.arbiter_address_MUX_sel(arbiter_address_MUX_sel)
 );
 
+l2_cache l2_cache (
+	.clk(clk),
+	.rst(rst),
+
+    /* Arbiter Side Signals */
+    .mem_address(a_pmem_address),
+    .mem_rdata256(a_pmem_rdata),
+    .mem_wdata256(a_pmem_wdata),
+    .mem_read(a_pmem_read),
+    .mem_write(a_pmem_write),
+    .mem_resp(a_pmem_resp),
+
+    /* Cacheline Adaptor Side Signals */
+    .pmem_address(cla_pmem_address),
+    .pmem_rdata(cla_pmem_rdata),
+    .pmem_wdata(cla_pmem_wdata),
+    .pmem_read(cla_pmem_read),
+    .pmem_write(cla_pmem_write),
+    .pmem_resp(cla_pmem_resp)
+);
 
 cacheline_adaptor cacheline_adaptor (
 	
@@ -154,12 +180,12 @@ cacheline_adaptor cacheline_adaptor (
 	.reset_n(~rst),
 
 	// Port to LLC (Lowest Level Cache)
-	.line_i(a_pmem_wdata),
-	.line_o(a_pmem_rdata),
-	.address_i(a_pmem_address),
-	.read_i(a_pmem_read),
-	.write_i(a_pmem_write),
-	.resp_o(a_pmem_resp),
+	.line_i(cla_pmem_wdata),
+	.line_o(cla_pmem_rdata),
+	.address_i(cla_pmem_address),
+	.read_i(cla_pmem_read),
+	.write_i(cla_pmem_write),
+	.resp_o(cla_pmem_resp),
 
 	// Port to memory
 	.burst_i(pmem_rdata),

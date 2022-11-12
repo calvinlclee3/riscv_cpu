@@ -18,11 +18,10 @@ import cache_mux_types::*;
 
     /* CPU memory signals */
     input   logic [31:0]    mem_address,
-    output  logic [31:0]    mem_rdata,
-    input   logic [31:0]    mem_wdata,
+    output  logic [255:0]   mem_rdata256,
+    input   logic [255:0]   mem_wdata256,
     input   logic           mem_read,
     input   logic           mem_write,
-    input   logic [3:0]     mem_byte_enable,
     output  logic           mem_resp,
 
     /* Physical memory signals */
@@ -34,10 +33,8 @@ import cache_mux_types::*;
     input   logic           pmem_resp
 );
 
-/* Bus Adapter Signals */
 logic [31:0]  mem_byte_enable256;
-logic [255:0] mem_wdata256;
-logic [255:0] mem_rdata256;
+assign mem_byte_enable256 = 32'b1;
 
 /* Datapath to Control */
 logic hit;
@@ -88,15 +85,5 @@ l2_cache_control control (.*);
 
 l2_cache_datapath datapath (.*);
 
-// bus_adapter bus_adapter
-// (
-//     .mem_wdata256(mem_wdata256),
-//     .mem_rdata256(mem_rdata256),
-//     .mem_wdata(mem_wdata),
-//     .mem_rdata(mem_rdata),
-//     .mem_byte_enable(mem_byte_enable),
-//     .mem_byte_enable256(mem_byte_enable256),
-//     .address(mem_address)
-// );
 
 endmodule : l2_cache

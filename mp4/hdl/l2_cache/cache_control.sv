@@ -1,7 +1,7 @@
 /* MODIFY. The cache controller. It is a state machine
 that controls the behavior of the cache. */
 
-module cache_control 
+module l2_cache_control 
 import rv32i_types::*;
 import cache_mux_types::*;
 (
@@ -296,4 +296,4 @@ begin: next_state_assignment
     end
 end
 
-endmodule : cache_control
+endmodule : l2_cache_control

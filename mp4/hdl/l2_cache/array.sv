@@ -1,7 +1,7 @@
 /* DO NOT MODIFY. WILL BE OVERRIDDEN BY THE AUTOGRADER.
 A register array to be used for tag arrays, LRU array, etc. */
 
-module array #(
+module l2_array #(
     parameter s_index = 3,
     parameter width = 1
 )
@@ -46,4 +46,4 @@ begin
     end
 end
 
-endmodule : array
+endmodule : l2_array

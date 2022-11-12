@@ -1,7 +1,7 @@
 /* MODIFY. Your cache design. It contains the cache
 controller, cache datapath, and bus adapter. */
 
-module cache 
+module l2_cache 
 import rv32i_types::*;
 import cache_mux_types::*;
 #(
@@ -84,19 +84,19 @@ pmemaddressmux_sel_t pmem_address_MUX_sel;
 
 
 
-cache_control control (.*);
+l2_cache_control control (.*);
 
-cache_datapath datapath (.*);
+l2_cache_datapath datapath (.*);
 
-bus_adapter bus_adapter
-(
-    .mem_wdata256(mem_wdata256),
-    .mem_rdata256(mem_rdata256),
-    .mem_wdata(mem_wdata),
-    .mem_rdata(mem_rdata),
-    .mem_byte_enable(mem_byte_enable),
-    .mem_byte_enable256(mem_byte_enable256),
-    .address(mem_address)
-);
+// bus_adapter bus_adapter
+// (
+//     .mem_wdata256(mem_wdata256),
+//     .mem_rdata256(mem_rdata256),
+//     .mem_wdata(mem_wdata),
+//     .mem_rdata(mem_rdata),
+//     .mem_byte_enable(mem_byte_enable),
+//     .mem_byte_enable256(mem_byte_enable256),
+//     .address(mem_address)
+// );
 
-endmodule : cache
+endmodule : l2_cache

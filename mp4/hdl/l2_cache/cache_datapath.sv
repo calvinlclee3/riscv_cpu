@@ -4,7 +4,7 @@
 valid, dirty, tag, and LRU arrays, comparators, muxes,
 logic gates and other supporting logic. */
 
-module cache_datapath
+module l2_cache_datapath
 import rv32i_types::*; // MP3CP1_error: is this the right place to put "import" statement?
 import cache_mux_types::*;
 #(
@@ -91,7 +91,7 @@ assign mem_rdata256 = data_array_dataout_MUX_out;
 assign pmem_wdata = data_array_dataout_MUX_out;
 assign pmem_address = pmem_address_MUX_out;
 
-array #(3, 1) v_array_0 (
+l2_array #(3, 1) v_array_0 (
 
     .clk(clk),
     .rst(rst),
@@ -104,7 +104,7 @@ array #(3, 1) v_array_0 (
 
 );
 
-array #(3, 1) v_array_1 (
+l2_array #(3, 1) v_array_1 (
 
     .clk(clk),
     .rst(rst),
@@ -117,7 +117,7 @@ array #(3, 1) v_array_1 (
 
 );
 
-array #(3, 1) d_array_0 (
+l2_array #(3, 1) d_array_0 (
 
     .clk(clk),
     .rst(rst),
@@ -130,7 +130,7 @@ array #(3, 1) d_array_0 (
 
 );
 
-array #(3, 1) d_array_1 (
+l2_array #(3, 1) d_array_1 (
 
     .clk(clk),
     .rst(rst),
@@ -143,7 +143,7 @@ array #(3, 1) d_array_1 (
 
 );
 
-array #(3, 24) tag_array_0 (
+l2_array #(3, 24) tag_array_0 (
 
     .clk(clk),
     .rst(rst),
@@ -156,7 +156,7 @@ array #(3, 24) tag_array_0 (
 
 );
 
-array #(3, 24) tag_array_1 (
+l2_array #(3, 24) tag_array_1 (
 
     .clk(clk),
     .rst(rst),
@@ -169,7 +169,7 @@ array #(3, 24) tag_array_1 (
 
 );
 
-array #(3, 1) LRU_array (
+l2_array #(3, 1) LRU_array (
 
     .clk(clk),
     .rst(rst),
@@ -182,7 +182,7 @@ array #(3, 1) LRU_array (
 
 );
 
-data_array #(5, 3) data_array_0 (
+l2_data_array #(5, 3) data_array_0 (
 
     .clk(clk),
     .read(1'b1),
@@ -194,7 +194,7 @@ data_array #(5, 3) data_array_0 (
 
 );
 
-data_array #(5, 3) data_array_1 (
+l2_data_array #(5, 3) data_array_1 (
 
     .clk(clk),
     .read(1'b1),
@@ -348,4 +348,4 @@ always_comb begin : HIT_MISS_DETERMINATION
 
 end
 
-endmodule : cache_datapath
+endmodule : l2_cache_datapath

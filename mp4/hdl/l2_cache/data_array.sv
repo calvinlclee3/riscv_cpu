@@ -3,7 +3,7 @@ A special register array specifically for your
 data arrays. This module supports a write mask to
 help you update the values in the array. */
 
-module data_array #(
+module l2_data_array #(
     parameter s_offset = 5,
     parameter s_index = 3
 )
@@ -47,4 +47,4 @@ begin
     end
 end
 
-endmodule : data_array
+endmodule : l2_data_array

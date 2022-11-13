@@ -10,7 +10,8 @@ import cache_mux_types::*;
     parameter s_tag    = 32 - s_offset - s_index,
     parameter s_mask   = 2**s_offset,
     parameter s_line   = 8*s_mask,
-    parameter num_sets = 2**s_index
+    parameter num_sets = 2**s_index,
+    parameter num_ways = 4
 )
 (
     input clk,
@@ -40,40 +41,61 @@ assign mem_byte_enable256 = '1;
 logic hit;
 logic way_0_hit;
 logic way_1_hit;
+logic way_2_hit;
+logic way_3_hit;
 
 logic v_array_0_dataout;
 logic v_array_1_dataout;
+logic v_array_2_dataout;
+logic v_array_3_dataout;
 
 logic d_array_0_dataout;
 logic d_array_1_dataout;
+logic d_array_2_dataout;
+logic d_array_3_dataout;
 
-logic LRU_array_dataout;
+logic [2:0] LRU_array_dataout;
 
 /* Control to Datapath */
 logic v_array_0_load;
 logic v_array_0_datain;
 logic v_array_1_load;
 logic v_array_1_datain;
+logic v_array_2_load;
+logic v_array_2_datain;
+logic v_array_3_load;
+logic v_array_3_datain;
 
 logic d_array_0_load;
 logic d_array_0_datain;
 logic d_array_1_load;
 logic d_array_1_datain;
+logic d_array_2_load;
+logic d_array_2_datain;
+logic d_array_3_load;
+logic d_array_3_datain;
 
 logic tag_array_0_load;
 logic tag_array_1_load;
+logic tag_array_2_load;
+logic tag_array_3_load;
+
 
 logic LRU_array_load;
-logic LRU_array_datain;
+logic [2:0] LRU_array_datain;
 
 logic memory_buffer_register_load;
 
 dataarraymux_sel_t write_en_0_MUX_sel;
 dataarraymux_sel_t write_en_1_MUX_sel;
+dataarraymux_sel_t write_en_2_MUX_sel;
+dataarraymux_sel_t write_en_3_MUX_sel;
 dataarraymux_sel_t data_array_0_datain_MUX_sel;
 dataarraymux_sel_t data_array_1_datain_MUX_sel;
+dataarraymux_sel_t data_array_2_datain_MUX_sel;
+dataarraymux_sel_t data_array_3_datain_MUX_sel;
 
-logic dataout_MUX_sel;
+logic [1:0] dataout_MUX_sel;
 
 pmemaddressmux_sel_t pmem_address_MUX_sel;
 

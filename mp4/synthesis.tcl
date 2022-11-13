@@ -46,7 +46,10 @@ foreach module $modules {
 elaborate mp4 
 current_design mp4
 check_design
+read_saif -input ../sim/dump.fsdb.saif -instance mp4_tb/dut
 
+
+set_max_area 500000 -ignore_tns
 set clk_name $design_clock_pin
 create_clock -period 10 -name my_clk $clk_name
 set_dont_touch_network [get_clocks my_clk]
@@ -61,13 +64,14 @@ set_max_fanout 1 [all_inputs]
 set_fanout_load 8 [all_outputs]
 
 link
-compile
+compile_ultra -no_autoungroup -gate_clock 
 
 current_design mp4
 
 report_area -hier > reports/area.rpt
 report_timing > reports/timing.rpt
 check_design > reports/check.rpt
+report_power -analysis_effort high -hierarchy > reports/power.rpt
 
-write_file -format ddc -output synth.ddc
+write_file -format ddc -hierarchy -output synth.ddc
 exit

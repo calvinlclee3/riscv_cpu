@@ -17,15 +17,16 @@ sim/simv: $(SRCS)
 run: sim/simv $(ASM)
 	bin/rv_load_memory.sh $(ASM) 2>&1 | tee sim/asm.log
 	cd sim && ./simv -l simulation.log
+	cd sim && fsdb2saif dump.fsdb
 
 synth: $(SRCS) $(SYNTH_TCL) 
 	mkdir -p synth/reports
 	cd synth && dc_shell -f $(SYNTH_TCL)  2>&1 | tee synthesis.log
-	@if grep -q -i -e error -e LINK-5 -e VER-504 synth/synthesis.log; then \
+	@if grep -q -i -e error -e LINK-5 synth/synthesis.log; then \
 		echo -e "\033[0;31m Fix errors below \033[0m"; \
-		grep -i -e error -e LINK-5 -e VER-504 synth/synthesis.log; exit 1; \
+		grep -i -e error -e LINK-5 synth/synthesis.log; exit 1; \
 	else \
-		echo -e "\033[0;32m Synthesis Successful \033[0m Check report under synth/reports/timing.rpt"; \
+		echo -e "\033[0;32m Synthesis Successful \033[0m Check timing and power report under synth/reports/"; \
     fi
 
 clean:

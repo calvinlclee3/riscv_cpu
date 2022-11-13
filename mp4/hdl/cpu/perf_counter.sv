@@ -10,7 +10,7 @@ module perf_counter #(parameter width = 32)
 logic [width-1:0] data;
 logic _overflow;
 
-always_ff @(posedge clk)
+always_ff @(posedge clk or posedge rst)
 begin
     if (rst)
     begin

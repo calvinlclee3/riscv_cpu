@@ -248,7 +248,7 @@ begin : state_actions
             end
             else
             begin
-                if (way_3_dist <= way_0_dist <= way_1_dist <= way_2_dist)
+                if (way_3_dist <= way_0_dist && way_3_dist <= way_1_dist && way_3_dist <= way_2_dist)
                     begin
                         // Alloc way 3
                         tag_array_3_load = 1'b1;
@@ -259,7 +259,7 @@ begin : state_actions
                         write_en_3_MUX_sel = mem_write_cache;
                         data_array_3_datain_MUX_sel = mem_write_cache;
                     end
-                else if (way_2_dist <= way_3_dist <= way_0_dist <= way_1_dist)
+                else if (way_2_dist <= way_3_dist  && way_2_dist <= way_0_dist && way_2_dist <= way_1_dist)
                     begin
                         // Alloc way 2
                         tag_array_2_load = 1'b1;
@@ -270,7 +270,7 @@ begin : state_actions
                         write_en_2_MUX_sel = mem_write_cache;
                         data_array_2_datain_MUX_sel = mem_write_cache;
                     end
-                else if (way_1_dist <= way_2_dist <= way_3_dist <= way_0_dist)
+                else if (way_1_dist <= way_2_dist && way_1_dist <= way_3_dist && way_1_dist <= way_0_dist)
                 begin
                     // Alloc way 1
                     tag_array_1_load = 1'b1;
@@ -296,7 +296,7 @@ begin : state_actions
             end
         WRITE_BACK:
         begin
-            if (way_3_dist <= way_0_dist <= way_1_dist <= way_2_dist)
+            if (way_3_dist <= way_0_dist && way_3_dist <= way_1_dist && way_3_dist <= way_2_dist)
                 begin
                     // Alloc way 3
                     pmem_write = 1'b1;
@@ -305,7 +305,7 @@ begin : state_actions
                     v_array_3_load = 1'b1;
                     v_array_3_datain = 1'b0;
                 end
-            else if (way_2_dist <= way_3_dist <= way_0_dist <= way_1_dist)
+            else if (way_2_dist <= way_3_dist  && way_2_dist <= way_0_dist && way_2_dist <= way_1_dist)
                 begin
                     // Alloc way 2
                     pmem_write = 1'b1;
@@ -314,7 +314,7 @@ begin : state_actions
                     v_array_2_load = 1'b1;
                     v_array_2_datain = 1'b0;
                 end
-            else if (way_1_dist <= way_2_dist <= way_3_dist <= way_0_dist)
+            else if (way_1_dist <= way_2_dist && way_1_dist <= way_3_dist && way_1_dist <= way_0_dist)
             begin
                     // Alloc way 1
                     pmem_write = 1'b1;
@@ -361,7 +361,7 @@ begin : next_state_logic
             end
             else
             begin
-                if (way_3_dist <= way_0_dist <= way_1_dist <= way_2_dist)
+                if (way_3_dist <= way_0_dist && way_3_dist <= way_1_dist && way_3_dist <= way_2_dist)
                     begin
                         // Alloc way 3
                         if(d_array_3_dataout == 1'b0)
@@ -369,7 +369,7 @@ begin : next_state_logic
                         else
                             next_state = WRITE_BACK;
                     end
-                    else if (way_2_dist <= way_3_dist <= way_0_dist <= way_1_dist)
+                    else if (way_2_dist <= way_3_dist  && way_2_dist <= way_0_dist && way_2_dist <= way_1_dist)
                     begin
                         // Alloc way 2
                         if(d_array_2_dataout == 1'b0)
@@ -377,7 +377,7 @@ begin : next_state_logic
                         else
                             next_state = WRITE_BACK;
                     end
-                else if (way_1_dist <= way_2_dist <= way_3_dist <= way_0_dist)
+                else if (way_1_dist <= way_2_dist && way_1_dist <= way_3_dist && way_1_dist <= way_0_dist)
                 begin
                         // Alloc way 1
                         if(d_array_1_dataout == 1'b0)

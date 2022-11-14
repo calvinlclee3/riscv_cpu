@@ -49,9 +49,10 @@ import cache_mux_types::*;
     output logic d_array_2_dataout,
     output logic d_array_3_dataout,
 
-    
-    // LRU array width is now 3.
-    output logic [2:0] LRU_array_dataout,
+    output logic [s_tag-1:0] way_0_dist,
+    output logic [s_tag-1:0] way_1_dist,
+    output logic [s_tag-1:0] way_2_dist,
+    output logic [s_tag-1:0] way_3_dist,
 
     /* Control to Datapath */
     input logic v_array_0_load,
@@ -76,10 +77,6 @@ import cache_mux_types::*;
     input logic tag_array_1_load,
     input logic tag_array_2_load,
     input logic tag_array_3_load,
-
-    input logic LRU_array_load,
-    // LRU array width is now 3.
-    input logic [2:0] LRU_array_datain,
 
     input logic memory_buffer_register_load,
 
@@ -196,19 +193,6 @@ l2_array #(.s_index(s_index), .width(s_tag)) tag_array [num_ways-1:0] (
 );
 
 
-// LRU array width is now 3.
-l2_array #(.s_index(s_index), .width(3)) LRU_array (
-
-    .clk(clk),
-    .rst(rst),
-    .read(1'b1),
-    .load(LRU_array_load),
-    .rindex(mem_address[7:5]),
-    .windex(mem_address[7:5]),
-    .datain(LRU_array_datain),
-    .dataout(LRU_array_dataout)
-
-);
 
 // l2_data_array #(5, 3) data_array_0 (
 
@@ -458,6 +442,14 @@ always_comb begin : HIT_MISS_DETERMINATION
        way_2_hit == 1'b1 || way_3_hit == 1'b1)
         hit = 1'b1;
 
+end
+
+always_comb begin : DISTANCECALCULATION
+    way_0_dist = (mem_address[31:8] > tag_array_0_dataout) ? (mem_address[31:8] - tag_array_0_dataout): (tag_array_0_dataout - mem_address[31:8]);
+    way_1_dist = (mem_address[31:8] > tag_array_1_dataout) ? (mem_address[31:8] - tag_array_1_dataout): (tag_array_1_dataout - mem_address[31:8]);
+    way_2_dist = (mem_address[31:8] > tag_array_2_dataout) ? (mem_address[31:8] - tag_array_2_dataout): (tag_array_2_dataout - mem_address[31:8]);
+    way_3_dist = (mem_address[31:8] > tag_array_3_dataout) ? (mem_address[31:8] - tag_array_3_dataout): (tag_array_3_dataout - mem_address[31:8]);
+    
 end
 
 endmodule : l2_cache_datapath

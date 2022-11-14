@@ -54,7 +54,7 @@ logic d_array_1_dataout;
 logic d_array_2_dataout;
 logic d_array_3_dataout;
 
-logic [31:8] way_0_dist, way_1_dist, way_2_dist, way_3_dist;
+logic [23:0] way_0_dist, way_1_dist, way_2_dist, way_3_dist;
 
 /* Control to Datapath */
 logic v_array_0_load;

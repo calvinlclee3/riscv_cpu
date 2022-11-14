@@ -37,10 +37,10 @@ import cache_mux_types::*;
     input logic d_array_2_dataout,
     input logic d_array_3_dataout,
     
-    input logic [31:8] way_0_dist, 
-    input logic [31:8] way_1_dist,
-    input logic [31:8] way_2_dist,
-    input logic [31:8] way_3_dist,
+    input logic [23:0] way_0_dist, 
+    input logic [23:0] way_1_dist,
+    input logic [23:0] way_2_dist,
+    input logic [23:0] way_3_dist,
 
     /* Control to Datapath */
     output logic v_array_0_load,

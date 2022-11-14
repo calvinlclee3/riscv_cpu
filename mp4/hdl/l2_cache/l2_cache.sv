@@ -54,7 +54,7 @@ logic d_array_1_dataout;
 logic d_array_2_dataout;
 logic d_array_3_dataout;
 
-logic [2:0] LRU_array_dataout;
+logic [31:8] way_0_dist, way_1_dist, way_2_dist, way_3_dist;
 
 /* Control to Datapath */
 logic v_array_0_load;
@@ -79,10 +79,6 @@ logic tag_array_0_load;
 logic tag_array_1_load;
 logic tag_array_2_load;
 logic tag_array_3_load;
-
-
-logic LRU_array_load;
-logic [2:0] LRU_array_datain;
 
 logic memory_buffer_register_load;
 

@@ -4,6 +4,8 @@ import sys
 TAG_BITS = 24
 INDEX_BITS = 3
 
+VERBOSE = True
+
 def parse_data(filename):
     with open(filename) as fp:
         lines = fp.readlines()	
@@ -13,13 +15,15 @@ def parse_data(filename):
 
     address_counter = Counter(filtered_lines)
 
-    address_set = set(filtered_lines)
+    #address_set = set(filtered_lines)
 
     distinct_addresses = [key for key in address_counter.keys() if key != 0]  
 
-    print("Number of distinct non-zero and non-x addresses, which resolve to the same cache line, is {}".format(len(distinct_addresses)))
-    print(len(address_set))
-
+    print("Number of distinct non-zero and non-x addresses, which resolve to the same cache line, is {}".format(len(distinct_addresses)
+))
+    if (VERBOSE):
+        with open(filename + '_addr_set.txt', 'w') as fp:
+            fp.writelines(distinct_addresses)
 
 if __name__ == "__main__":
     parse_data(sys.argv[1])

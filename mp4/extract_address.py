@@ -10,8 +10,9 @@ def parse_data(filename):
 
     distinct_addresses = [key for key in address_counter.keys() if key != "x" and key != "0"]
 
+    filtered_lines = [addr for addr in filtered_lines if addr != "0" and addr != "x"]
 
-    print("Number of total addressess (including 0 and x) is {}".format(len(filtered_lines)))    
+    print("Number of total addressess (excluding 0 and x) is {}".format(len(filtered_lines)))    
 
     print("Number of distinct non-zero and non-x addresses is {}".format(len(distinct_addresses)))
 if __name__ == "__main__":

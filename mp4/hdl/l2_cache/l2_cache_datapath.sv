@@ -481,10 +481,10 @@ LRU_array_dataout = LRU_out;
 
 if (LRU_out[2] == 1'b1)
 begin
-LRU_array_dataout[1] = (way_0_dist < way_1_dist)? 0: 1;
+LRU_array_dataout[1] = (way_0_dist < way_1_dist)? 1'b0: 1'b1;
 end
 else begin
-LRU_array_dataout[0] = (way_2_dist < way_3_dist)? 0: 1; 
+LRU_array_dataout[0] = (way_2_dist < way_3_dist)? 1'b0: 1'b1; 
 end
 
 end

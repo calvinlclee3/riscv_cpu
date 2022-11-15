@@ -4,13 +4,11 @@ import sys
 TAG_BITS = 24
 INDEX_BITS = 3
 
-ZERO = "00000000000000000000000000000000"
-
 def parse_data(filename):
     with open(filename) as fp:
         lines = fp.readlines()	
     filtered_lines = [line[line.rfind("=")+1:].strip() for line in lines if line.strip().startswith("a_pmem_address")]
-    filtered_lines = [int(addr[31:31-TAG_BITS-INDEX_BITS]) for addr in filtered_lines if addr != ZERO and addr != "0" and addr.contains("x") == False]
+    filtered_lines = [int(addr[31:31-TAG_BITS-INDEX_BITS]) for addr in filtered_lines if addr.contains("x") == False]
     #careful, python indexing doesn't include the end index (unlike sys verilog) ;)
 
     address_counter = Counter(filtered_lines)

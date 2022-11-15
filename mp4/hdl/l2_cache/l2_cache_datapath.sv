@@ -468,11 +468,13 @@ always_comb begin : HIT_MISS_DETERMINATION
 end
 
 always_comb begin : DISTANCECALCULATION
-    way_0_dist = (mem_address[31:8] > tag_array_0_dataout) ? (mem_address[31:8] - tag_array_0_dataout): (tag_array_0_dataout - mem_address[31:8]);
-    way_1_dist = (mem_address[31:8] > tag_array_1_dataout) ? (mem_address[31:8] - tag_array_1_dataout): (tag_array_1_dataout - mem_address[31:8]);
-    way_2_dist = (mem_address[31:8] > tag_array_2_dataout) ? (mem_address[31:8] - tag_array_2_dataout): (tag_array_2_dataout - mem_address[31:8]);
-    way_3_dist = (mem_address[31:8] > tag_array_3_dataout) ? (mem_address[31:8] - tag_array_3_dataout): (tag_array_3_dataout - mem_address[31:8]);
+    way_0_dist = ($signed(mem_address[31:8]) > $signed(tag_array_0_dataout)) ? (mem_address[31:8] - tag_array_0_dataout): (tag_array_0_dataout - mem_address[31:8]);
+    way_1_dist = ($signed(mem_address[31:8]) > $signed(tag_array_1_dataout)) ? (mem_address[31:8] - tag_array_1_dataout): (tag_array_1_dataout - mem_address[31:8]);
+    way_2_dist = ($signed(mem_address[31:8]) > $signed(tag_array_2_dataout)) ? (mem_address[31:8] - tag_array_2_dataout): (tag_array_2_dataout - mem_address[31:8]);
+    way_3_dist = ($signed(mem_address[31:8]) > $signed(tag_array_3_dataout)) ? (mem_address[31:8] - tag_array_3_dataout): (tag_array_3_dataout - mem_address[31:8]);
+    
 end
+
 
 always_comb begin : ADJUSTLRU
 LRU_array_dataout = LRU_out;

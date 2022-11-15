@@ -33,11 +33,6 @@ import rv32i_types::*;
 logic [31:0] a_pmem_address;
 logic [31:0] cla_pmem_address;
 
-always @ (posedge cla_pmem_read or posedge cla_pmem_write)
-begin
-	$display("a_pmem_address = %27b", cla_pmem_address[31:5]);
-end
-
 logic i_pmem_resp;
 logic [255:0] i_pmem_rdata;
 logic [31:0] i_pmem_address;
@@ -65,6 +60,10 @@ logic [255:0] cla_pmem_wdata;
 logic cla_pmem_read;
 logic cla_pmem_write;
 
+always @ (posedge cla_pmem_read or posedge cla_pmem_write)
+begin
+	$display("a_pmem_address = %27b", cla_pmem_address[31:5]);
+end
 
 /* L2 Perf Counter Signals*/
 logic [perf_counter_width-1:0] num_l2_request;

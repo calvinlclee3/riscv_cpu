@@ -31,7 +31,7 @@ import rv32i_types::*;
 );
 
 initial begin
- $monitor("a_pmem_address = %32b", a_pmem_address);
+ $monitor("a_pmem_address = %27b", a_pmem_address[31:5]);
 end
 
 logic i_pmem_resp;

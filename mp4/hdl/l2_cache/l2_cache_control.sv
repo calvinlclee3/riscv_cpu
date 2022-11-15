@@ -83,6 +83,19 @@ import cache_mux_types::*;
 
 );
 
+logic count_l2missFSM;
+logic overflow_l2missFSM;
+logic [31:0] num_l2missFSM;
+
+perf_counter l2missFSM (
+.clk(clk),
+.rst(rst),
+.count(count_l2missFSM),
+.overflow(overflow_l2missFSM),
+.out(num_l2missFSM)
+);
+
+
 enum int unsigned {
     /* List of states */
     DEFAULT = 0, READ_WRITE = 1, NO_WB_1 = 2, NO_WB_2 = 3, 
@@ -141,6 +154,7 @@ function void set_defaults();
     dataout_MUX_sel = 2'b00;
 
     pmem_address_MUX_sel = cache_read_mem;
+    count_l2missFSM = 1'b0;
 
 endfunction
 
@@ -170,6 +184,7 @@ begin : state_actions
                 else if (way_3_hit)
                     LRU_array_datain = {1'b1, LRU_array_dataout[1], 1'b1};  
             end
+            else count_l2missFSM = 1'b1;
             if(mem_read)
             begin
                 if(way_0_hit == 1'b1 && way_1_hit == 1'b0 && way_2_hit == 1'b0 && way_3_hit == 1'b0)

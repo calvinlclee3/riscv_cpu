@@ -3,17 +3,18 @@ import sys
 
 TAG_BITS = 24
 INDEX_BITS = 3
+ZERO = '00000000000000000000000000000000'
 
 def parse_data(filename):
     with open(filename) as fp:
         lines = fp.readlines()	
     filtered_lines = [line[line.rfind("=")+1:].strip() for line in lines if line.strip().startswith("a_pmem_address")]
-    filtered_lines = [int(addr[0:TAG_BITS + INDEX_BITS]) for addr in filtered_lines if 'x' not in addr]
+    filtered_lines = [addr[0:TAG_BITS + INDEX_BITS] for addr in filtered_lines if 'x' not in addr and addr != ZERO]
     #careful, python indexing doesn't include the end index (unlike sys verilog) and is the other way!
 
     address_counter = Counter(filtered_lines)
 
-    distinct_addresses = [key for key in address_counter.keys() if key != 0]  
+    distinct_addresses = list(address_counter.keys())
 
     print("Number of distinct non-zero and non-x addresses, which resolve to the same cache line, is {}".format(len(distinct_addresses)))
 

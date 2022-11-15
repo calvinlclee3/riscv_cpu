@@ -23,7 +23,7 @@ def parse_data(filename):
 ))
     if (VERBOSE):
         with open(filename + '_addr_set.txt', 'w') as fp:
-            fp.writelines(map(lambda x: str(x), distinct_addresses))
+            fp.writelines(map(lambda x: str(x) + '\n', distinct_addresses))
 
 if __name__ == "__main__":
     parse_data(sys.argv[1])

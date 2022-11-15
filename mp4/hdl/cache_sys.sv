@@ -33,7 +33,7 @@ import rv32i_types::*;
 logic [31:0] a_pmem_address;
 
 initial begin
- $monitor("a_pmem_address = %27b", a_pmem_address[31:5]);
+ $monitor("a_pmem_address = %27b", cla_pmem_address[31:5]);
 end
 
 logic i_pmem_resp;

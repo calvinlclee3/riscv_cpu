@@ -5,12 +5,11 @@ def parse_data(filename):
     with open(filename) as fp:
         lines = fp.readlines()	
     filtered_lines = [line[line.rfind("=")+1:].strip() for line in lines if line.strip().startswith("a_pmem_address")]
-    
+    filtered_lines = [int(addr) for addr in filtered_lines if addr != "0" and addr != "x"]
+
     address_counter = Counter(filtered_lines)
 
-    distinct_addresses = [key for key in address_counter.keys() if key != "x" and key != "0"]
-
-    filtered_lines = [addr for addr in filtered_lines if addr != "0" and addr != "x"]
+    distinct_addresses = [key for key in address_counter.keys() if key != 0]
 
     print("Number of total addressess (excluding 0 and x) is {}".format(len(filtered_lines)))    
 

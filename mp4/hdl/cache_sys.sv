@@ -30,6 +30,8 @@ import rv32i_types::*;
 	output logic data_mem_resp
 );
 
+logic [31:0] a_pmem_address;
+
 initial begin
  $monitor("a_pmem_address = %27b", a_pmem_address[31:5]);
 end
@@ -50,7 +52,6 @@ arbiteraddressmux::arbiteraddressmux_sel_t arbiter_address_MUX_sel;
 
 logic a_pmem_resp;
 logic [255:0] a_pmem_rdata;
-logic [31:0] a_pmem_address;
 logic [255:0] a_pmem_wdata;
 logic a_pmem_read;
 logic a_pmem_write;

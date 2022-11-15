@@ -123,6 +123,13 @@ assign mem_rdata256 = data_array_dataout_MUX_out;
 assign pmem_wdata = data_array_dataout_MUX_out;
 assign pmem_address = pmem_address_MUX_out;
 
+logic [num_ways-2:0] LRU_out; 
+logic [s_tag-1:0] way_0_dist;
+logic [s_tag-1:0] way_1_dist;
+logic [s_tag-1:0] way_2_dist;
+logic [s_tag-1:0] way_3_dist;
+
+
 // l2_array #(3, 1) v_array_0 (
 
 //     .clk(clk),
@@ -206,7 +213,7 @@ l2_array #(.s_index(s_index), .width(3)) LRU_array (
     .rindex(mem_address[7:5]),
     .windex(mem_address[7:5]),
     .datain(LRU_array_datain),
-    .dataout(LRU_array_dataout)
+    .dataout(LRU_out)
 
 );
 
@@ -459,5 +466,26 @@ always_comb begin : HIT_MISS_DETERMINATION
         hit = 1'b1;
 
 end
+
+always_comb begin : DISTANCECALCULATION
+    way_0_dist = (mem_address[31:8] > tag_array_0_dataout) ? (mem_address[31:8] - tag_array_0_dataout): (tag_array_0_dataout - mem_address[31:8];
+    way_1_dist = (mem_address[31:8] > tag_array_1_dataout) ? (mem_address[31:8] - tag_array_1_dataout): (tag_array_1_dataout - mem_address[31:8];
+    way_2_dist = (mem_address[31:8] > tag_array_2_dataout) ? (mem_address[31:8] - tag_array_2_dataout): (tag_array_2_dataout - mem_address[31:8];
+    way_3_dist = (mem_address[31:8] > tag_array_3_dataout) ? (mem_address[31:8] - tag_array_3_dataout): (tag_array_3_dataout - mem_address[31:8];
+end
+
+always_comb begin : ADJUSTLRU
+LRU_array_dataout = LRU_out;
+
+if (LRU_out[2] == 1'b1)
+begin
+LRU_array_dataout[1] = (way_0_dist < way_1_dist)? 0: 1;
+end
+else begin
+LRU_array_dataout[0] = (way_2_dist < way_3_dist)? 0: 1; 
+end
+
+end
+
 
 endmodule : l2_cache_datapath

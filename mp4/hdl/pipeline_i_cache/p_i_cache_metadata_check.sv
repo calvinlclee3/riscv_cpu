@@ -36,6 +36,8 @@ import cache_mux_types::*;
   // LRU array width is now 3.
   output logic [2:0] LRU_array_dataout,
 
+  output logic [255:0] dataout,
+
   /* Control to Datapath */
   input logic v_array_0_load,
   input logic v_array_0_datain,
@@ -63,9 +65,31 @@ import cache_mux_types::*;
   input dataarraymux_sel_t data_array_0_datain_MUX_sel,
   input dataarraymux_sel_t data_array_1_datain_MUX_sel,
   input dataarraymux_sel_t data_array_2_datain_MUX_sel,
-  input dataarraymux_sel_t data_array_3_datain_MUX_sel,
+  input dataarraymux_sel_t data_array_3_datain_MUX_sel
 
 );
+
+logic [255:0] data_array_0_dataout;
+logic [255:0] data_array_1_dataout;
+logic [255:0] data_array_2_dataout;
+logic [255:0] data_array_3_dataout;
+logic [255:0] data_array_0_datain_MUX_out;
+logic [255:0] data_array_1_datain_MUX_out;
+logic [255:0] data_array_2_datain_MUX_out;
+logic [255:0] data_array_3_datain_MUX_out;
+
+logic [31:0] write_en_0_MUX_out;
+logic [31:0] write_en_1_MUX_out;
+logic [31:0] write_en_2_MUX_out;
+logic [31:0] write_en_3_MUX_out;
+
+logic [s_tag-1:0] tag_array_0_dataout;
+logic [s_tag-1:0] tag_array_1_dataout;
+logic [s_tag-1:0] tag_array_2_dataout;
+logic [s_tag-1:0] tag_array_3_dataout;
+
+
+assign pmem_address = {mem_address[31:5], 5'b0};
 
 
 //valid array
@@ -239,7 +263,7 @@ always_comb begin : data_array_3_datain_MUX
 end
 
 always_comb begin : HIT_MISS_DETERMINATION 
-
+  dataout = '0;
   hit = 1'b0;
   way_0_hit = 1'b0;
   way_1_hit = 1'b0;
@@ -249,25 +273,37 @@ always_comb begin : HIT_MISS_DETERMINATION
   if(tag_array_0_dataout == mem_address[31:8])
   begin
       if(v_array_0_dataout == 1'b1)
+      begin
           way_0_hit = 1'b1;
+          dataout = data_array_0_dataout;
+      end
   end
       
   if(tag_array_1_dataout == mem_address[31:8])
   begin
       if(v_array_1_dataout == 1'b1)
+      begin
           way_1_hit = 1'b1;
+          dataout = data_array_1_dataout;
+      end
   end
 
   if(tag_array_2_dataout == mem_address[31:8])
   begin
       if(v_array_2_dataout == 1'b1)
+      begin
           way_2_hit = 1'b1;
+          dataout = data_array_2_dataout;
+      end
   end
       
   if(tag_array_3_dataout == mem_address[31:8])
   begin
       if(v_array_3_dataout == 1'b1)
+      begin
           way_3_hit = 1'b1;
+          dataout = data_array_3_dataout;
+      end
   end
 
   if(way_0_hit == 1'b1 || way_1_hit == 1'b1 || 

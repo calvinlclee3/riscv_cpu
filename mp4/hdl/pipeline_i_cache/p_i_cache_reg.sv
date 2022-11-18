@@ -8,7 +8,7 @@ import rv32i_types::*;
     output i_cache_pipeline_reg out
 );
 
-cache_pipeline_reg data;
+i_cache_pipeline_reg data;
 
 always_ff @ (posedge clk) begin
     if (rst) begin

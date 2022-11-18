@@ -19,10 +19,8 @@ import cache_mux_types::*;
   input logic v_array_2_dataout,
   input logic v_array_3_dataout,
 
-  input cache_pipeline_reg cache_pipeline_out,
-  input cache_pipeline_reg cache_pipeline_in,
-
-  input logic [2:0] LRU_array_dataout,
+  input i_cache_pipeline_reg cache_pipeline_out,
+  input i_cache_pipeline_reg cache_pipeline_in,
 
   /* Control to Datapath */
   output logic v_array_0_load,
@@ -51,9 +49,7 @@ import cache_mux_types::*;
   output dataarraymux_sel_t data_array_2_datain_MUX_sel,
   output dataarraymux_sel_t data_array_3_datain_MUX_sel,
 
-  output paddressmux_sel_t address_mux_sel,
-
-  output logic [255:0] mem_rdata
+  output paddressmux_sel_t address_mux_sel
 );
 
 
@@ -118,87 +114,89 @@ always_comb begin : state_actions
     MISS: begin
       address_mux_sel = prev_cpu_address;
       pmem_read = 1'b1;
-      if(v_array_0_dataout == 1'b0)
+      if (pmem_resp == 1'b1 && cache_pipeline_in.hit == 1'b0)
       begin
-        tag_array_0_load = 1'b1;
-        v_array_0_load = 1'b1;
-        v_array_0_datain = 1'b1
-        write_en_0_MUX_sel = mem_write_cache;
-        data_array_0_datain_MUX_sel = mem_write_cache;
-      end
-      else if(v_array_1_dataout == 1'b0)
-      begin
-        tag_array_1_load = 1'b1;
-        v_array_1_load = 1'b1;
-        v_array_1_datain = 1'b1;
-        write_en_1_MUX_sel = mem_write_cache;
-        data_array_1_datain_MUX_sel = mem_write_cache;
-      end
-      else if(v_array_2_dataout == 1'b0)
-      begin
-        tag_array_2_load = 1'b1;
-        v_array_2_load = 1'b1;
-        v_array_2_datain = 1'b1;
-        write_en_2_MUX_sel = mem_write_cache;
-        data_array_2_datain_MUX_sel = mem_write_cache;
-      end
-      else if(v_array_3_dataout == 1'b0)
-      begin
-        tag_array_3_load = 1'b1;
-        v_array_3_load = 1'b1;
-        v_array_3_datain = 1'b1;
-        write_en_3_MUX_sel = mem_write_cache;
-        data_array_3_datain_MUX_sel = mem_write_cache;
-      end
-      else
-      begin
-        if(LRU_array_dataout[2] == 1'b0)
+        if(v_array_0_dataout == 1'b0)
         begin
-          if(LRU_array_dataout[0] == 1'b0)
-          begin
-            // Alloc way 3
-            tag_array_3_load = 1'b1;
-            v_array_3_load = 1'b1;
-            v_array_3_datain = 1'b1;
-            write_en_3_MUX_sel = mem_write_cache;
-            data_array_3_datain_MUX_sel = mem_write_cache;
-          end
-          else
-          begin
-            // Alloc way 2
-            tag_array_2_load = 1'b1;
-            v_array_2_load = 1'b1;
-            v_array_2_datain = 1'b1;
-            write_en_2_MUX_sel = mem_write_cache;
-            data_array_2_datain_MUX_sel = mem_write_cache;
-          end
+          tag_array_0_load = 1'b1;
+          v_array_0_load = 1'b1;
+          v_array_0_datain = 1'b1;
+          write_en_0_MUX_sel = mem_write_cache;
+          data_array_0_datain_MUX_sel = mem_write_cache;
+        end
+        else if(v_array_1_dataout == 1'b0)
+        begin
+          tag_array_1_load = 1'b1;
+          v_array_1_load = 1'b1;
+          v_array_1_datain = 1'b1;
+          write_en_1_MUX_sel = mem_write_cache;
+          data_array_1_datain_MUX_sel = mem_write_cache;
+        end
+        else if(v_array_2_dataout == 1'b0)
+        begin
+          tag_array_2_load = 1'b1;
+          v_array_2_load = 1'b1;
+          v_array_2_datain = 1'b1;
+          write_en_2_MUX_sel = mem_write_cache;
+          data_array_2_datain_MUX_sel = mem_write_cache;
+        end
+        else if(v_array_3_dataout == 1'b0)
+        begin
+          tag_array_3_load = 1'b1;
+          v_array_3_load = 1'b1;
+          v_array_3_datain = 1'b1;
+          write_en_3_MUX_sel = mem_write_cache;
+          data_array_3_datain_MUX_sel = mem_write_cache;
         end
         else
         begin
-            if(LRU_array_dataout[1] == 1'b0)
+          if(cache_pipeline_in.LRU_array_dataout[2] == 1'b0)
+          begin
+            if(cache_pipeline_in.LRU_array_dataout[0] == 1'b0)
             begin
-              // Alloc way 1
-              tag_array_1_load = 1'b1;
-              v_array_1_load = 1'b1;
-              v_array_1_datain = 1'b1;
-              write_en_1_MUX_sel = mem_write_cache;
-              data_array_1_datain_MUX_sel = mem_write_cache;
+              // Alloc way 3
+              tag_array_3_load = 1'b1;
+              v_array_3_load = 1'b1;
+              v_array_3_datain = 1'b1;
+              write_en_3_MUX_sel = mem_write_cache;
+              data_array_3_datain_MUX_sel = mem_write_cache;
             end
             else
             begin
-              // Alloc way 0
-              tag_array_0_load = 1'b1;
-              v_array_0_load = 1'b1;
-              v_array_0_datain = 1'b1;
-              write_en_0_MUX_sel = mem_write_cache;
-              data_array_0_datain_MUX_sel = mem_write_cache;
-            end  
+              // Alloc way 2
+              tag_array_2_load = 1'b1;
+              v_array_2_load = 1'b1;
+              v_array_2_datain = 1'b1;
+              write_en_2_MUX_sel = mem_write_cache;
+              data_array_2_datain_MUX_sel = mem_write_cache;
+            end
+          end
+          else
+          begin
+              if(cache_pipeline_in.LRU_array_dataout[1] == 1'b0)
+              begin
+                // Alloc way 1
+                tag_array_1_load = 1'b1;
+                v_array_1_load = 1'b1;
+                v_array_1_datain = 1'b1;
+                write_en_1_MUX_sel = mem_write_cache;
+                data_array_1_datain_MUX_sel = mem_write_cache;
+              end
+              else
+              begin
+                // Alloc way 0
+                tag_array_0_load = 1'b1;
+                v_array_0_load = 1'b1;
+                v_array_0_datain = 1'b1;
+                write_en_0_MUX_sel = mem_write_cache;
+                data_array_0_datain_MUX_sel = mem_write_cache;
+              end  
+          end
         end
       end
     end
 
   HIT: begin
-    mem_rdata = cache_pipeline_out.dataout;
     address_mux_sel = curr_cpu_address; //MOVED ON TO HANDLING NEXT REQUEST
     mem_resp = cache_pipeline_out.hit; //MEM_RESP_OUT
     LRU_array_load = 1'b1;
@@ -230,7 +228,7 @@ always_comb begin : next_state_logic
     MISS: begin
       if (pmem_resp)
       begin
-        if (cache_pipeline_in.hit)
+          if (cache_pipeline_in.hit == 1'b1)
           next_state = HIT;
       end
     end
@@ -246,6 +244,8 @@ always_comb begin : next_state_logic
     IDLE: begin 
       if (mem_read == 1'b1 && cache_pipeline_in.hit == 1'b1)
         next_state = HIT;
+      else if (mem_read == 1'b1 && cache_pipeline_in.hit == 1'b0)
+      next_state = MISS;
     end
 
 	endcase

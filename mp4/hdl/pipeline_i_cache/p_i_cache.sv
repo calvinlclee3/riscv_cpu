@@ -10,6 +10,7 @@ import cache_mux_types::*;
     parameter num_sets = 2**s_index,
     parameter num_ways = 4
 ) 
+(
   input clk,
   input rst,
   /* Physical memory signals */
@@ -30,6 +31,9 @@ import cache_mux_types::*;
   output logic [31:0] mem_rdata_cpu
 );
 
+assign pmem_write = 1'b0;
+assign pmem_wdata = '0;
+
 logic hit;
 
 logic [255:0] mem_wdata;
@@ -40,8 +44,6 @@ logic v_array_0_dataout;
 logic v_array_1_dataout;
 logic v_array_2_dataout;
 logic v_array_3_dataout;
-
-logic [2:0] LRU_array_dataout;
 
 logic v_array_0_load;
 logic v_array_0_datain;
@@ -57,8 +59,27 @@ logic tag_array_1_load;
 logic tag_array_2_load;
 logic tag_array_3_load;
 
+logic LRU_array_load;
+
+logic [2:0] LRU_array_datain;
+
 i_cache_pipeline_reg cache_pipeline_in;
 i_cache_pipeline_reg cache_pipeline_out;
+
+
+dataarraymux_sel_t write_en_0_MUX_sel;
+dataarraymux_sel_t write_en_1_MUX_sel;
+dataarraymux_sel_t write_en_2_MUX_sel;
+dataarraymux_sel_t write_en_3_MUX_sel;
+dataarraymux_sel_t data_array_0_datain_MUX_sel;
+dataarraymux_sel_t data_array_1_datain_MUX_sel;
+dataarraymux_sel_t data_array_2_datain_MUX_sel;
+dataarraymux_sel_t data_array_3_datain_MUX_sel;
+
+paddressmux_sel_t address_mux_sel;
+
+rv32i_word address_MUX_out;
+
 
 p_i_cache_control control(
   .clk,
@@ -81,59 +102,116 @@ p_i_cache_control control(
   .cache_pipeline_out,
   .cache_pipeline_in,
 
-  .LRU_array_dataout,
-
   /* Control to Datapath */
-  output logic v_array_0_load,
-  output logic v_array_0_datain,
-  output logic v_array_1_load,
-  output logic v_array_1_datain,
-  output logic v_array_2_load,
-  output logic v_array_2_datain,
-  output logic v_array_3_load,
-  output logic v_array_3_datain,
+  .v_array_0_load,
+  .v_array_0_datain,
+  .v_array_1_load,
+  .v_array_1_datain,
+  .v_array_2_load,
+  .v_array_2_datain,
+  .v_array_3_load,
+  .v_array_3_datain,
+  .tag_array_0_load,
+  .tag_array_1_load,
+  .tag_array_2_load,
+  .tag_array_3_load,
 
-  output logic tag_array_0_load,
-  output logic tag_array_1_load,
-  output logic tag_array_2_load,
-  output logic tag_array_3_load,
+  .LRU_array_load,
+  .LRU_array_datain,
 
-  output logic LRU_array_load,
-  output logic [2:0] LRU_array_datain,
-
-  output dataarraymux_sel_t write_en_0_MUX_sel,
-  output dataarraymux_sel_t write_en_1_MUX_sel,
-  output dataarraymux_sel_t write_en_2_MUX_sel,
-  output dataarraymux_sel_t write_en_3_MUX_sel,
-  output dataarraymux_sel_t data_array_0_datain_MUX_sel,
-  output dataarraymux_sel_t data_array_1_datain_MUX_sel,
-  output dataarraymux_sel_t data_array_2_datain_MUX_sel,
-  output dataarraymux_sel_t data_array_3_datain_MUX_sel,
-
-  output paddressmux_sel_t address_mux_sel,
+  .write_en_0_MUX_sel,
+  .write_en_1_MUX_sel,
+  .write_en_2_MUX_sel,
+  .write_en_3_MUX_sel,
+  .data_array_0_datain_MUX_sel,
+  .data_array_1_datain_MUX_sel,
+  .data_array_2_datain_MUX_sel,
+  .data_array_3_datain_MUX_sel,
+  .address_mux_sel
 );
 
 
 //STAGE 1: COMPARE TAG AND SEE IF HIT OR MISS
 
+assign cache_pipeline_in.cpu_address = mem_address;
+
+p_i_cache_metadata_check check
+(
+  .clk,
+  .rst,
+  /* CPU memory signals */
+  .mem_address(address_MUX_out),
+
+  /* Physical memory data signals */
+  .pmem_rdata,
+  .pmem_address,
+
+  .hit(cache_pipeline_in.hit),
+  .way_0_hit(cache_pipeline_in.way_0_hit),
+  .way_1_hit(cache_pipeline_in.way_1_hit),
+  .way_2_hit(cache_pipeline_in.way_2_hit),
+  .way_3_hit(cache_pipeline_in.way_3_hit),
+  
+  .v_array_0_dataout,
+  .v_array_1_dataout,
+  .v_array_2_dataout,
+  .v_array_3_dataout,
+
+  // LRU array width is now 3.
+  .LRU_array_dataout(cache_pipeline_in.LRU_array_dataout),
+
+  /* Control to Datapath */
+  .v_array_0_load,
+  .v_array_0_datain,
+  .v_array_1_load,
+  .v_array_1_datain,
+  .v_array_2_load,
+  .v_array_2_datain,
+  .v_array_3_load,
+  .v_array_3_datain,
+
+  .tag_array_0_load,
+  .tag_array_1_load,
+  .tag_array_2_load,
+  .tag_array_3_load,
+
+  .LRU_array_load,
+  .LRU_array_datain,
+  
+  .write_en_0_MUX_sel,
+  .write_en_1_MUX_sel,
+  .write_en_2_MUX_sel,
+  .write_en_3_MUX_sel,
+
+  .data_array_0_datain_MUX_sel,
+  .data_array_1_datain_MUX_sel,
+  .data_array_2_datain_MUX_sel,
+  .data_array_3_datain_MUX_sel,
+
+  .dataout(cache_pipeline_in.dataout)
+);
 
 
+always_comb begin : ADDRESSMUX
+  address_MUX_out = mem_address;
+  unique case (address_mux_sel)
+    curr_cpu_address: address_MUX_out = mem_address;
+    prev_cpu_address: address_MUX_out = cache_pipeline_out.cpu_address;
+  endcase
+end
 
 
-
+p_i_cache_reg pipeline_reg
+(
+  .clk,
+  .rst, 
+  .load(1'b1),
+  .in(cache_pipeline_in),
+  .out(cache_pipeline_out)
+);
 
 //STAGE 2: DELIVER DATA
-
-
-
-//HARDWARE UNITS
-
-
-
-always_comb begin : 
-
-
-end
+assign mem_rdata = cache_pipeline_out.dataout;
 
 
 
@@ -147,9 +225,6 @@ p_line_adapter bus (
     .mem_byte_enable_line(mem_byte_enable),
     .address(mem_address)
 );
-
-
-
 
 
 

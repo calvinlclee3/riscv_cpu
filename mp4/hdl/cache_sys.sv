@@ -55,7 +55,6 @@ logic a_pmem_write;
 
 logic cla_pmem_resp;
 logic [255:0] cla_pmem_rdata;
-logic [31:0] cla_pmem_address;
 logic [255:0] cla_pmem_wdata;
 logic cla_pmem_read;
 logic cla_pmem_write;
@@ -71,9 +70,10 @@ logic num_l2_request_overflow;
 logic [perf_counter_width-1:0] num_l2_miss;
 logic num_l2_miss_overflow;
 
-cache i_cache (
+p_i_cache i_cache (
 
 	.clk(clk),
+	.rst(rst),
 
 	/* Physical memory signals */
 	.pmem_resp(i_pmem_resp),

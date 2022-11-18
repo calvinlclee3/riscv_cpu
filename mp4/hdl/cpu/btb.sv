@@ -69,6 +69,8 @@ logic v_array_3_dataout;
 logic LRU_array_load;
 logic [2:0] LRU_array_datain_read_hit;
 logic [2:0] LRU_array_datain_write_miss;
+logic LRU_array_load_read_hit;
+logic LRU_array_load_write_miss;
 logic [2:0] LRU_array_datain;
 logic [2:0] LRU_array_dataout;
 
@@ -268,6 +270,7 @@ function void set_defaults_read();
     out = '0;
 
     LRU_array_datain_read_hit = '0;
+    LRU_array_load_read_hit = 1'b0;
     
 endfunction
 
@@ -300,9 +303,8 @@ function void set_defaults_write();
     v_array_2_datain = '0;
     v_array_3_datain = '0;
 
-    LRU_array_load = 1'b0;
-
     LRU_array_datain_write_miss = '0;
+    LRU_array_load_write_miss = 1'b0;
 
 endfunction
 
@@ -317,6 +319,7 @@ always_comb begin : READ_HIT_MISS_DETERMINATION
             read_way_0_hit = 1'b1;
             out = data_array_0_dataout;
             LRU_array_datain_read_hit = {1'b0, 1'b0, LRU_array_dataout[0]};
+            LRU_array_load_read_hit = 1'b1;
         end
     end
         
@@ -327,6 +330,7 @@ always_comb begin : READ_HIT_MISS_DETERMINATION
             read_way_1_hit = 1'b1;
             out = data_array_1_dataout;
             LRU_array_datain_read_hit = {1'b0, 1'b1, LRU_array_dataout[0]};
+            LRU_array_load_read_hit = 1'b1;
         end
     end
 
@@ -337,7 +341,7 @@ always_comb begin : READ_HIT_MISS_DETERMINATION
             read_way_2_hit = 1'b1;
             out = data_array_2_dataout;
             LRU_array_datain_read_hit = {1'b1, LRU_array_dataout[1], 1'b0};
-
+            LRU_array_load_read_hit = 1'b1;
         end
     end
 
@@ -348,7 +352,7 @@ always_comb begin : READ_HIT_MISS_DETERMINATION
             read_way_3_hit = 1'b1;
             out = data_array_3_dataout;
             LRU_array_datain_read_hit = {1'b1, LRU_array_dataout[1], 1'b1};
-
+            LRU_array_load_read_hit = 1'b1;
         end
     end
 
@@ -398,24 +402,26 @@ always_comb begin : WRITE_HIT_MISS_DETERMINATION
             begin
                 allocate_way(2'b00, write_address[31:s_index+2], in);
                 LRU_array_datain_write_miss = {1'b0, 1'b0, LRU_array_dataout[0]};
-
+                LRU_array_load_write_miss = 1'b1;
             end
             else if(v_array_1_dataout == 1'b0)
             begin
                 allocate_way(2'b01, write_address[31:s_index+2], in);
                 LRU_array_datain_write_miss = {1'b0, 1'b1, LRU_array_dataout[0]}; // 1
+                LRU_array_load_write_miss = 1'b1;
             end
             else if(v_array_2_dataout == 1'b0)
             begin
                 
                 allocate_way(2'b10, write_address[31:s_index+2], in);
                 LRU_array_datain_write_miss =  {1'b1, LRU_array_dataout[1], 1'b0}; // 2
+                LRU_array_load_write_miss = 1'b1;
             end
             else if(v_array_3_dataout == 1'b0)
             begin
                 allocate_way(2'b11, write_address[31:s_index+2], in);
                 LRU_array_datain_write_miss = {1'b1, LRU_array_dataout[1], 1'b1}; // 3
-
+                LRU_array_load_write_miss = 1'b1;
             end
             else
             begin
@@ -426,12 +432,14 @@ always_comb begin : WRITE_HIT_MISS_DETERMINATION
                         // Alloc way 3
                         allocate_way(2'b11, write_address[31:s_index+2], in);
                         LRU_array_datain_write_miss = {1'b1, LRU_array_dataout[1], 1'b1}; // 3
+                        LRU_array_load_write_miss = 1'b1;
                     end
                     else
                     begin
                         // Alloc way 2
                         allocate_way(2'b10, write_address[31:s_index+2], in);
                         LRU_array_datain_write_miss = {1'b1, LRU_array_dataout[1], 1'b0}; // 2
+                        LRU_array_load_write_miss = 1'b1;
                     end
                 end
                 else
@@ -441,12 +449,14 @@ always_comb begin : WRITE_HIT_MISS_DETERMINATION
                         // Alloc way 1
                         allocate_way(2'b01, write_address[31:s_index+2], in);
                         LRU_array_datain_write_miss = {1'b0, 1'b1, LRU_array_dataout[0]}; // 1
+                        LRU_array_load_write_miss = 1'b1;
                     end
                     else
                     begin
                         // Alloc way 0
                         allocate_way(2'b00, write_address[31:s_index+2], in);
                         LRU_array_datain_write_miss = {1'b0, 1'b0, LRU_array_dataout[0]}; // 0
+                        LRU_array_load_write_miss = 1'b1;
                     end  
                 end
             end
@@ -459,9 +469,15 @@ end
 always_comb
 begin
     if(read_hit)
+    begin
         LRU_array_datain = LRU_array_datain_read_hit;
+        LRU_array_load = LRU_array_load_read_hit;
+    end
     else
+    begin
         LRU_array_datain = LRU_array_datain_write_miss;
+        LRU_array_load = LRU_array_load_write_miss;
+    end
 end
 
 endmodule : btb

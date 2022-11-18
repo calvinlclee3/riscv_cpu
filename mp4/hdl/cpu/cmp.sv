@@ -9,7 +9,7 @@ import rv32i_types::*;
 
 always_comb
 begin
-
+    f = '0;
     unique case(cmpop)
         beq:   f = (a == b);
         bne:   f = (a != b);

@@ -55,15 +55,16 @@ logic a_pmem_write;
 
 logic cla_pmem_resp;
 logic [255:0] cla_pmem_rdata;
-logic [31:0] cla_pmem_address;
 logic [255:0] cla_pmem_wdata;
 logic cla_pmem_read;
 logic cla_pmem_write;
 
-always @ (posedge cla_pmem_read or posedge cla_pmem_write)
-begin
-	$display("a_pmem_address = %27b", cla_pmem_address[31:5]);
-end
+/* Does not pass synthesis, use for simulation only. */
+
+// always @ (posedge cla_pmem_read or posedge cla_pmem_write)
+// begin
+// 	$display("a_pmem_address = %27b", cla_pmem_address[31:5]);
+// end
 
 /* L2 Perf Counter Signals*/
 logic [perf_counter_width-1:0] num_l2_request;
@@ -74,6 +75,7 @@ logic num_l2_miss_overflow;
 cache i_cache (
 
 	.clk(clk),
+	.rst(rst),
 
 	/* Physical memory signals */
 	.pmem_resp(i_pmem_resp),
@@ -117,6 +119,7 @@ perf_counter #(.width(perf_counter_width)) l2miss
 cache d_cache (
 
 	.clk(clk),
+	.rst(rst),
 
 	/* Physical memory signals */
 	.pmem_resp(d_pmem_resp),

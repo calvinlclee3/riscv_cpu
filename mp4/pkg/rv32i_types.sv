@@ -190,6 +190,22 @@ typedef struct packed {
 
 } mem_wb_pipeline_reg;
 
+typedef struct packed {
+
+    rv32i_word cpu_address;
+    rv32i_word mem_wdata;
+    rv32i_word mem_rdata;
+    logic mem_read;
+    logic mem_write;
+    logic way_0_hit;
+    logic way_1_hit;
+    logic way_2_hit;
+    logic way_3_hit;
+    logic hit;
+    logic [2:0] LRU_array_dataout;
+
+} cache_pipeline_reg;
+
 
 endpackage : rv32i_types
 

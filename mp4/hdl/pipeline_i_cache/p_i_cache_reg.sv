@@ -1,11 +1,11 @@
-module cache_reg 
+module p_i_cache_reg 
 import rv32i_types::*;
 (
     input logic clk,
     input logic rst,
     input logic load,
-    input cache_pipeline_reg in,
-    output cache_pipeline_reg out
+    input i_cache_pipeline_reg in,
+    output i_cache_pipeline_reg out
 );
 
 cache_pipeline_reg data;
@@ -26,4 +26,4 @@ always_comb begin
 
 end
 
-endmodule: cache_reg
+endmodule: p_i_cache_reg

@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi_R-2020.12-SP1-1
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 0 25 1920 607 255 65
+viewPort 0 25 1168 552 469 65
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -16,8 +16,8 @@ signalSpacing 5
 
 ; windowTimeUnit is used for zoom, cursor & marker
 ; waveform viewport range
-zoom 1768506170.750000 1966083885.750000
-cursor 1955585000.000000
+zoom 686275880.691566 713306532.595181
+cursor 711955000.000000
 marker 0.000000
 
 ; user define markers
@@ -57,10 +57,12 @@ addSignal -h 15 -holdScope debug_WB_PC[31:0]
 addSignal -h 15 -holdScope debug_WB_IR[31:0]
 addSignal -h 15 -holdScope debug_WB_target_address[31:0]
 addSignal -h 15 -UNSIGNED -UDEC -holdScope num_control_flow_instr[31:0]
+addSignal -h 15 -UNSIGNED -UDEC -holdScope num_ctrl_instr_wo_stall[31:0]
 addSignal -h 15 -UNSIGNED -UDEC -holdScope num_correct_branch_predict[31:0]
 addSignal -h 15 -UNSIGNED -UDEC /mp4_tb/dut/cache_sys/num_l2_request[31:0]
 addSignal -h 15 -UNSIGNED -UDEC -holdScope num_l2_miss[31:0]
 addSignal -h 15 /mp4_tb/dut/cpu/num_control_flow_instr_overflow
+addSignal -h 15 -holdScope num_ctrl_instr_wo_stall_overflow
 addSignal -h 15 -holdScope num_correct_branch_predict_overflow
 addSignal -h 15 /mp4_tb/dut/cache_sys/num_l2_request_overflow
 addSignal -h 15 -holdScope num_l2_miss_overflow

@@ -88,6 +88,7 @@ logic increment_tournament_pht;
 logic decrement_tournament_pht;
 
 logic global_stall;
+logic num_ctrl_instr_wo_stall_count;
 logic num_correct_branch_predict_count;
 
 /****************************** DEBUG ******************************/ 
@@ -104,6 +105,8 @@ rv32i_word debug_WB_target_address;
 logic debug_halt;
 logic [perf_counter_width-1:0] num_control_flow_instr;
 logic num_control_flow_instr_overflow;
+logic [perf_counter_width-1:0] num_ctrl_instr_wo_stall;
+logic num_ctrl_instr_wo_stall_overflow;
 logic [perf_counter_width-1:0] num_correct_branch_predict;
 logic num_correct_branch_predict_overflow;
 
@@ -359,8 +362,17 @@ perf_counter #(.width(perf_counter_width)) pf0 (
     .out(num_control_flow_instr)
 );
 
-/* Count the number of correctly predicted branches. */
+/* Count the number of control flow instructions moving through the pipeline without any stalls. */
 perf_counter #(.width(perf_counter_width)) pf1 (
+    .clk(clk),
+    .rst(rst),
+    .count(num_ctrl_instr_wo_stall_count),
+    .overflow(num_ctrl_instr_wo_stall_overflow),
+    .out(num_ctrl_instr_wo_stall)
+);
+
+/* Count the number of correct branch prediction. */
+perf_counter #(.width(perf_counter_width)) pf2 (
     .clk(clk),
     .rst(rst),
     .count(num_correct_branch_predict_count),
@@ -421,33 +433,49 @@ assign mem_wb_in.alu_out_address = ex_mem_out.alu_out_address;
 assign br_jal_wrong_target = id_ex_in.target_address != if_id_out.btb_out.target_address;
 assign jalr_wrong_target = {id_ex_in.target_address[31:1], 1'b0} != if_id_out.btb_out.target_address;
 
-// This logic is to ensure performance counters are incremented properly.
-// Note that branch predictor being "correct" and the correct instruction being fetched are two different things.
-always_comb begin: BRANCH_PREDICTION_CORRECT_OR_INCORRECT
+/****************************** PERF COUNTER LOGIC ******************************/ 
+
+always_comb begin: LOGIC_NUM_CTRL_INSTR_WO_STALL
+
+    num_ctrl_instr_wo_stall_count = 1'b0;
+    if(if_id_reg_load)
+    begin
+        if(id_ex_in.ctrl.opcode == op_br)
+        begin
+            if((if_id_out.btb_read_hit == 1'b1) && (id_ex_in.br_en == if_id_out.br_pr) && (br_jal_wrong_target == 1'b0))
+                num_ctrl_instr_wo_stall_count = 1'b1;
+            if((if_id_out.btb_read_hit == 1'b0) && (id_ex_in.br_en == 1'b0))
+                num_ctrl_instr_wo_stall_count = 1'b1;
+        end
+        else if(id_ex_in.ctrl.opcode == op_jal)
+        begin
+            if((if_id_out.btb_read_hit == 1'b1) && (br_jal_wrong_target == 1'b0))
+                num_ctrl_instr_wo_stall_count = 1'b1;
+        end
+        else if(id_ex_in.ctrl.opcode == op_jalr)
+        begin
+            if((if_id_out.btb_read_hit == 1'b1) && (jalr_wrong_target == 1'b0))
+                num_ctrl_instr_wo_stall_count = 1'b1;
+        end
+    end
+
+end
+
+always_comb begin: LOGIC_NUM_CORRECT_BRANCH_PREDICT
 
     num_correct_branch_predict_count = 1'b0;
     if(if_id_reg_load)
     begin
         if(id_ex_in.ctrl.opcode == op_br)
         begin
-            if((if_id_out.btb_read_hit == 1'b1) && (id_ex_in.br_en == if_id_out.br_pr) && (br_jal_wrong_target == 1'b0))
-                num_correct_branch_predict_count = 1'b1;
-            if((if_id_out.btb_read_hit == 1'b0) && (id_ex_in.br_en == 1'b0))
-                num_correct_branch_predict_count = 1'b1;
-        end
-        else if(id_ex_in.ctrl.opcode == op_jal)
-        begin
-            if((if_id_out.btb_read_hit == 1'b1) && (br_jal_wrong_target == 1'b0))
-                num_correct_branch_predict_count = 1'b1;
-        end
-        else if(id_ex_in.ctrl.opcode == op_jalr)
-        begin
-            if((if_id_out.btb_read_hit == 1'b1) && (jalr_wrong_target == 1'b0))
+            if(id_ex_in.br_en == if_id_out.br_pr)
                 num_correct_branch_predict_count = 1'b1;
         end
     end
 
 end
+
+
 /****************************** MUXES ******************************/ 
 
 always_comb begin : PCMUX

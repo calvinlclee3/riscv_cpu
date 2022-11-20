@@ -31,11 +31,11 @@ end
 
 always_comb
 begin
-    if((rindex == windex) && load)
-        // transparent
-        out = in;
-    else
-        out = data[rindex];
+    // if((rindex == windex) && load)
+    //     // transparent
+    //     out = in;
+    // else
+    out = data[rindex];
 end
 
 endmodule : btb_array

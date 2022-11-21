@@ -115,6 +115,7 @@ always_comb begin : state_actions
     end
 
     MISS: begin
+      load_i_cache_reg = 1'b0;
       address_mux_sel = prev_cpu_address;
       if (mem_read == 1'b1)
       begin

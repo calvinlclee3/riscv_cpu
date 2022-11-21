@@ -385,8 +385,7 @@ perf_counter #(.width(perf_counter_width)) pf2 (
 
 /* assign ports for I-cache */
 assign instr_read = 1'b1; // possible_error: eval later (it is possible to always read as long as we dont store the read value)
-//assign instr_mem_address = if_id_in.pc;
-assign instr_mem_address = pc_MUX_out;
+assign instr_mem_address = (rst == 1'b1)? 32'h00000060: pc_MUX_out;
 assign if_id_in.ir = instr_mem_rdata; //IR value from I-Cache
 
 /* assign ports for D-cache */

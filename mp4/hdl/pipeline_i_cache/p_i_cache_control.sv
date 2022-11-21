@@ -201,7 +201,6 @@ always_comb begin : state_actions
     address_mux_sel = curr_cpu_address; //MOVED ON TO HANDLING NEXT REQUEST
     if (cache_pipeline_in.hit == 1'b1 && mem_read == 1'b1)
     begin
-      mem_resp = 1'b1; //MEM_RESP_OUT
       LRU_array_load = 1'b1;
       if(cache_pipeline_in.way_0_hit)
           LRU_array_datain = {1'b0, 1'b0, cache_pipeline_in.LRU_array_dataout[0]};

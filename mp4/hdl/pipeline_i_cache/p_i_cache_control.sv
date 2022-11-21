@@ -201,7 +201,6 @@ always_comb begin : state_actions
       else if (cache_pipeline_in.hit == 1'b1)
       begin
       mem_resp = 1'b1;
-      address_mux_sel = curr_cpu_address;
       LRU_array_load = 1'b1;
       if(cache_pipeline_in.way_0_hit)
           LRU_array_datain = {1'b0, 1'b0, cache_pipeline_in.LRU_array_dataout[0]};
@@ -217,20 +216,7 @@ always_comb begin : state_actions
 
   HIT: begin
     address_mux_sel = curr_cpu_address; //MOVED ON TO HANDLING NEXT REQUEST
-    if (cache_pipeline_in.hit == 1'b1)
-    begin
-      LRU_array_load = 1'b1;
-      if(cache_pipeline_in.way_0_hit)
-          LRU_array_datain = {1'b0, 1'b0, cache_pipeline_in.LRU_array_dataout[0]};
-      else if (cache_pipeline_in.way_1_hit)
-          LRU_array_datain = {1'b0, 1'b1, cache_pipeline_in.LRU_array_dataout[0]};
-      else if (cache_pipeline_in.way_2_hit)
-          LRU_array_datain = {1'b1, cache_pipeline_in.LRU_array_dataout[1], 1'b0};
-      else if (cache_pipeline_in.way_3_hit)
-          LRU_array_datain = {1'b1, cache_pipeline_in.LRU_array_dataout[1], 1'b1}; 
-      mem_resp = 1'b1;
     end
-  end
 
 	endcase
 end
@@ -248,7 +234,7 @@ always_comb begin : next_state_logic
     end
 
     MISS: begin
-      if (cache_pipeline_in.hit == 1'b1 && mem_read == 1'b1)
+      if (cache_pipeline_in.hit == 1'b1)
         next_state = HIT;
       end
 

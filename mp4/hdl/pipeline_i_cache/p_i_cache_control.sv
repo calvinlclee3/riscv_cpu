@@ -204,9 +204,9 @@ always_comb begin : state_actions
     end
 
   HIT: begin
-    address_mux_sel = curr_cpu_address; //MOVED ON TO HANDLING NEXT REQUEST
     if (cache_pipeline_in.hit == 1'b1)
       begin
+      address_mux_sel = curr_cpu_address; //MOVED ON TO HANDLING NEXT REQUEST
       mem_resp = 1'b1;
       LRU_array_load = 1'b1;
       if(cache_pipeline_in.way_0_hit)
@@ -219,6 +219,7 @@ always_comb begin : state_actions
           LRU_array_datain = {1'b1, cache_pipeline_in.LRU_array_dataout[1], 1'b1};
       end 
     end
+    else address_mux_sel = prev_cpu_address;
 
 	endcase
 end

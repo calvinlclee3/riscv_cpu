@@ -193,6 +193,8 @@ always_comb begin : state_actions
           end
         end
       end
+      else if (cache_pipeline_in.hit == 1'b1)
+      mem_resp = 1'b1;
     end
 
   HIT: begin

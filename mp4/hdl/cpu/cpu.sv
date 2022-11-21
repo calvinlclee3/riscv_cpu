@@ -390,8 +390,14 @@ always_ff @ (posedge clk)
 begin
     if (rst)
     instr_mem_address <= 32'h00000060;
+    else if (if_id_in.pc == 32'h00000060)
+    begin
+    if (rst == 1'b0)
+    instr_mem_address <= pc_MUX_out;
+    end
     else
     instr_mem_address <= pc_MUX_out;
+
 end
 
 assign if_id_in.ir = instr_mem_rdata; //IR value from I-Cache

@@ -198,6 +198,8 @@ always_comb begin : state_actions
         end
       end
       end
+      else 
+      address_mux_sel = curr_cpu_address;
       end
     end
 

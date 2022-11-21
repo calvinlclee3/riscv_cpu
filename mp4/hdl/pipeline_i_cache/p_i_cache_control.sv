@@ -112,6 +112,8 @@ always_comb begin : state_actions
 
     MISS: begin
       address_mux_sel = prev_cpu_address;
+      if (mem_read == 1'b1)
+      begin
       if (cache_pipeline_in.hit == 1'b0)
       begin
       pmem_read = 1'b1;
@@ -196,13 +198,14 @@ always_comb begin : state_actions
         end
       end
       end
-      else if (cache_pipeline_in.hit == 1'b1 && mem_read == 1'b1)
+      else if (cache_pipeline_in.hit == 1'b1)
       mem_resp = 1'b1;
+      end
     end
 
   HIT: begin
     address_mux_sel = curr_cpu_address; //MOVED ON TO HANDLING NEXT REQUEST
-    if (cache_pipeline_in.hit == 1'b1 && mem_read == 1'b1)
+    if (cache_pipeline_in.hit == 1'b1)
     begin
       LRU_array_load = 1'b1;
       if(cache_pipeline_in.way_0_hit)
@@ -232,7 +235,7 @@ always_comb begin : next_state_logic
     end
 
     MISS: begin
-      if (cache_pipeline_in.hit == 1'b1)
+      if (cache_pipeline_in.hit == 1'b1 && mem_read == 1'b1)
         next_state = HIT;
       end
 

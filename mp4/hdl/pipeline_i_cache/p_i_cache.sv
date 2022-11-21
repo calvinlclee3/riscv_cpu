@@ -211,7 +211,7 @@ p_i_cache_reg pipeline_reg
 );
 
 //STAGE 2: DELIVER DATA
-assign mem_rdata = cache_pipeline_out.dataout;
+assign mem_rdata = cache_pipeline_in.dataout;
 
 
 

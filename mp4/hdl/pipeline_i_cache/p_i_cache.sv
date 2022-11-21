@@ -34,8 +34,6 @@ import cache_mux_types::*;
 assign pmem_write = 1'b0;
 assign pmem_wdata = '0;
 
-logic hit;
-
 logic [255:0] mem_wdata;
 logic [255:0] mem_rdata;
 logic [31:0] mem_byte_enable;
@@ -62,6 +60,8 @@ logic tag_array_3_load;
 logic LRU_array_load;
 
 logic [2:0] LRU_array_datain;
+
+logic load_i_cache_reg;
 
 i_cache_pipeline_reg cache_pipeline_in;
 i_cache_pipeline_reg cache_pipeline_out;
@@ -127,6 +127,7 @@ p_i_cache_control control(
   .data_array_1_datain_MUX_sel,
   .data_array_2_datain_MUX_sel,
   .data_array_3_datain_MUX_sel,
+  .load_i_cache_reg,
   .address_mux_sel
 );
 
@@ -205,7 +206,7 @@ p_i_cache_reg pipeline_reg
 (
   .clk,
   .rst, 
-  .load(1'b1),
+  .load(load_i_cache_reg),
   .in(cache_pipeline_in),
   .out(cache_pipeline_out)
 );

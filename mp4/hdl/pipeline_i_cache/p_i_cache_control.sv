@@ -236,8 +236,7 @@ always_comb begin : next_state_logic
 
     HIT: begin
 
-      if (cache_pipeline_in.hit == 1'b0) 
-        next_state = MISS;
+      next_state = MISS;
     end
 
 	endcase

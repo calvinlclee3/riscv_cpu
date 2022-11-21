@@ -224,7 +224,7 @@ p_line_adapter bus (
     .mem_rdata(mem_rdata_cpu),
     .mem_byte_enable(mem_byte_enable_cpu),
     .mem_byte_enable_line(mem_byte_enable),
-    .address(address_MUX_out)
+    .address(cache_pipeline_out.cpu_address)
 );
 
 

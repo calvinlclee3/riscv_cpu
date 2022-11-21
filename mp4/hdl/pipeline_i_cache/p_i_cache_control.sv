@@ -49,6 +49,8 @@ import cache_mux_types::*;
   output dataarraymux_sel_t data_array_2_datain_MUX_sel,
   output dataarraymux_sel_t data_array_3_datain_MUX_sel,
 
+  output logic load_i_cache_reg,
+
   output paddressmux_sel_t address_mux_sel
 );
 
@@ -88,6 +90,8 @@ function void set_defaults();
   data_array_3_datain_MUX_sel = no_write;
 
   address_mux_sel = curr_cpu_address;
+
+  load_i_cache_reg = 1'b1;
 
 
 endfunction
@@ -198,8 +202,6 @@ always_comb begin : state_actions
         end
       end
       end
-      else 
-      address_mux_sel = curr_cpu_address;
       end
     end
 
@@ -218,7 +220,10 @@ always_comb begin : state_actions
       else if (cache_pipeline_in.way_3_hit)
           LRU_array_datain = {1'b1, cache_pipeline_in.LRU_array_dataout[1], 1'b1};
       end 
-    else address_mux_sel = prev_cpu_address;
+    else begin
+       address_mux_sel = prev_cpu_address;
+       load_i_cache_reg = 1'b0;
+    end
     end
 
 	endcase
@@ -237,7 +242,7 @@ always_comb begin : next_state_logic
     end
 
     MISS: begin
-      if (cache_pipeline_in.hit == 1'b1)
+      if (pmem_resp == 1'b1)
         next_state = HIT;
       end
 

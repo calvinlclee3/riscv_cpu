@@ -390,7 +390,7 @@ always_ff @ (posedge clk)
 begin
     if (rst)
     instr_mem_address <= 32'h00000060;
-    else if (if_id_reg_load == 1'b1)
+    else
     instr_mem_address <= pc_MUX_out;
 end
 

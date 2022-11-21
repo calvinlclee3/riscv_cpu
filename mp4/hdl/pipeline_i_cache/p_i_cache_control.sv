@@ -234,7 +234,7 @@ always_comb begin : next_state_logic
     end
 
     MISS: begin
-      if (p_mem_resp == 1'b1)
+      if (pmem_resp == 1'b1)
         next_state = HIT;
       end
 

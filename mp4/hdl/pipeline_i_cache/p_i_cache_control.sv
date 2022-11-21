@@ -234,7 +234,7 @@ always_comb begin : next_state_logic
     end
 
     MISS: begin
-      if (pmem_resp == 1'b1)
+      if (cache_pipeline_in.hit == 1'b1)
         next_state = HIT;
       end
 

@@ -218,8 +218,8 @@ always_comb begin : state_actions
       else if (cache_pipeline_in.way_3_hit)
           LRU_array_datain = {1'b1, cache_pipeline_in.LRU_array_dataout[1], 1'b1};
       end 
-    end
     else address_mux_sel = prev_cpu_address;
+    end
 
 	endcase
 end

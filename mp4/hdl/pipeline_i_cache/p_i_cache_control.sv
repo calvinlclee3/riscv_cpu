@@ -112,8 +112,10 @@ always_comb begin : state_actions
 
     MISS: begin
       address_mux_sel = prev_cpu_address;
+      if (cache_pipeline_in.hit == 1'b0)
+      begin
       pmem_read = 1'b1;
-      if (pmem_resp == 1'b1 && cache_pipeline_in.hit == 1'b0)
+      if (pmem_resp == 1'b1)
       begin
         if(v_array_0_dataout == 1'b0)
         begin
@@ -193,7 +195,8 @@ always_comb begin : state_actions
           end
         end
       end
-      else if (cache_pipeline_in.hit == 1'b1)
+      end
+      else if (cache_pipeline_in.hit == 1'b1 && mem_read == 1'b1)
       mem_resp = 1'b1;
     end
 

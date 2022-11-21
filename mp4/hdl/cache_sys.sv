@@ -69,8 +69,8 @@ logic cla_pmem_write;
 /* L2 Perf Counter Signals*/
 logic [perf_counter_width-1:0] num_l2_request;
 logic num_l2_request_overflow;
-logic [perf_counter_width-1:0] num_l2_miss;
-logic num_l2_miss_overflow;
+// logic [perf_counter_width-1:0] num_l2_miss;
+// logic num_l2_miss_overflow;
 
 cache i_cache (
 
@@ -106,15 +106,15 @@ perf_counter #(.width(perf_counter_width)) l2total
     .out(num_l2_request)
 );
 
-/* Count the total number of L2 cache misses. */
-perf_counter #(.width(perf_counter_width)) l2miss
-(
-	.clk(cla_pmem_read || cla_pmem_write),
-    .rst(rst),
-    .count(1'b1),
-    .overflow(num_l2_miss_overflow),
-    .out(num_l2_miss)
-);
+// /* Count the total number of L2 cache misses. */
+// perf_counter #(.width(perf_counter_width)) l2miss
+// (
+// 	.clk(cla_pmem_read || cla_pmem_write),
+//     .rst(rst),
+//     .count(1'b1),
+//     .overflow(num_l2_miss_overflow),
+//     .out(num_l2_miss)
+// );
 
 cache d_cache (
 

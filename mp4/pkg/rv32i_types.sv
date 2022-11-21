@@ -20,7 +20,7 @@ import tournamentmux::*;
 localparam perf_counter_width = 32;
 
 /* Specify the depth of branch history recorded. */
-localparam history_depth = 10;
+localparam history_depth = 8;
 
 /* Specify the number of sets in BTB. */
 localparam btb_s_index = 4;

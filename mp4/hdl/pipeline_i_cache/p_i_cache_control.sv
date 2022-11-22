@@ -95,6 +95,8 @@ function void set_defaults();
 
   load_i_cache_reg = 1'b1;
 
+  read_array_flag = 1'b1;
+
 
 endfunction
 
@@ -225,6 +227,7 @@ always_comb begin : state_actions
       end 
     else begin
        load_i_cache_reg = 1'b0;
+       read_array_flag = 1'b0;
     end
     end
 

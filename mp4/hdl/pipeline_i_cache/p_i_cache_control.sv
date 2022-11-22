@@ -90,7 +90,7 @@ function void set_defaults();
   data_array_2_datain_MUX_sel = no_write;
   data_array_3_datain_MUX_sel = no_write;
 
-  address_mux_sel = prev_cpu_address;
+  address_mux_sel = curr_cpu_address;
 
   load_i_cache_reg = 1'b1;
 

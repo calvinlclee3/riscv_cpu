@@ -21,6 +21,7 @@ import cache_mux_types::*;
 
   input i_cache_pipeline_reg cache_pipeline_out,
   input i_cache_pipeline_reg cache_pipeline_in,
+  input logic if_id_reg_load,
 
   /* Control to Datapath */
   output logic v_array_0_load,

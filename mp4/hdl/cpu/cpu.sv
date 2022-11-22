@@ -88,8 +88,8 @@ logic decrement_tournament_pht;
 logic global_stall;
 logic num_ctrl_instr_wo_stall_count;
 logic num_correct_branch_predict_count;
-assign continue_i_cache = ~(global_stall == 1'b1 && data_mem_resp == 1'b0);
-
+//assign continue_i_cache = ~(global_stall == 1'b1 && data_mem_resp == 1'b0);
+assign continue_i_cache = 1'b1;
 /****************************** DEBUG ******************************/ 
 
 rv32i_word debug_ID_PC;

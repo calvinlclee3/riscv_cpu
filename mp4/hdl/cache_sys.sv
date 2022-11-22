@@ -18,6 +18,7 @@ import rv32i_types::*;
 	input rv32i_word instr_mem_address,
 	output rv32i_word instr_mem_rdata,
 	output logic instr_mem_resp,
+	input logic if_id_reg_load,
 
 
 	/* CPU Memory Signals: D-Cache */
@@ -72,7 +73,7 @@ logic num_l2_request_overflow;
 // logic [perf_counter_width-1:0] num_l2_miss;
 // logic num_l2_miss_overflow;
 
-cache i_cache (
+p_i_cache i_cache (
 
 	.clk(clk),
 	.rst(rst),
@@ -92,7 +93,8 @@ cache i_cache (
 	.mem_address(instr_mem_address),
 	.mem_wdata_cpu(32'b0),
 	.mem_resp(instr_mem_resp),
-	.mem_rdata_cpu(instr_mem_rdata)
+	.mem_rdata_cpu(instr_mem_rdata),
+	.if_id_reg_load(if_id_reg_load)
 
 );
 

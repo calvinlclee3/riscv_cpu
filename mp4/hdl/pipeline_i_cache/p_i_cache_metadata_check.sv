@@ -66,7 +66,9 @@ import cache_mux_types::*;
   input dataarraymux_sel_t data_array_0_datain_MUX_sel,
   input dataarraymux_sel_t data_array_1_datain_MUX_sel,
   input dataarraymux_sel_t data_array_2_datain_MUX_sel,
-  input dataarraymux_sel_t data_array_3_datain_MUX_sel
+  input dataarraymux_sel_t data_array_3_datain_MUX_sel, 
+  
+  input logic read_array_flag
 
 );
 
@@ -97,7 +99,7 @@ assign pmem_address = {mem_address[31:5], 5'b0};
 l2_array #(.s_index(s_index), .width(1)) v_array [num_ways-1:0] (
     .clk({clk, clk, clk, clk}),
     .rst({rst, rst, rst, rst}),
-    .read({1'b1, 1'b1, 1'b1, 1'b1}),
+    .read({read_array_flag, read_array_flag, read_array_flag, read_array_flag}),
     .load({v_array_3_load, v_array_2_load, v_array_1_load, v_array_0_load}),
     .rindex({mem_address[7:5], mem_address[7:5], mem_address[7:5], mem_address[7:5]}),
     .windex({mem_address[7:5], mem_address[7:5], mem_address[7:5], mem_address[7:5]}),
@@ -109,7 +111,7 @@ l2_array #(.s_index(s_index), .width(1)) v_array [num_ways-1:0] (
 l2_array #(.s_index(s_index), .width(s_tag)) tag_array [num_ways-1:0] (
     .clk({clk, clk, clk, clk}),
     .rst({rst, rst, rst, rst}),
-    .read({1'b1, 1'b1, 1'b1, 1'b1}),
+    .read({read_array_flag, read_array_flag, read_array_flag, read_array_flag}),
     .load({tag_array_3_load, tag_array_2_load, tag_array_1_load, tag_array_0_load}),
     .rindex({mem_address[7:5], mem_address[7:5], mem_address[7:5], mem_address[7:5]}),
     .windex({mem_address[7:5], mem_address[7:5], mem_address[7:5], mem_address[7:5]}),
@@ -120,7 +122,7 @@ l2_array #(.s_index(s_index), .width(s_tag)) tag_array [num_ways-1:0] (
 //data array
 l2_data_array #(.s_offset(s_offset), .s_index(s_index)) data_array [num_ways-1:0] (
     .clk({clk, clk, clk, clk}),
-    .read({1'b1, 1'b1, 1'b1, 1'b1}),
+    .read({read_array_flag, read_array_flag, read_array_flag, read_array_flag}),
     .write_en({write_en_3_MUX_out, write_en_2_MUX_out, write_en_1_MUX_out, write_en_0_MUX_out}),
     .rindex({mem_address[7:5], mem_address[7:5], mem_address[7:5], mem_address[7:5]}),
     .windex({mem_address[7:5], mem_address[7:5], mem_address[7:5], mem_address[7:5]}),
@@ -133,7 +135,7 @@ l2_array #(.s_index(s_index), .width(3)) LRU_array (
 
     .clk(clk),
     .rst(rst),
-    .read(1'b1),
+    .read(read_array_flag),
     .load(LRU_array_load),
     .rindex(mem_address[7:5]),
     .windex(mem_address[7:5]),

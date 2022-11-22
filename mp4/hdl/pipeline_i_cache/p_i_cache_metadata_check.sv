@@ -15,6 +15,8 @@ import cache_mux_types::*;
   input rst,
   /* CPU memory signals */
   input   logic [31:0]    mem_address,
+  input logic [31:0]    prev_address,
+  output logic old_hit,
 
   /* Physical memory data signals */
   input  logic [255:0] pmem_rdata,
@@ -309,6 +311,43 @@ always_comb begin : HIT_MISS_DETERMINATION
   if(way_0_hit == 1'b1 || way_1_hit == 1'b1 || 
      way_2_hit == 1'b1 || way_3_hit == 1'b1)
       hit = 1'b1;
+
+end
+
+always_comb begin
+old_hit = 1'b0;
+if(tag_array_0_dataout == prev_address[31:8])
+  begin
+      if(v_array_0_dataout == 1'b1)
+      begin
+          old_hit = 1'b1;
+      end
+  end
+      
+  else if(tag_array_1_dataout == prev_address[31:8])
+  begin
+      if(v_array_1_dataout == 1'b1)
+      begin
+          old_hit = 1'b1;
+      end
+  end
+
+  else if(tag_array_2_dataout == prev_address[31:8])
+  begin
+      if(v_array_2_dataout == 1'b1)
+      begin
+          old_hit = 1'b1;
+      end
+  end
+      
+  else if(tag_array_3_dataout == prev_address[31:8])
+  begin
+      if(v_array_3_dataout == 1'b1)
+      begin
+         old_hit = 1'b1;
+      end
+  end
+
 
 end
 

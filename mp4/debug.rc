@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi_R-2020.12-SP1-1
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 0 25 1168 552 469 65
+viewPort 0 25 1690 710 469 65
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -25,7 +25,7 @@ marker 0.000000
 ; visible top row signal index
 top 0
 ; marker line index
-markerPos 17
+markerPos 21
 
 ; event list
 ; addEvent event_name event_expression
@@ -57,15 +57,17 @@ addSignal -h 15 -holdScope debug_WB_PC[31:0]
 addSignal -h 15 -holdScope debug_WB_IR[31:0]
 addSignal -h 15 -holdScope debug_WB_target_address[31:0]
 addSignal -h 15 -UNSIGNED -UDEC -holdScope num_control_flow_instr[31:0]
+addSignal -h 15 -UNSIGNED -UDEC -holdScope num_br_instr[31:0]
 addSignal -h 15 -UNSIGNED -UDEC -holdScope num_ctrl_instr_wo_stall[31:0]
 addSignal -h 15 -UNSIGNED -UDEC -holdScope num_correct_branch_predict[31:0]
 addSignal -h 15 -UNSIGNED -UDEC /mp4_tb/dut/cache_sys/num_l2_request[31:0]
-addSignal -h 15 -UNSIGNED -UDEC -holdScope num_l2_miss[31:0]
+addSignal -h 15 -UNSIGNED -UDEC /mp4_tb/dut/cache_sys/l2_cache/control/num_l2_miss[31:0]
 addSignal -h 15 /mp4_tb/dut/cpu/num_control_flow_instr_overflow
+addSignal -h 15 -holdScope num_br_instr_overflow
 addSignal -h 15 -holdScope num_ctrl_instr_wo_stall_overflow
 addSignal -h 15 -holdScope num_correct_branch_predict_overflow
 addSignal -h 15 /mp4_tb/dut/cache_sys/num_l2_request_overflow
-addSignal -h 15 -holdScope num_l2_miss_overflow
+addSignal -h 15 /mp4_tb/dut/cache_sys/l2_cache/control/num_l2_miss_overflow
 addSignal -h 15 /mp4_tb/dut/cpu/debug_halt
 addGroup "G2"
 

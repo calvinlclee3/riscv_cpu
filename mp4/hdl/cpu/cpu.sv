@@ -104,6 +104,8 @@ rv32i_word debug_WB_target_address;
 logic debug_halt;
 logic [perf_counter_width-1:0] num_control_flow_instr;
 logic num_control_flow_instr_overflow;
+logic [perf_counter_width-1:0] num_br_instr;
+logic num_br_instr_overflow;
 logic [perf_counter_width-1:0] num_ctrl_instr_wo_stall;
 logic num_ctrl_instr_wo_stall_overflow;
 logic [perf_counter_width-1:0] num_correct_branch_predict;
@@ -165,6 +167,7 @@ pht #(.s_index(history_depth)) global_pht (
     .rst(rst),
     .increment(increment_pht),
     .decrement(decrement_pht),
+ // .rindex(ghr_out ^ if_id_in.pc[history_depth+1:2]),
     .rindex(ghr_out),
     .windex(if_id_out.global_pht_index),
     .out(if_id_in.global_pr)
@@ -361,6 +364,15 @@ perf_counter #(.width(perf_counter_width)) pf0 (
     .out(num_control_flow_instr)
 );
 
+/* Count the total number of branch instructions executed. */
+perf_counter #(.width(perf_counter_width)) pf3 (
+    .clk(clk),
+    .rst(rst),
+    .count(if_id_reg_load && id_ex_in.ctrl.opcode == op_br),
+    .overflow(num_br_instr_overflow),
+    .out(num_br_instr)
+);
+
 /* Count the number of control flow instructions moving through the pipeline without any stalls. */
 perf_counter #(.width(perf_counter_width)) pf1 (
     .clk(clk),
@@ -397,6 +409,7 @@ assign mem_wb_in.MDR = data_mem_rdata;
 assign data_mbe = ex_mem_out.write_read_mask;
 
 /* if_id pipeline reg assignments */
+// assign if_id_in.global_pht_index = ghr_out ^ if_id_in.pc[history_depth+1:2];
 assign if_id_in.global_pht_index = ghr_out;
 assign if_id_in.local_pht_index = bht_out;
 
@@ -714,6 +727,5 @@ always_comb begin : REGFILEMUX
         default: ;
     endcase
 end
-
 
 endmodule : cpu

@@ -27,6 +27,7 @@ import cache_mux_types::*;
   input logic [3:0] mem_byte_enable_cpu,
   input logic [31:0] mem_address,
   input logic [31:0] mem_wdata_cpu,
+  input logic if_id_reg_load,
   output logic mem_resp,
   output logic [31:0] mem_rdata_cpu
 );
@@ -128,6 +129,7 @@ p_i_cache_control control(
   .data_array_2_datain_MUX_sel,
   .data_array_3_datain_MUX_sel,
   .load_i_cache_reg,
+  .if_id_reg_load,
   .address_mux_sel
 );
 

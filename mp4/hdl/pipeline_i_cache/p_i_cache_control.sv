@@ -208,7 +208,7 @@ always_comb begin : state_actions
     end
 
   HIT: begin
-    if (cache_pipeline_in.hit == 1'b1)
+    if (cache_pipeline_in.hit == 1'b1 && if_id_reg_load == 1'b1)
       begin
       address_mux_sel = curr_cpu_address; //MOVED ON TO HANDLING NEXT REQUEST
       mem_resp = 1'b1;

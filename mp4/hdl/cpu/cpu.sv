@@ -11,7 +11,7 @@ import rv32i_types::*;
     output rv32i_word instr_mem_address,
     input rv32i_word instr_mem_rdata,
     input logic instr_mem_resp,
-    output logic if_id_reg_load,
+    output logic continue_i_cache,
 
     /* D-Cache Ports */
     output logic data_read,
@@ -24,7 +24,7 @@ import rv32i_types::*;
 
 );
 
-
+assign continue_i_cache = ~(global_stall == 1'b1 && data_mem_resp == 1'b0);
 logic load_pc;
 pcmux::pcmux_sel_t pc_MUX_sel;
 idforwardamux::idforwardamux_sel_t id_forward_A_MUX_sel;
@@ -52,7 +52,7 @@ rv32i_word wb_mem_forward_MUX_out;
 rv32i_word regfile_MUX_out;
 
 /* Pipeline Register I/O */
-
+logic if_id_reg_load;
 logic id_ex_reg_load;
 logic ex_mem_reg_load;
 logic mem_wb_reg_load;

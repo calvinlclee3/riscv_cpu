@@ -64,6 +64,8 @@ logic [2:0] LRU_array_datain;
 
 logic load_i_cache_reg;
 
+logic read_array_flag;
+
 i_cache_pipeline_reg cache_pipeline_in;
 i_cache_pipeline_reg cache_pipeline_out;
 
@@ -129,6 +131,7 @@ p_i_cache_control control(
   .data_array_3_datain_MUX_sel,
   .load_i_cache_reg,
   .if_id_reg_load,
+  .read_array_flag,
   .address_mux_sel
 );
 
@@ -190,6 +193,7 @@ p_i_cache_metadata_check check
   .data_array_2_datain_MUX_sel,
   .data_array_3_datain_MUX_sel,
   .prev_address(cache_pipeline_out.cpu_address),
+  .read_array_flag,
 
   .dataout(cache_pipeline_in.dataout)
 );

@@ -105,8 +105,7 @@ enum int unsigned
 {
   START,
 	MISS,
-  HIT, 
-  IDLE
+  HIT
 } state, next_state;
 
 /* State Control Signals */
@@ -212,7 +211,7 @@ always_comb begin : state_actions
     end
 
   HIT: begin
-    if (cache_pipeline_in.hit == 1'b1)
+    if (cache_pipeline_in.hit == 1'b1 && if_id_reg_load == 1'b1)
       begin
       address_mux_sel = curr_cpu_address; //MOVED ON TO HANDLING NEXT REQUEST
       mem_resp = 1'b1;
@@ -230,10 +229,6 @@ always_comb begin : state_actions
        load_i_cache_reg = 1'b0;
        read_array_flag = 1'b0;
     end
-    end
-
-    IDLE: begin
-      load_i_cache_reg = 1'b0;
     end
 
 	endcase
@@ -257,22 +252,9 @@ always_comb begin : next_state_logic
       end
 
     HIT: begin
+
       if (cache_pipeline_in.hit == 1'b0)
       next_state = MISS;
-      else if (if_id_reg_load == 1'b0)
-      next_state = IDLE;
-    end
-
-    IDLE: begin
-      if (if_id_reg_load == 1'b1)
-      begin
-      
-      if (cache_pipeline_in.hit == 1'b1)
-      next_state = HIT;
-
-      else next_state = MISS;
-
-      end
     end
 
 	endcase

@@ -69,7 +69,7 @@ cache_sys cache_sys (
     .instr_mem_address(instr_mem_address),
     .instr_mem_rdata(instr_mem_rdata),
     .instr_mem_resp(instr_mem_resp),
-    .if_id_reg_load(if_id_reg_load),
+    .if_id_reg_load(if_id_reg_load == 1'b1 || data_mem_resp == 1'b1),
 
 
     /* CPU Memory Signals: D-Cache */

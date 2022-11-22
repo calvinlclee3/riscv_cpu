@@ -81,6 +81,7 @@ paddressmux_sel_t address_mux_sel;
 
 rv32i_word address_MUX_out;
 
+logic old_hit;
 
 p_i_cache_control control(
   .clk,
@@ -190,6 +191,8 @@ p_i_cache_metadata_check check
   .data_array_1_datain_MUX_sel,
   .data_array_2_datain_MUX_sel,
   .data_array_3_datain_MUX_sel,
+  .prev_address(cache_pipeline_out.cpu_address),
+  .old_hit(old_hit),
 
   .dataout(cache_pipeline_in.dataout)
 );
@@ -215,8 +218,6 @@ p_i_cache_reg pipeline_reg
 
 //STAGE 2: DELIVER DATA
 assign mem_rdata = cache_pipeline_in.dataout;
-
-
 
 
 p_line_adapter bus (

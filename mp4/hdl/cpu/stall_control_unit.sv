@@ -357,6 +357,7 @@ begin
         load_pc = 1'b0;
         pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
         global_stall = 1'b1;
+        continue_i_cache = 1'b1;
     end
 
     /* Data Cache Miss */

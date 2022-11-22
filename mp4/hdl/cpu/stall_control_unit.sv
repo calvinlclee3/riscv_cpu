@@ -47,7 +47,8 @@ import rv32i_types::*;
     output logic increment_tournament_pht,
     output logic decrement_tournament_pht,
 
-    output logic global_stall
+    output logic global_stall, 
+    output logic continue_i_cache
 
 );
 
@@ -82,6 +83,7 @@ function void set_defaults();
     global_c = 1'b0;
 
     global_stall = 1'b0;
+    continue_i_cache = 1'b1;
 endfunction
 
 
@@ -122,6 +124,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
 
@@ -132,6 +135,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
 
@@ -153,6 +157,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
 
@@ -163,6 +168,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
     end
@@ -180,6 +186,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
 
@@ -190,6 +197,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
     end
@@ -207,6 +215,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b0, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b0, 1'b1, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
         if (id_ex_out_ctrl.opcode == op_store)
@@ -216,6 +225,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b0, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b0, 1'b1, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
 
@@ -355,7 +365,7 @@ begin
         load_pc = 1'b0;
         pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
         global_stall = 1'b1;
-
+        continue_i_cache = 1'b0;
     end
 
 end

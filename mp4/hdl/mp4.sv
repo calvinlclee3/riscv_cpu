@@ -1,4 +1,3 @@
-
 module mp4
 import rv32i_types::*;
 (
@@ -25,6 +24,7 @@ logic data_write;
 logic [3:0] data_mbe;
 rv32i_word data_mem_address;
 rv32i_word data_mem_wdata;
+logic if_id_reg_load;
 
 cpu cpu (
 
@@ -36,6 +36,7 @@ cpu cpu (
     .instr_mem_address(instr_mem_address),
     .instr_mem_rdata(instr_mem_rdata),
     .instr_mem_resp(instr_mem_resp),
+    .if_id_reg_load(if_id_reg_load),
 
 
     /* D-Cache Ports */
@@ -68,6 +69,7 @@ cache_sys cache_sys (
     .instr_mem_address(instr_mem_address),
     .instr_mem_rdata(instr_mem_rdata),
     .instr_mem_resp(instr_mem_resp),
+    .if_id_reg_load(if_id_reg_load),
 
 
     /* CPU Memory Signals: D-Cache */

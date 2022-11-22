@@ -24,7 +24,7 @@ logic data_write;
 logic [3:0] data_mbe;
 rv32i_word data_mem_address;
 rv32i_word data_mem_wdata;
-logic if_id_reg_load;
+logic continue_i_cache;
 
 cpu cpu (
 
@@ -36,7 +36,7 @@ cpu cpu (
     .instr_mem_address(instr_mem_address),
     .instr_mem_rdata(instr_mem_rdata),
     .instr_mem_resp(instr_mem_resp),
-    .if_id_reg_load(if_id_reg_load),
+    .continue_i_cache(continue_i_cache),
 
 
     /* D-Cache Ports */
@@ -69,7 +69,7 @@ cache_sys cache_sys (
     .instr_mem_address(instr_mem_address),
     .instr_mem_rdata(instr_mem_rdata),
     .instr_mem_resp(instr_mem_resp),
-    .if_id_reg_load(if_id_reg_load == 1'b1 || data_mem_resp == 1'b1),
+    .if_id_reg_load(continue_i_cache),
 
 
     /* CPU Memory Signals: D-Cache */

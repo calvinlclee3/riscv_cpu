@@ -11,7 +11,7 @@ import rv32i_types::*;
     output rv32i_word instr_mem_address,
     input rv32i_word instr_mem_rdata,
     input logic instr_mem_resp,
-
+    output logic if_id_reg_load,
 
     /* D-Cache Ports */
     output logic data_read,
@@ -53,7 +53,6 @@ rv32i_word regfile_MUX_out;
 
 /* Pipeline Register I/O */
 
-logic if_id_reg_load;
 logic id_ex_reg_load;
 logic ex_mem_reg_load;
 logic mem_wb_reg_load;

@@ -12,9 +12,4 @@ typedef enum bit {
     ,cache_write_mem = 1'b1
 } pmemaddressmux_sel_t;
 
-typedef enum bit {
-    curr_cpu_address = 1'b0
-    ,prev_cpu_address = 1'b1
-} paddressmux_sel_t;
-
 endpackage : cache_mux_types

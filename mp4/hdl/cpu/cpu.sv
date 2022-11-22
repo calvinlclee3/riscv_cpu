@@ -11,7 +11,7 @@ import rv32i_types::*;
     output rv32i_word instr_mem_address,
     input rv32i_word instr_mem_rdata,
     input logic instr_mem_resp,
-    output logic continue_i_cache,
+
 
     /* D-Cache Ports */
     output logic data_read,
@@ -23,6 +23,7 @@ import rv32i_types::*;
 	input logic data_mem_resp
 
 );
+
 
 logic load_pc;
 pcmux::pcmux_sel_t pc_MUX_sel;
@@ -51,6 +52,7 @@ rv32i_word wb_mem_forward_MUX_out;
 rv32i_word regfile_MUX_out;
 
 /* Pipeline Register I/O */
+
 logic if_id_reg_load;
 logic id_ex_reg_load;
 logic ex_mem_reg_load;
@@ -88,8 +90,7 @@ logic decrement_tournament_pht;
 logic global_stall;
 logic num_ctrl_instr_wo_stall_count;
 logic num_correct_branch_predict_count;
-assign continue_i_cache = ~(data_mem_resp == 1'b0 && (ex_mem_out.ctrl.mem_read == 1'b1 || ex_mem_out.ctrl.mem_write == 1'b1));
-//assign continue_i_cache = 1'b1;
+
 /****************************** DEBUG ******************************/ 
 
 rv32i_word debug_ID_PC;
@@ -396,9 +397,7 @@ perf_counter #(.width(perf_counter_width)) pf2 (
 
 /* assign ports for I-cache */
 assign instr_read = 1'b1; // possible_error: eval later (it is possible to always read as long as we dont store the read value)
-assign instr_mem_address = (rst == 1'b1)? 32'h00000060: pc_MUX_out;
-
-
+assign instr_mem_address = if_id_in.pc;
 assign if_id_in.ir = instr_mem_rdata; //IR value from I-Cache
 
 /* assign ports for D-cache */

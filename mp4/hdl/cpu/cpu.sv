@@ -88,7 +88,6 @@ logic decrement_tournament_pht;
 logic global_stall;
 logic num_ctrl_instr_wo_stall_count;
 logic num_correct_branch_predict_count;
-assign continue_i_cache = ~((data_mem_resp == 1'b0 && (ex_mem_out.ctrl.mem_read == 1'b1 || ex_mem_out.ctrl.mem_write == 1'b1)) || (if_id_reg_load == 1'b0 && if_id_in.pc != 32'h0000060)) ;
 //assign continue_i_cache = 1'b1;
 /****************************** DEBUG ******************************/ 
 
@@ -337,7 +336,8 @@ stall_control_unit stall_control_unit (
     .increment_tournament_pht(increment_tournament_pht),
     .decrement_tournament_pht(decrement_tournament_pht),
 
-    .global_stall(global_stall)
+    .global_stall(global_stall),
+    .continue_i_cache(continue_i_cache)
 
 );
 

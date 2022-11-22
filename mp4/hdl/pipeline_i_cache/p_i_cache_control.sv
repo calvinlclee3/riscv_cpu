@@ -51,6 +51,7 @@ import cache_mux_types::*;
   output dataarraymux_sel_t data_array_3_datain_MUX_sel,
 
   output logic load_i_cache_reg,
+  output logic read_array_flag,
 
   output paddressmux_sel_t address_mux_sel
 );

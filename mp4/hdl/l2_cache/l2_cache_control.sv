@@ -83,16 +83,17 @@ import cache_mux_types::*;
 
 );
 
-logic count_l2missFSM;
-logic overflow_l2missFSM;
-logic [31:0] num_l2missFSM;
+logic num_l2_miss_count;
+logic num_l2_miss_overflow;
+logic [perf_counter_width-1:0] num_l2_miss;
 
-perf_counter l2missFSM (
-.clk(clk),
-.rst(rst),
-.count(count_l2missFSM),
-.overflow(overflow_l2missFSM),
-.out(num_l2missFSM)
+/* Count the total number of L2 cache misses. */
+perf_counter #(.width(perf_counter_width)) l2miss (
+    .clk(clk),
+    .rst(rst),
+    .count(num_l2_miss_count),
+    .overflow(num_l2_miss_overflow),
+    .out(num_l2_miss)
 );
 
 
@@ -154,7 +155,7 @@ function void set_defaults();
     dataout_MUX_sel = 2'b00;
 
     pmem_address_MUX_sel = cache_read_mem;
-    count_l2missFSM = 1'b0;
+    num_l2_miss_count = 1'b0;
 
 endfunction
 
@@ -184,7 +185,7 @@ begin : state_actions
                 else if (way_3_hit)
                     LRU_array_datain = {1'b1, LRU_array_dataout[1], 1'b1};  
             end
-            else count_l2missFSM = 1'b1;
+            else num_l2_miss_count = 1'b1;
             if(mem_read)
             begin
                 if(way_0_hit == 1'b1 && way_1_hit == 1'b0 && way_2_hit == 1'b0 && way_3_hit == 1'b0)

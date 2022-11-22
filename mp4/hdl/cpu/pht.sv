@@ -19,21 +19,21 @@ import rv32i_types::*;
 
 localparam num_sets = 2**s_index;
 
-logic [1:0] data [num_sets-1:0];
-logic [1:0] in;
+logic [2:0] data [num_sets-1:0];
+logic [2:0] in;
 
 always_comb
 begin
     in = data[windex];
     if(increment)
     begin
-        if(data[windex] != 2'b11)
-            in = data[windex] + 2'b01;
+        if(data[windex] != 3'b111)
+            in = data[windex] + 3'b001;
     end
     else if(decrement)
     begin
-        if(data[windex] != 2'b00)
-            in = data[windex] - 2'b01;
+        if(data[windex] != 3'b000)
+            in = data[windex] - 3'b001;
     end
 end
 
@@ -42,7 +42,7 @@ begin
     if (rst)
     begin
         for (int i = 0; i < num_sets; ++i)
-            data[i] <= 2'b10;
+            data[i] <= 3'b100;
     end
     else
     begin
@@ -54,9 +54,9 @@ always_comb
 begin
     if((rindex == windex) && (decrement || increment))
         // transparent
-        out = in[1];
+        out = in[2];
     else
-        out = data[rindex][1];
+        out = data[rindex][2];
 
 end
 

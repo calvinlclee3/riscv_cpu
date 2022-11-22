@@ -16,7 +16,6 @@ import cache_mux_types::*;
   /* CPU memory signals */
   input   logic [31:0]    mem_address,
   input logic [31:0]    prev_address,
-  output logic old_hit,
 
   /* Physical memory data signals */
   input  logic [255:0] pmem_rdata,

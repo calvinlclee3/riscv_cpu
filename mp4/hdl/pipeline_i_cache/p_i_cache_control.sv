@@ -223,7 +223,6 @@ always_comb begin : state_actions
           LRU_array_datain = {1'b1, cache_pipeline_in.LRU_array_dataout[1], 1'b1};
       end 
     else begin
-       address_mux_sel = prev_cpu_address;
        load_i_cache_reg = 1'b0;
     end
     end

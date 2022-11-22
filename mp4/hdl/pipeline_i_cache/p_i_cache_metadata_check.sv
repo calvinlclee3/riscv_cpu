@@ -272,7 +272,7 @@ always_comb begin : HIT_MISS_DETERMINATION
   way_2_hit = 1'b0;
   way_3_hit = 1'b0;
 
-  if(tag_array_0_dataout == mem_address[31:8])
+  if(tag_array_0_dataout == prev_address[31:8])
   begin
       if(v_array_0_dataout == 1'b1)
       begin
@@ -281,7 +281,7 @@ always_comb begin : HIT_MISS_DETERMINATION
       end
   end
       
-  if(tag_array_1_dataout == mem_address[31:8])
+  if(tag_array_1_dataout == prev_address[31:8])
   begin
       if(v_array_1_dataout == 1'b1)
       begin
@@ -290,7 +290,7 @@ always_comb begin : HIT_MISS_DETERMINATION
       end
   end
 
-  if(tag_array_2_dataout == mem_address[31:8])
+  if(tag_array_2_dataout == prev_address[31:8])
   begin
       if(v_array_2_dataout == 1'b1)
       begin
@@ -299,7 +299,7 @@ always_comb begin : HIT_MISS_DETERMINATION
       end
   end
       
-  if(tag_array_3_dataout == mem_address[31:8])
+  if(tag_array_3_dataout == prev_address[31:8])
   begin
       if(v_array_3_dataout == 1'b1)
       begin
@@ -314,42 +314,6 @@ always_comb begin : HIT_MISS_DETERMINATION
 
 end
 
-always_comb begin
-old_hit = 1'b0;
-if(tag_array_0_dataout == prev_address[31:8])
-  begin
-      if(v_array_0_dataout == 1'b1)
-      begin
-          old_hit = 1'b1;
-      end
-  end
-      
-  else if(tag_array_1_dataout == prev_address[31:8])
-  begin
-      if(v_array_1_dataout == 1'b1)
-      begin
-          old_hit = 1'b1;
-      end
-  end
-
-  else if(tag_array_2_dataout == prev_address[31:8])
-  begin
-      if(v_array_2_dataout == 1'b1)
-      begin
-          old_hit = 1'b1;
-      end
-  end
-      
-  else if(tag_array_3_dataout == prev_address[31:8])
-  begin
-      if(v_array_3_dataout == 1'b1)
-      begin
-         old_hit = 1'b1;
-      end
-  end
-
-
-end
 
 
 

@@ -124,7 +124,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
-                continue_i_cache = 1'b0;
+                //continue_i_cache = 1'b0;
             end
         end
 
@@ -135,7 +135,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
-                continue_i_cache = 1'b0;
+                //continue_i_cache = 1'b0;
             end
         end
 

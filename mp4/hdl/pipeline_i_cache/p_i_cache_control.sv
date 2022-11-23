@@ -18,8 +18,7 @@ import cache_mux_types::*;
   input logic v_array_1_dataout,
   input logic v_array_2_dataout,
   input logic v_array_3_dataout,
-
-  input i_cache_pipeline_reg cache_pipeline_out,
+  
   input i_cache_pipeline_reg cache_pipeline_in,
   input logic if_id_reg_load,
 

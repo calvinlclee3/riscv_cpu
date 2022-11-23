@@ -101,7 +101,6 @@ p_i_cache_control control(
   .v_array_2_dataout,
   .v_array_3_dataout,
 
-  .cache_pipeline_out,
   .cache_pipeline_in,
 
   /* Control to Datapath */

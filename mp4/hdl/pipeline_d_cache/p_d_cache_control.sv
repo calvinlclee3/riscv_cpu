@@ -33,6 +33,14 @@ import cache_mux_types::*;
   output logic v_array_2_datain,
   output logic v_array_3_load,
   output logic v_array_3_datain,
+  output logic d_array_0_load,
+  output logic d_array_0_datain,
+  output logic d_array_1_load,
+  output logic d_array_1_datain,
+  output logic d_array_2_load,
+  output logic d_array_2_datain,
+  output logic d_array_3_load,
+  output logic d_array_3_datain,
 
   output logic tag_array_0_load,
   output logic tag_array_1_load,
@@ -106,7 +114,8 @@ enum int unsigned
 {
   START,
 	MISS,
-  HIT
+  HIT,
+  WRITE_BACK
 } state, next_state;
 
 /* State Control Signals */
@@ -267,9 +276,9 @@ always_comb begin : state_actions
   WRITE_BACK: begin
     address_mux_sel = prev_cpu_address;
 
-    if(LRU_array_dataout[2] == 1'b0)
+    if(cache_pipeline_out.LRU_array_dataout[2] == 1'b0)
       begin
-        if(LRU_array_dataout[0] == 1'b0)
+        if(cache_pipeline_out.LRU_array_dataout[0] == 1'b0)
         begin
             pmem_write = 1'b1;
             dataout_MUX_sel = 2'b11;
@@ -288,7 +297,7 @@ always_comb begin : state_actions
       end
       else
       begin
-        if(LRU_array_dataout[1] == 1'b0)
+        if(cache_pipeline_out.LRU_array_dataout[1] == 1'b0)
         begin
             pmem_write = 1'b1;
             dataout_MUX_sel = 2'b01;

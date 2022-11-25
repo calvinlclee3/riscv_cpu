@@ -1,3 +1,4 @@
+`define BAD_MUX_SEL $display("%0d: %s:  %0t: Illegal MUX Select", `__LINE__, `__FILE__, $time)
 module p_d_cache_metadata_check 
 import rv32i_types::*; // MP3CP1_error: is this the right place to put "import" statement?
 import cache_mux_types::*;

@@ -13,6 +13,7 @@ import cache_mux_types::*;
   /* Physical memory signals */
   input   logic           pmem_resp,
   output  logic           pmem_read,
+  output  logic           pmem_write,
 
   /* Datapath to Control */
   input logic v_array_0_dataout,
@@ -62,7 +63,9 @@ import cache_mux_types::*;
   output logic load_d_cache_reg,
   output logic read_array_flag,
 
-  output paddressmux_sel_t address_mux_sel
+  output paddressmux_sel_t address_mux_sel,
+  input logic [1:0] dataout_MUX_sel,
+  output pmemaddressmux_sel_t pmem_address_MUX_sel
 );
 
 
@@ -101,10 +104,11 @@ function void set_defaults();
   data_array_3_datain_MUX_sel = no_write;
 
   address_mux_sel = curr_cpu_address;
-
+  dataout_MUX_sel = 2'b00;
   load_d_cache_reg = 1'b1;
 
   read_array_flag = 1'b1;
+  pmem_address_MUX_sel = cache_read_mem;
 
 
 endfunction

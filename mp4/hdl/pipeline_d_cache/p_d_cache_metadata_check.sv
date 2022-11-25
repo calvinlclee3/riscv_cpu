@@ -79,7 +79,10 @@ import cache_mux_types::*;
   input dataarraymux_sel_t data_array_2_datain_MUX_sel,
   input dataarraymux_sel_t data_array_3_datain_MUX_sel, 
   
-  input logic read_array_flag
+  input logic read_array_flag,
+
+    input logic [1:0] dataout_MUX_sel,
+  input pmemaddressmux_sel_t pmem_address_MUX_sel
 
 );
 
@@ -107,8 +110,11 @@ logic [s_tag-1:0] tag_array_1_dataout;
 logic [s_tag-1:0] tag_array_2_dataout;
 logic [s_tag-1:0] tag_array_3_dataout;
 
+logic [s_tag-1:0] tag_array_dataout_MUX_out;
+logic [31:0] pmem_address_MUX_out;
 
-assign pmem_address = {mem_address[31:5], 5'b0};
+assign pmem_address = pmem_address_MUX_out;
+assign pmem_wdata = data_array_dataout_MUX_out;
 
 
 //valid array
@@ -297,6 +303,54 @@ always_comb begin : data_array_3_datain_MUX
   endcase
 end
 
+always_comb begin : DATA_ARRAY_DATAOUT_MUX 
+
+    unique case (dataout_MUX_sel)
+
+        2'b00: data_array_dataout_MUX_out = data_array_0_dataout;
+        2'b01: data_array_dataout_MUX_out = data_array_1_dataout;
+        2'b10: data_array_dataout_MUX_out = data_array_2_dataout;
+        2'b11: data_array_dataout_MUX_out = data_array_3_dataout;
+
+        default: 
+        begin
+            `BAD_MUX_SEL;
+            data_array_dataout_MUX_out = '0;
+        end
+    endcase
+end
+
+always_comb begin : TAG_ARRAY_DATAOUT_MUX 
+
+    unique case (dataout_MUX_sel)
+
+        2'b00: tag_array_dataout_MUX_out = tag_array_0_dataout;
+        2'b01: tag_array_dataout_MUX_out = tag_array_1_dataout;
+        2'b10: tag_array_dataout_MUX_out = tag_array_2_dataout;
+        2'b11: tag_array_dataout_MUX_out = tag_array_3_dataout;
+
+        default: 
+        begin
+            `BAD_MUX_SEL;
+            tag_array_dataout_MUX_out = '0;
+        end
+    endcase
+end
+
+always_comb begin : PMEM_ADDRESS_MUX 
+
+    unique case (pmem_address_MUX_sel)
+
+        cache_read_mem:  pmem_address_MUX_out = {mem_address[31:5], 5'b0};
+        cache_write_mem: pmem_address_MUX_out = {tag_array_dataout_MUX_out , mem_address[7:5], 5'b0};
+
+        default: 
+        begin
+            `BAD_MUX_SEL;
+            pmem_address_MUX_out = '0;
+        end
+    endcase
+end
 always_comb begin : HIT_MISS_DETERMINATION 
   dataout = '0;
   hit = 1'b0;

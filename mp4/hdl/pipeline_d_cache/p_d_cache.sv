@@ -92,17 +92,23 @@ paddressmux_sel_t address_mux_sel;
 
 rv32i_word address_MUX_out;
 
+logic [1:0] dataout_MUX_sel;
+
+pmemaddressmux_sel_t pmem_address_MUX_sel;
+
 p_d_cache_control control(
   .clk,
   .rst,
 
   /* CPU memory signals */
   .mem_read,
+  .mem_write,
   .mem_resp,
 
   /* Physical memory signals */
   .pmem_resp,
   .pmem_read,
+  .pmem_write,
 
   /* Datapath to Control */
   .v_array_0_dataout,
@@ -149,7 +155,9 @@ p_d_cache_control control(
   .load_d_cache_reg,
   .if_id_reg_load,
   .read_array_flag,
-  .address_mux_sel
+  .address_mux_sel,
+  .dataout_MUX_sel,
+  .pmem_address_MUX_sel
 );
 
 
@@ -222,7 +230,8 @@ p_d_cache_metadata_check check
   .data_array_3_datain_MUX_sel,
   .prev_address(cache_pipeline_out.cpu_address),
   .read_array_flag,
-
+  .dataout_MUX_sel,
+  .pmem_address_MUX_sel,
   .dataout(cache_pipeline_in.dataout)
 );
 

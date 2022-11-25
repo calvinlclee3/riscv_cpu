@@ -425,11 +425,11 @@ always_comb begin : DIRTY_DETERMINATION
         begin
             if(LRU_array_dataout[1] == 1'b0)
             begin
-                dirty_out = d_array_1_dataout
+                dirty_out = d_array_1_dataout;
             end
             else
             begin
-                dirty_out = d_array_0_dataout
+                dirty_out = d_array_0_dataout;
             end  
         end
     end

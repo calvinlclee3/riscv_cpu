@@ -2,7 +2,8 @@ module ewb
 import rv32i_types::*;
 #(
     width = 256,
-    index = 6
+    index = 6, 
+    tag = 24
 )
 (
     input logic clk
@@ -10,11 +11,17 @@ import rv32i_types::*;
 
     // valid-ready input protocol
     input logic [width-1:0] data_i,
+    input logic [31:0] addr_i,
     input logic valid_i,
-    output logic ready_o,
+    output logic full_o,
+
+    input logic tag_check,
+    input logic [23:0] tag_i,
+    output logic hit_o,
+    output logic [width-1:0] read_o,
 
     // valid-yumi output protocol
-    output logic valid_o,
+    output logic empty_o,
     output logic [width-1:0] data_o,
     input logic yumi_i
 );
@@ -23,78 +30,57 @@ localparam cap = 2 ** index;
 
 /******************************** Declarations *******************************/
 // Need memory to hold queued data
-logic [width-1:0] queue [cap-1:0];
+logic [width-1:0] queue_data [cap];
+logic [31:0] queue_addr [cap];
 
 // Pointers which point to the read and write ends of the queue
-logic [index:0] read_ptr, write_ptr, read_ptr_next, write_ptr_next;
+logic [index-1:0] read_ptr, write_ptr, read_ptr_next, write_ptr_next;
+logic [index:0] queue_counter;
+
+assign write_ptr_next = (write_ptr == cap-1)? '0: write_ptr+1;
+assign read_ptr_next = (read_ptr == cap-1)? '0: read_ptr+1;
 
 // Helper logic
-logic empty, full, ptr_eq, sign_match;
 logic enqueue, dequeue;
 
-// We always know what the next data which will be dequeued is.
-// Thus it only makes sense to register it in an output buffer
-logic [width-1:0] output_buffer_r;
-/*****************************************************************************/
 
-/***************************** Output Assignments ****************************/
-assign ready_o = ~full;
-assign valid_o = ~empty;
-assign data_o = output_buffer_r;
-/*****************************************************************************/
-
-/******************************** Assignments ********************************/
-assign full = ptr_eq & (~sign_match);
-assign ptr_eq = |(read_ptr[index-1:0] == write_ptr[index-1:0]);
-assign sign_match = read_ptr[index] == write_ptr[index];
-assign empty = ptr_eq & sign_match;
-assign enqueue = ready_o & valid_i;
-assign dequeue = valid_o & yumi_i;
-assign write_ptr_next = write_ptr + '1;
-assign read_ptr_next = read_ptr + '1;
-/*****************************************************************************/
+assign full_o = (queue_counter == cap)? 1'b1: 1'b0;
+assign empty_o = (queue_counter == '0)? 1'b1: 1'b0;
+assign enqueue = (valid_i == 1'b1) && (full_o == 1'b0);
+assign dequeue = (yumi_i == 1'b1) && (empty_o == 1'b0);
 
 /*************************** Non-Blocking Assignments ************************/
 always_ff @(posedge clk, posedge rst) begin
-    // The `n` in the `reset_n_i` means the reset signal is active low
     if (rst) begin
         read_ptr  <= '0;
         write_ptr <= '0;
+        queue_counter <= '0;
     end
     else begin
         case ({enqueue, dequeue})
-            2'b00: ;
             2'b01: begin : dequeue_case
-                output_buffer_r <= queue[read_ptr_next[index-1:0]];
                 read_ptr <= read_ptr_next;
+                queue_counter <= queue_counter-1;
             end
             2'b10: begin : enqueue_case
-                queue[write_ptr[index-1:0]] <= data_i;
+                queue_data[write_ptr] <= data_i;
+                queue_addr[write_ptr] <= addr_i;
                 write_ptr <= write_ptr_next;
-                if (empty) begin
-                    output_buffer_r <= data_i;
-                end
+                queue_counter <= queue_counter+1;
             end
-            // When enqueing and dequeing simultaneously, we must be careful
-            // to place proper data into output buffer.
-            // If there is only one item in the queue, then the input data
-            // Should be copied directly into the output buffer
-            2'b11: begin : dequeue_and_enqueue_case
-                // Dequeue portion
-                output_buffer_r <= read_ptr_next[index-1:0] ==
-                                     write_ptr[index-1:0] ?
-                                        data_i :
-                                        queue[read_ptr_next[index-1:0]];
-                read_ptr <= read_ptr_next;
-
-                // Enqueue portion
-                queue[write_ptr[index-1:0]] <= data_i;
-                write_ptr <= write_ptr_next;
-                // No need to check empty, since can't dequeue from empty
-            end
+            default:;
         endcase
     end
-/*****************************************************************************/
+
+    if (tag_check == 1'b1) begin
+        for (int i = 0; i < queue_counter; ++i) begin
+            if (queue_addr[(i+read_ptr)%cap][31:8] == tag_i) begin
+                hit_o <= 1'b1;
+                read_o <= queue_data[(i+read_ptr)%cap];
+            end
+        end
+    end
 end
+
 
 endmodule : ewb

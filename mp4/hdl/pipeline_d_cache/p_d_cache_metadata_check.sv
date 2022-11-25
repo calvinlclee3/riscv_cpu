@@ -16,10 +16,12 @@ import cache_mux_types::*;
   /* CPU memory signals */
   input   logic [31:0]    mem_address,
   input logic [31:0]    prev_address,
+  input   logic [31:0]    mem_byte_enable256,
 
   /* Physical memory data signals */
   input  logic [255:0] pmem_rdata,
   output logic [31:0]  pmem_address,
+  output  logic [255:0]   pmem_wdata,
 
 /* Control signals */
   /* Datapath to Control */
@@ -94,6 +96,7 @@ logic [255:0] data_array_0_datain_MUX_out;
 logic [255:0] data_array_1_datain_MUX_out;
 logic [255:0] data_array_2_datain_MUX_out;
 logic [255:0] data_array_3_datain_MUX_out;
+logic [255:0] data_array_dataout_MUX_out;
 
 logic d_array_0_dataout;
 logic d_array_1_dataout;

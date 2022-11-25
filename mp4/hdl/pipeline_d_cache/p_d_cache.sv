@@ -32,8 +32,6 @@ import cache_mux_types::*;
   output logic [31:0] mem_rdata_cpu
 );
 
-assign pmem_write = 1'b0;
-assign pmem_wdata = '0;
 
 logic [255:0] mem_wdata;
 logic [255:0] mem_rdata;
@@ -171,10 +169,12 @@ p_d_cache_metadata_check check
   .rst,
   /* CPU memory signals */
   .mem_address(address_MUX_out),
+  .mem_byte_enable256(mem_byte_enable_cpu),
 
   /* Physical memory data signals */
   .pmem_rdata,
   .pmem_address,
+  .pmem_wdata,
 
   .hit(cache_pipeline_in.hit),
   .way_0_hit(cache_pipeline_in.way_0_hit),

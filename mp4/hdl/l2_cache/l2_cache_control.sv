@@ -99,10 +99,10 @@ perf_counter #(.width(perf_counter_width)) l2miss (
 
 enum int unsigned {
     /* List of states */
-    DEFAULT = 0, READ_WRITE = 1, NO_WB_1 = 2, NO_WB_2 = 3, 
-    WRITE_BACK = 4
-
+    DEFAULT, EWB_LOAD, WRITE_BACK, COUNTDOWN, HIT_DETECT, MEM_READ
 } state, next_state;
+
+logic V;
 
 function void set_defaults();
 
@@ -156,6 +156,8 @@ function void set_defaults();
 
     pmem_address_MUX_sel = cache_read_mem;
     num_l2_miss_count = 1'b0;
+    
+    V = 1'b0;
 
 endfunction
 
@@ -170,6 +172,11 @@ begin : state_actions
     /* Actions for each state */
     case(state)
         DEFAULT:;
+
+        EWB_LOAD: begin
+            
+
+        end
         READ_WRITE:
         begin
             mem_resp = hit;

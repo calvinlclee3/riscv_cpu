@@ -68,6 +68,7 @@ logic read_array_flag;
 
 i_cache_pipeline_reg cache_pipeline_in;
 i_cache_pipeline_reg cache_pipeline_out;
+i_cache_pipeline_data cache_pipeline_data;
 
 
 dataarraymux_sel_t write_en_0_MUX_sel;
@@ -101,8 +102,7 @@ p_i_cache_control control(
   .v_array_2_dataout,
   .v_array_3_dataout,
 
-  .cache_pipeline_out,
-  .cache_pipeline_in,
+  .cache_pipeline_data,
 
   /* Control to Datapath */
   .v_array_0_load,
@@ -151,11 +151,11 @@ p_i_cache_metadata_check check
   .pmem_rdata,
   .pmem_address,
 
-  .hit(cache_pipeline_in.hit),
-  .way_0_hit(cache_pipeline_in.way_0_hit),
-  .way_1_hit(cache_pipeline_in.way_1_hit),
-  .way_2_hit(cache_pipeline_in.way_2_hit),
-  .way_3_hit(cache_pipeline_in.way_3_hit),
+  .hit(cache_pipeline_data.hit),
+  .way_0_hit(cache_pipeline_data.way_0_hit),
+  .way_1_hit(cache_pipeline_data.way_1_hit),
+  .way_2_hit(cache_pipeline_data.way_2_hit),
+  .way_3_hit(cache_pipeline_data.way_3_hit),
   
   .v_array_0_dataout,
   .v_array_1_dataout,
@@ -163,7 +163,7 @@ p_i_cache_metadata_check check
   .v_array_3_dataout,
 
   // LRU array width is now 3.
-  .LRU_array_dataout(cache_pipeline_in.LRU_array_dataout),
+  .LRU_array_dataout(cache_pipeline_data.LRU_array_dataout),
 
   /* Control to Datapath */
   .v_array_0_load,
@@ -195,7 +195,7 @@ p_i_cache_metadata_check check
   .prev_address(cache_pipeline_out.cpu_address),
   .read_array_flag,
 
-  .dataout(cache_pipeline_in.dataout)
+  .dataout(cache_pipeline_data.dataout)
 );
 
 
@@ -218,7 +218,7 @@ p_i_cache_reg pipeline_reg
 );
 
 //STAGE 2: DELIVER DATA
-assign mem_rdata = cache_pipeline_in.dataout;
+assign mem_rdata = cache_pipeline_data.dataout;
 
 
 p_line_adapter bus (

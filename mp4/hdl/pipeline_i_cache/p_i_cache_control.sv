@@ -18,9 +18,8 @@ import cache_mux_types::*;
   input logic v_array_1_dataout,
   input logic v_array_2_dataout,
   input logic v_array_3_dataout,
-
-  input i_cache_pipeline_reg cache_pipeline_out,
-  input i_cache_pipeline_reg cache_pipeline_in,
+  
+  input i_cache_pipeline_data cache_pipeline_data,
   input logic if_id_reg_load,
 
   /* Control to Datapath */
@@ -123,7 +122,7 @@ always_comb begin : state_actions
       address_mux_sel = prev_cpu_address;
       if (mem_read == 1'b1)
       begin
-      if (cache_pipeline_in.hit == 1'b0)
+      if (cache_pipeline_data.hit == 1'b0)
       begin
       pmem_read = 1'b1;
       if (pmem_resp == 1'b1)
@@ -162,9 +161,9 @@ always_comb begin : state_actions
         end
         else
         begin
-          if(cache_pipeline_in.LRU_array_dataout[2] == 1'b0)
+          if(cache_pipeline_data.LRU_array_dataout[2] == 1'b0)
           begin
-            if(cache_pipeline_in.LRU_array_dataout[0] == 1'b0)
+            if(cache_pipeline_data.LRU_array_dataout[0] == 1'b0)
             begin
               // Alloc way 3
               tag_array_3_load = 1'b1;
@@ -185,7 +184,7 @@ always_comb begin : state_actions
           end
           else
           begin
-              if(cache_pipeline_in.LRU_array_dataout[1] == 1'b0)
+              if(cache_pipeline_data.LRU_array_dataout[1] == 1'b0)
               begin
                 // Alloc way 1
                 tag_array_1_load = 1'b1;
@@ -211,19 +210,19 @@ always_comb begin : state_actions
     end
 
   HIT: begin
-    if (cache_pipeline_in.hit == 1'b1 && if_id_reg_load == 1'b1)
+    if (cache_pipeline_data.hit == 1'b1 && if_id_reg_load == 1'b1)
       begin
       address_mux_sel = curr_cpu_address; //MOVED ON TO HANDLING NEXT REQUEST
       mem_resp = 1'b1;
       LRU_array_load = 1'b1;
-      if(cache_pipeline_in.way_0_hit)
-          LRU_array_datain = {1'b0, 1'b0, cache_pipeline_in.LRU_array_dataout[0]};
-      else if (cache_pipeline_in.way_1_hit)
-          LRU_array_datain = {1'b0, 1'b1, cache_pipeline_in.LRU_array_dataout[0]};
-      else if (cache_pipeline_in.way_2_hit)
-          LRU_array_datain = {1'b1, cache_pipeline_in.LRU_array_dataout[1], 1'b0};
-      else if (cache_pipeline_in.way_3_hit)
-          LRU_array_datain = {1'b1, cache_pipeline_in.LRU_array_dataout[1], 1'b1};
+      if(cache_pipeline_data.way_0_hit)
+          LRU_array_datain = {1'b0, 1'b0, cache_pipeline_data.LRU_array_dataout[0]};
+      else if (cache_pipeline_data.way_1_hit)
+          LRU_array_datain = {1'b0, 1'b1, cache_pipeline_data.LRU_array_dataout[0]};
+      else if (cache_pipeline_data.way_2_hit)
+          LRU_array_datain = {1'b1, cache_pipeline_data.LRU_array_dataout[1], 1'b0};
+      else if (cache_pipeline_data.way_3_hit)
+          LRU_array_datain = {1'b1, cache_pipeline_data.LRU_array_dataout[1], 1'b1};
       end 
     else begin
        load_i_cache_reg = 1'b0;
@@ -241,7 +240,7 @@ always_comb begin : next_state_logic
 
 	case(state)
     START: begin
-      if (mem_read && cache_pipeline_in.hit == 1'b0) begin
+      if (mem_read && cache_pipeline_data.hit == 1'b0) begin
         next_state = MISS;
       end
     end
@@ -253,7 +252,7 @@ always_comb begin : next_state_logic
 
     HIT: begin
 
-      if (cache_pipeline_in.hit == 1'b0)
+      if (cache_pipeline_data.hit == 1'b0)
       next_state = MISS;
     end
 

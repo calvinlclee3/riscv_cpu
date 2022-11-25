@@ -203,6 +203,19 @@ typedef struct packed {
 
 } i_cache_pipeline_reg;
 
+typedef struct packed {
+
+    rv32i_word cpu_address;
+    logic [255:0] dataout;
+    logic way_0_hit;
+    logic way_1_hit;
+    logic way_2_hit;
+    logic way_3_hit;
+    logic hit;
+    logic dirty;
+    logic [2:0] LRU_array_dataout;
+
+} d_cache_pipeline_reg;
 
 endpackage : rv32i_types
 

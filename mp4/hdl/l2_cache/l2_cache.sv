@@ -100,12 +100,37 @@ logic [1:0] dataout_MUX_sel;
 pmemaddressmux_sel_t pmem_address_MUX_sel;
 
 
+logic load_ewb;
+logic wb_ewb;
+logic tag_check;
+logic ewb_hit;
+logic [255:0] ewb_dataout;
+logic [255:0] datapath_dataout;
 
+ewb ewb (
+    .clk, 
+    .rst, 
+    .data_i(mem_wdata256),
+    .addr_i(mem_address),
 
+    .tag_check(tag_check),
+    .tag_i(mem_address[31:5]),
+    .hit_o(ewb_hit),
+    .read_o(ewb_dataout),
+    .valid_i(load_ewb),
+    .data_o(pmem_wdata),
+    .yumi_i(wb_ewb)
+);
+
+always_comb begin
+    mem_rdata256 = datapath_dataout;
+    if (ewb_hit == 1'b1)
+        mem_rdata256 = ewb_dataout;
+end
 
 l2_cache_control control (.*);
 
-l2_cache_datapath datapath (.*);
+l2_cache_datapath datapath (.mem_rdata256(datapath_dataout), .*);
 
 
 endmodule : l2_cache

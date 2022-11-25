@@ -2,7 +2,7 @@ module ewb
 import rv32i_types::*;
 #(
     width = 256,
-    index = 2
+    index = 6
 )
 (
     input logic clk

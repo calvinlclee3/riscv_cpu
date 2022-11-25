@@ -16,7 +16,7 @@ import rv32i_types::*;
     output logic full_o,
 
     input logic tag_check,
-    input logic [23:0] tag_i,
+    input logic [26:0] tag_i,
     output logic hit_o,
     output logic [width-1:0] read_o,
 
@@ -74,7 +74,7 @@ always_ff @(posedge clk, posedge rst) begin
 
     if (tag_check == 1'b1) begin
         for (int i = 0; i < queue_counter; ++i) begin
-            if (queue_addr[(i+read_ptr)%cap][31:8] == tag_i) begin
+            if (queue_addr[(i+read_ptr)%cap][31:5] == tag_i) begin
                 hit_o <= 1'b1;
                 read_o <= queue_data[(i+read_ptr)%cap];
             end

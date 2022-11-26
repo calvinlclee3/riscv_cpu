@@ -510,7 +510,7 @@ begin : state_actions
         DEFAULT:;
         READ_WRITE:
         begin
-            mem_resp = hit;
+            mem_resp = hit | ewb_hit;
             if(hit)
             begin
                 LRU_array_load = 1'b1;
@@ -741,7 +741,7 @@ begin : next_state_logic
         end
         READ_WRITE:
         begin
-            if(hit == 1'b1)
+            if(hit == 1'b1 || ewb_hit == 1'b1)
             begin
                 next_state = DEFAULT;
             end

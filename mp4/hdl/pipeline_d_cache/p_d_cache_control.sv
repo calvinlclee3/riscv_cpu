@@ -64,7 +64,7 @@ import cache_mux_types::*;
   output logic read_array_flag,
 
   output paddressmux_sel_t address_mux_sel,
-  input logic [1:0] dataout_MUX_sel,
+  output logic [1:0] dataout_MUX_sel,
   output pmemaddressmux_sel_t pmem_address_MUX_sel
 );
 
@@ -226,7 +226,7 @@ always_comb begin : state_actions
     end
 
   HIT: begin
-    if (cache_pipeline_in.hit == 1'b1 && if_id_reg_load == 1'b1)
+    if (cache_pipeline_in.hit == 1'b1) // don't need to take care of load condition because data miss stall the whole pipeline
       begin
       address_mux_sel = curr_cpu_address; //MOVED ON TO HANDLING NEXT REQUEST
       mem_resp = 1'b1;
@@ -239,30 +239,30 @@ always_comb begin : state_actions
           LRU_array_datain = {1'b1, cache_pipeline_in.LRU_array_dataout[1], 1'b0};
       else if (cache_pipeline_in.way_3_hit)
           LRU_array_datain = {1'b1, cache_pipeline_in.LRU_array_dataout[1], 1'b1};
-      if(cache_pipeline_out.mem_write)
+      if(cache_pipeline_in.mem_write)
       begin
-        if(cache_pipeline_out.hit && cache_pipeline_out.way_0_hit)
+        if(cache_pipeline_in.hit && cache_pipeline_in.way_0_hit)
         begin
             write_en_0_MUX_sel = cpu_write_cache;
             data_array_0_datain_MUX_sel = cpu_write_cache;
             d_array_0_load = 1'b1;
             d_array_0_datain = 1'b1;
         end
-        else if(cache_pipeline_out.hit && cache_pipeline_out.way_1_hit)
+        else if(cache_pipeline_in.hit && cache_pipeline_in.way_1_hit)
         begin
             write_en_1_MUX_sel = cpu_write_cache;
             data_array_1_datain_MUX_sel = cpu_write_cache;
             d_array_1_load = 1'b1;
             d_array_1_datain = 1'b1;
         end
-        else if(cache_pipeline_out.hit && cache_pipeline_out.way_2_hit)
+        else if(cache_pipeline_in.hit && cache_pipeline_in.way_2_hit)
         begin
             write_en_2_MUX_sel = cpu_write_cache;
             data_array_2_datain_MUX_sel = cpu_write_cache;
             d_array_2_load = 1'b1;
             d_array_2_datain = 1'b1;
         end
-        else if(cache_pipeline_out.hit && cache_pipeline_out.way_3_hit)
+        else if(cache_pipeline_in.hit && cache_pipeline_in.way_3_hit)
         begin
             write_en_3_MUX_sel = cpu_write_cache;
             data_array_3_datain_MUX_sel = cpu_write_cache;
@@ -271,10 +271,10 @@ always_comb begin : state_actions
         end
       end
     end
-    else begin
-       load_d_cache_reg = 1'b0;
-       read_array_flag = 1'b0;
-    end
+    // else begin
+       // load_d_cache_reg = 1'b0;
+       // read_array_flag = 1'b0;
+    // end
   end
   
   WRITE_BACK: begin
@@ -345,7 +345,7 @@ always_comb begin : next_state_logic
 
     HIT: begin
 
-      if (cache_pipeline_in.hit == 1'b0)
+      if ((cache_pipeline_out.mem_read || cache_pipeline_out.mem_write) && cache_pipeline_in.hit == 1'b0) // it will go from hit to miss when D-cache is not used
       next_state = MISS;
     end
 

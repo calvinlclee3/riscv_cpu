@@ -208,12 +208,16 @@ typedef struct packed {
 
     rv32i_word cpu_address;
     logic [255:0] dataout;
+    logic [255:0] mem_wdata;
+    logic [31:0]  mem_byte_enable256;
     logic way_0_hit;
     logic way_1_hit;
     logic way_2_hit;
     logic way_3_hit;
     logic hit;
     logic dirty;
+    logic mem_write;
+    logic mem_read;
     logic [2:0] LRU_array_dataout;
 
 } d_cache_pipeline_reg;

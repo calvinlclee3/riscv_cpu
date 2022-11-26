@@ -18,6 +18,7 @@ import cache_mux_types::*;
   input   logic [31:0]    mem_address,
   input logic [31:0]    prev_address,
   input   logic [31:0]    mem_byte_enable256,
+  input   logic [255:0]   mem_wdata256,
 
   /* Physical memory data signals */
   input  logic [255:0] pmem_rdata,
@@ -140,7 +141,7 @@ l2_array #(.s_index(s_index), .width(1)) d_array [num_ways-1:0] (
     .read({read_array_flag, read_array_flag, read_array_flag, read_array_flag}),
     .load({d_array_3_load, d_array_2_load, d_array_1_load, d_array_0_load}),
     .rindex({mem_address[7:5], mem_address[7:5], mem_address[7:5], mem_address[7:5]}),
-    .windex({mem_address[7:5], mem_address[7:5], mem_address[7:5], mem_address[7:5]}),
+    .windex({prev_address[7:5], prev_address[7:5], prev_address[7:5], prev_address[7:5]}),
     .datain({d_array_3_datain, d_array_2_datain, d_array_1_datain, d_array_0_datain}),
     .dataout({d_array_3_dataout, d_array_2_dataout, d_array_1_dataout, d_array_0_dataout})
 );
@@ -163,7 +164,7 @@ l2_data_array #(.s_offset(s_offset), .s_index(s_index)) data_array [num_ways-1:0
     .read({read_array_flag, read_array_flag, read_array_flag, read_array_flag}),
     .write_en({write_en_3_MUX_out, write_en_2_MUX_out, write_en_1_MUX_out, write_en_0_MUX_out}),
     .rindex({mem_address[7:5], mem_address[7:5], mem_address[7:5], mem_address[7:5]}),
-    .windex({mem_address[7:5], mem_address[7:5], mem_address[7:5], mem_address[7:5]}),
+    .windex({prev_address[7:5], prev_address[7:5], prev_address[7:5], prev_address[7:5]}),
     .datain({data_array_3_datain_MUX_out, data_array_2_datain_MUX_out, data_array_1_datain_MUX_out, data_array_0_datain_MUX_out}),
     .dataout({data_array_3_dataout, data_array_2_dataout, data_array_1_dataout, data_array_0_dataout})
 );
@@ -176,7 +177,7 @@ l2_array #(.s_index(s_index), .width(3)) LRU_array (
     .read(read_array_flag),
     .load(LRU_array_load),
     .rindex(mem_address[7:5]),
-    .windex(mem_address[7:5]),
+    .windex(prev_address[7:5]),
     .datain(LRU_array_datain),
     .dataout(LRU_array_dataout)
 
@@ -252,6 +253,7 @@ always_comb begin : data_array_0_datain_MUX
   unique case (data_array_0_datain_MUX_sel)
 
       no_write       : data_array_0_datain_MUX_out = '0;
+      cpu_write_cache: data_array_0_datain_MUX_out = mem_wdata256;
       mem_write_cache: data_array_0_datain_MUX_out = pmem_rdata;
 
       default: 
@@ -267,6 +269,7 @@ always_comb begin : data_array_1_datain_MUX
   unique case (data_array_1_datain_MUX_sel)
 
       no_write       : data_array_1_datain_MUX_out = '0;
+      cpu_write_cache: data_array_1_datain_MUX_out = mem_wdata256;
       mem_write_cache: data_array_1_datain_MUX_out = pmem_rdata;
 
       default: 
@@ -282,6 +285,7 @@ always_comb begin : data_array_2_datain_MUX
   unique case (data_array_2_datain_MUX_sel)
 
       no_write       : data_array_2_datain_MUX_out = '0;
+      cpu_write_cache: data_array_2_datain_MUX_out = mem_wdata256;
       mem_write_cache: data_array_2_datain_MUX_out = pmem_rdata;
 
       default: 
@@ -297,6 +301,7 @@ always_comb begin : data_array_3_datain_MUX
   unique case (data_array_3_datain_MUX_sel)
 
       no_write       : data_array_3_datain_MUX_out = '0;
+      cpu_write_cache: data_array_3_datain_MUX_out = mem_wdata256;
       mem_write_cache: data_array_3_datain_MUX_out = pmem_rdata;
 
       default: 

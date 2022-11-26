@@ -162,6 +162,10 @@ p_d_cache_control control(
 //STAGE 1: COMPARE TAG AND SEE IF HIT OR MISS
 
 assign cache_pipeline_in.cpu_address = mem_address;
+assign cache_pipeline_in.mem_write = mem_write;
+assign cache_pipeline_in.mem_read = mem_read;
+assign cache_pipeline_in.mem_wdata = mem_wdata;
+assign cache_pipeline_in.mem_byte_enable256 = mem_byte_enable;
 
 p_d_cache_metadata_check check
 (
@@ -169,7 +173,8 @@ p_d_cache_metadata_check check
   .rst,
   /* CPU memory signals */
   .mem_address(address_MUX_out),
-  .mem_byte_enable256(mem_byte_enable_cpu),
+  .mem_byte_enable256(cache_pipeline_in.mem_byte_enable256),
+  .mem_wdata256(cache_pipeline_in.mem_wdata),		// write happens for the previous instruction, which is at the second stage
 
   /* Physical memory data signals */
   .pmem_rdata,

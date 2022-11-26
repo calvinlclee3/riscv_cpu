@@ -573,74 +573,125 @@ begin : state_actions
         begin
             pmem_read = 1'b1;
             pmem_address_MUX_sel = cache_read_mem;
-        end
-        NO_WB_2:
-        begin
-            if(v_array_0_dataout == 1'b0)
+            if (pmem_resp == 1'b1) 
             begin
-                tag_array_0_load = 1'b1;
-                v_array_0_load = 1'b1;
-                v_array_0_datain = 1'b1;
-                d_array_0_load = 1'b1;
-                d_array_0_datain = 1'b0;
-                write_en_0_MUX_sel = mem_write_cache;
-                data_array_0_datain_MUX_sel = mem_write_cache;
+                if(v_array_0_dataout == 1'b0)
+                begin
+                    tag_array_0_load = 1'b1;
+                    v_array_0_load = 1'b1;
+                    v_array_0_datain = 1'b1;
+                    d_array_0_load = 1'b1;
+                    d_array_0_datain = 1'b0;
+                    write_en_0_MUX_sel = mem_write_cache;
+                    data_array_0_datain_MUX_sel = mem_write_cache;
+                end
+                else if(v_array_1_dataout == 1'b0)
+                begin
+                    tag_array_1_load = 1'b1;
+                    v_array_1_load = 1'b1;
+                    v_array_1_datain = 1'b1;
+                    d_array_1_load = 1'b1;
+                    d_array_1_datain = 1'b0;
+                    write_en_1_MUX_sel = mem_write_cache;
+                    data_array_1_datain_MUX_sel = mem_write_cache;
+                end
+                else if(v_array_2_dataout == 1'b0)
+                begin
+                    tag_array_2_load = 1'b1;
+                    v_array_2_load = 1'b1;
+                    v_array_2_datain = 1'b1;
+                    d_array_2_load = 1'b1;
+                    d_array_2_datain = 1'b0;
+                    write_en_2_MUX_sel = mem_write_cache;
+                    data_array_2_datain_MUX_sel = mem_write_cache;
+                end
+                else if(v_array_3_dataout == 1'b0)
+                begin
+                    tag_array_3_load = 1'b1;
+                    v_array_3_load = 1'b1;
+                    v_array_3_datain = 1'b1;
+                    d_array_3_load = 1'b1;
+                    d_array_3_datain = 1'b0;
+                    write_en_3_MUX_sel = mem_write_cache;
+                    data_array_3_datain_MUX_sel = mem_write_cache;
+                end
+                else
+                begin
+                    if(LRU_array_dataout[2] == 1'b0)
+                    begin
+                        if(LRU_array_dataout[0] == 1'b0)
+                        begin
+                            // Alloc way 3
+                            tag_array_3_load = 1'b1;
+                            v_array_3_load = 1'b1;
+                            v_array_3_datain = 1'b1;
+                            d_array_3_load = 1'b1;
+                            d_array_3_datain = 1'b0;
+                            write_en_3_MUX_sel = mem_write_cache;
+                            data_array_3_datain_MUX_sel = mem_write_cache;
+                        end
+                        else
+                        begin
+                            // Alloc way 2
+                            tag_array_2_load = 1'b1;
+                            v_array_2_load = 1'b1;
+                            v_array_2_datain = 1'b1;
+                            d_array_2_load = 1'b1;
+                            d_array_2_datain = 1'b0;
+                            write_en_2_MUX_sel = mem_write_cache;
+                            data_array_2_datain_MUX_sel = mem_write_cache;
+                        end
+                    end
+                    else
+                    begin
+                        if(LRU_array_dataout[1] == 1'b0)
+                        begin
+                            // Alloc way 1
+                            tag_array_1_load = 1'b1;
+                            v_array_1_load = 1'b1;
+                            v_array_1_datain = 1'b1;
+                            d_array_1_load = 1'b1;
+                            d_array_1_datain = 1'b0;
+                            write_en_1_MUX_sel = mem_write_cache;
+                            data_array_1_datain_MUX_sel = mem_write_cache;
+                        end
+                        else
+                        begin
+                            // Alloc way 0
+                            tag_array_0_load = 1'b1;
+                            v_array_0_load = 1'b1;
+                            v_array_0_datain = 1'b1;
+                            d_array_0_load = 1'b1;
+                            d_array_0_datain = 1'b0;
+                            write_en_0_MUX_sel = mem_write_cache;
+                            data_array_0_datain_MUX_sel = mem_write_cache;
+                        end  
+                    end
+                end
+                end
             end
-            else if(v_array_1_dataout == 1'b0)
-            begin
-                tag_array_1_load = 1'b1;
-                v_array_1_load = 1'b1;
-                v_array_1_datain = 1'b1;
-                d_array_1_load = 1'b1;
-                d_array_1_datain = 1'b0;
-                write_en_1_MUX_sel = mem_write_cache;
-                data_array_1_datain_MUX_sel = mem_write_cache;
-            end
-            else if(v_array_2_dataout == 1'b0)
-            begin
-                tag_array_2_load = 1'b1;
-                v_array_2_load = 1'b1;
-                v_array_2_datain = 1'b1;
-                d_array_2_load = 1'b1;
-                d_array_2_datain = 1'b0;
-                write_en_2_MUX_sel = mem_write_cache;
-                data_array_2_datain_MUX_sel = mem_write_cache;
-            end
-            else if(v_array_3_dataout == 1'b0)
-            begin
-                tag_array_3_load = 1'b1;
-                v_array_3_load = 1'b1;
-                v_array_3_datain = 1'b1;
-                d_array_3_load = 1'b1;
-                d_array_3_datain = 1'b0;
-                write_en_3_MUX_sel = mem_write_cache;
-                data_array_3_datain_MUX_sel = mem_write_cache;
-            end
-            else
+            
+            WRITE_BACK:
             begin
                 if(LRU_array_dataout[2] == 1'b0)
                 begin
                     if(LRU_array_dataout[0] == 1'b0)
                     begin
                         // Alloc way 3
-                        tag_array_3_load = 1'b1;
+                        load_ewb = 1'b1;
+                        dataout_MUX_sel = 2'b11;
+                        pmem_address_MUX_sel = cache_write_mem;
                         v_array_3_load = 1'b1;
-                        v_array_3_datain = 1'b1;
-                        d_array_3_load = 1'b1;
-                        d_array_3_datain = 1'b0;
-                        write_en_3_MUX_sel = mem_write_cache;
-                        data_array_3_datain_MUX_sel = mem_write_cache;
+                        v_array_3_datain = 1'b0;
                     end
                     else
                     begin
                         // Alloc way 2
-                        tag_array_2_load = 1'b1;
+                        load_ewb = 1'b1;
+                        dataout_MUX_sel = 2'b10;
+                        pmem_address_MUX_sel = cache_write_mem;
                         v_array_2_load = 1'b1;
-                        v_array_2_datain = 1'b1;
-                        d_array_2_load = 1'b1;
-                        d_array_2_datain = 1'b0;
-                        write_en_2_MUX_sel = mem_write_cache;
-                        data_array_2_datain_MUX_sel = mem_write_cache;
+                        v_array_2_datain = 1'b0;
                     end
                 end
                 else
@@ -648,72 +699,22 @@ begin : state_actions
                     if(LRU_array_dataout[1] == 1'b0)
                     begin
                         // Alloc way 1
-                        tag_array_1_load = 1'b1;
+                        load_ewb = 1'b1;
+                        dataout_MUX_sel = 2'b01;
+                        pmem_address_MUX_sel = cache_write_mem;
                         v_array_1_load = 1'b1;
-                        v_array_1_datain = 1'b1;
-                        d_array_1_load = 1'b1;
-                        d_array_1_datain = 1'b0;
-                        write_en_1_MUX_sel = mem_write_cache;
-                        data_array_1_datain_MUX_sel = mem_write_cache;
+                        v_array_1_datain = 1'b0;
                     end
                     else
                     begin
                         // Alloc way 0
-                        tag_array_0_load = 1'b1;
+                        load_ewb = 1'b1;
+                        dataout_MUX_sel = 2'b00;
+                        pmem_address_MUX_sel = cache_write_mem;
                         v_array_0_load = 1'b1;
-                        v_array_0_datain = 1'b1;
-                        d_array_0_load = 1'b1;
-                        d_array_0_datain = 1'b0;
-                        write_en_0_MUX_sel = mem_write_cache;
-                        data_array_0_datain_MUX_sel = mem_write_cache;
+                        v_array_0_datain = 1'b0;
                     end  
                 end
-            end
-        end
-        WRITE_BACK:
-        begin
-            if(LRU_array_dataout[2] == 1'b0)
-            begin
-                if(LRU_array_dataout[0] == 1'b0)
-                begin
-                    // Alloc way 3
-                    load_ewb = 1'b1;
-                    dataout_MUX_sel = 2'b11;
-                    pmem_address_MUX_sel = cache_write_mem;
-                    v_array_3_load = 1'b1;
-                    v_array_3_datain = 1'b0;
-                end
-                else
-                begin
-                    // Alloc way 2
-                    load_ewb = 1'b1;
-                    dataout_MUX_sel = 2'b10;
-                    pmem_address_MUX_sel = cache_write_mem;
-                    v_array_2_load = 1'b1;
-                    v_array_2_datain = 1'b0;
-                end
-            end
-            else
-            begin
-                if(LRU_array_dataout[1] == 1'b0)
-                begin
-                    // Alloc way 1
-                    load_ewb = 1'b1;
-                    dataout_MUX_sel = 2'b01;
-                    pmem_address_MUX_sel = cache_write_mem;
-                    v_array_1_load = 1'b1;
-                    v_array_1_datain = 1'b0;
-                end
-                else
-                begin
-                    // Alloc way 0
-                    load_ewb = 1'b1;
-                    dataout_MUX_sel = 2'b00;
-                    pmem_address_MUX_sel = cache_write_mem;
-                    v_array_0_load = 1'b1;
-                    v_array_0_datain = 1'b0;
-                end  
-            end
         end
 
         DEQUEUE:
@@ -798,12 +799,8 @@ begin : next_state_logic
         begin
             if(pmem_resp == 1'b1)
             begin
-                next_state = NO_WB_2;
+                next_state = READ_WRITE;
             end
-        end
-        NO_WB_2:
-        begin
-            next_state = READ_WRITE;
         end
         WRITE_BACK:
         begin

@@ -106,7 +106,7 @@ perf_counter #(.width(perf_counter_width)) l2miss (
 
 enum int unsigned {
     /* List of states */
-    DEFAULT, EWB_LOAD, WRITE_BACK, COUNTDOWN, HIT_DETECT, MEM_READ
+    DEFAULT, EWB_LOAD, WRITE_BACK, COUNTDOWN, HIT_DETECT, MEM_READ, HIT_DETECT2
 } state, next_state;
 
 logic V;
@@ -200,7 +200,7 @@ begin : state_actions
             wb_ewb = 1'b1; //Dequeue entry from Eviction buffer
         end
 
-        HIT_DETECT: begin
+        HIT_DETECT, HIT_DETECT2: begin
             if (ewb_hit == 1'b1)
             begin //If hit in EWB
                 mem_resp = 1'b1;
@@ -359,7 +359,7 @@ begin : next_state_logic
             if (mem_write == 1'b1)
             next_state = EWB_LOAD;
             else if (mem_read == 1'b1)
-            next_state = HIT_DETECT;
+            next_state = HIT_DETECT2;
             else if (V == 1'b1)
             next_state = COUNTDOWN;
         end
@@ -398,6 +398,14 @@ begin : next_state_logic
         MEM_READ: begin
             if (hit == 1'b1)
             next_state = DEFAULT;
+        end
+
+        HIT_DETECT2: begin
+            if (ewb_hit == 1'b1 || hit == 1'b1)
+            begin
+                next_state = DEFAULT;
+            end
+            else next_state = MEM_READ;
         end
 
 

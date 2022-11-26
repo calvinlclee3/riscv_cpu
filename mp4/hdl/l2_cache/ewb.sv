@@ -54,8 +54,6 @@ always_ff @(posedge clk, posedge rst) begin
         read_ptr  <= '0;
         write_ptr <= '0;
         queue_counter <= '0;
-        hit_o <= 1'b0;
-        read_o <= '0;
     end
     else begin
         case ({enqueue, dequeue})

@@ -79,12 +79,14 @@ always_comb begin
     if (tag_check == 1'b1) begin
         for (int i = 0; i < queue_counter; ++i) begin
             if (queue_addr[(i+read_ptr)%cap][31:5] == tag_i) begin
-                hit_o <= 1'b1;
-                read_o <= queue_data[(i+read_ptr)%cap];
+                hit_o = 1'b1;
+                read_o = queue_data[(i+read_ptr)%cap];
             end
         end
     end
 end
+
+assign data_o = queue_data[read_ptr];
 
 
 endmodule : ewb

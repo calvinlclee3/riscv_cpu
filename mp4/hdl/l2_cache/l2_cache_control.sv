@@ -245,9 +245,9 @@ begin : state_actions
         MEM_READ: begin
             pmem_read = 1'b1;
             pmem_address_MUX_sel = cache_read_mem;
+            mem_resp = hit;
             if (pmem_resp == 1'b1)
             begin
-                mem_resp = 1'b1;
                 if(v_array_0_dataout == 1'b0)
                 begin
                     tag_array_0_load = 1'b1;
@@ -396,7 +396,7 @@ begin : next_state_logic
         end
 
         MEM_READ: begin
-            if (pmem_resp == 1'b1)
+            if (hit == 1'b1)
             next_state = DEFAULT;
         end
 

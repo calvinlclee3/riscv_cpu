@@ -29,6 +29,8 @@ import cache_mux_types::*;
     /* EWB to Control */
     input logic ewb_hit,
 
+    input logic ewb_empty,
+
     /* Datapath to Control */
     input logic hit,
     input logic way_0_hit,
@@ -734,7 +736,7 @@ begin : next_state_logic
             if(mem_read == 1'b1 || mem_write == 1'b1)
                 next_state = READ_WRITE;
 
-            else 
+            else if (ewb_empty == 1'b0)
                 next_state = DEQUEUE;
         end
         READ_WRITE:

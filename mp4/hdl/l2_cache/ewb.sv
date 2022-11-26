@@ -6,7 +6,7 @@ import rv32i_types::*;
     tag = 24
 )
 (
-    input logic clk
+    input logic clk,
     input logic rst, 
 
     // valid-ready input protocol

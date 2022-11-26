@@ -435,8 +435,8 @@ logic counter;
 
 enum int unsigned {
     /* List of states */
-    DEFAULT = 0, READ_WRITE = 1, NO_WB_1 = 2,
-    WRITE_BACK = 3, DEQUEUE = 4
+    DEFAULT, READ_WRITE, NO_WB_1,
+    WRITE_BACK, DEQUEUE
 
 } state, next_state;
 

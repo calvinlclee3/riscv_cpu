@@ -73,6 +73,11 @@ always_ff @(posedge clk, posedge rst) begin
         endcase
     end
 
+end
+
+always_comb begin
+    hit_o = 1'b0;
+    read_o = '0;
     if (tag_check == 1'b1) begin
         for (int i = 0; i < queue_counter; ++i) begin
             if (queue_addr[(i+read_ptr)%cap][31:5] == tag_i) begin

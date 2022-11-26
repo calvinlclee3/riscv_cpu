@@ -53,8 +53,6 @@ always_ff @(posedge clk, posedge rst) begin
         read_ptr  <= '0;
         write_ptr <= '0;
         queue_counter <= '0;
-        queue_data <= '0; 
-        queue_addr <= '0;
     end
     else begin
         case ({enqueue, dequeue})

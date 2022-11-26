@@ -106,17 +106,19 @@ logic tag_check;
 logic ewb_hit;
 logic [255:0] ewb_dataout;
 logic [255:0] datapath_dataout;
+logic ewb_empty;
 
 ewb ewb (
     .clk, 
     .rst, 
-    .data_i(mem_wdata256),
-    .addr_i(mem_address),
+    .data_i(datapath_dataout),
+    .addr_i(pmem_address),
 
     .tag_check(tag_check),
     .tag_i(mem_address[31:5]),
     .hit_o(ewb_hit),
     .read_o(ewb_dataout),
+    .empty_o(ewb_empty),
     .valid_i(load_ewb),
     .data_o(pmem_wdata),
     .yumi_i(wb_ewb)

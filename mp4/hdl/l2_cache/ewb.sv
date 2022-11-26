@@ -42,7 +42,6 @@ assign read_ptr_next = (read_ptr == cap-1)? '0: read_ptr+1;
 // Helper logic
 logic enqueue, dequeue;
 
-
 assign full_o = (queue_counter == cap)? 1'b1: 1'b0;
 assign empty_o = (queue_counter == '0)? 1'b1: 1'b0;
 assign enqueue = (valid_i == 1'b1) && (full_o == 1'b0);
@@ -54,6 +53,8 @@ always_ff @(posedge clk, posedge rst) begin
         read_ptr  <= '0;
         write_ptr <= '0;
         queue_counter <= '0;
+        queue_data <= '0; 
+        queue_addr <= '0;
     end
     else begin
         case ({enqueue, dequeue})

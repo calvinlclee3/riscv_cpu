@@ -3,7 +3,8 @@ import rv32i_types::*;
 #(
     width = 256,
     index = 6, 
-    tag = 24
+    tag = 24, 
+    cap = 64
 )
 (
     input logic clk,
@@ -25,8 +26,6 @@ import rv32i_types::*;
     output logic [width-1:0] data_o,
     input logic yumi_i
 );
-
-localparam cap = 2 ** index;
 
 /******************************** Declarations *******************************/
 // Need memory to hold queued data

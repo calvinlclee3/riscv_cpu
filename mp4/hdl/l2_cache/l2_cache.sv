@@ -130,7 +130,7 @@ end
 
 l2_cache_control control (.*);
 
-l2_cache_datapath datapath (.mem_rdata256(datapath_dataout), .*);
+l2_cache_datapath datapath (.mem_rdata256(datapath_dataout), .pmem_wdata(), .*);
 
 
 endmodule : l2_cache

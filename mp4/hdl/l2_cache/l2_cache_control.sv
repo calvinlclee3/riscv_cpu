@@ -741,8 +741,8 @@ begin : next_state_logic
             if(mem_read == 1'b1 || mem_write == 1'b1)
                 next_state = READ_WRITE;
 
-            else if (ewb_empty == 1'b0)
-                next_state = DEQUEUE;
+            // else if (ewb_empty == 1'b0)
+            //     next_state = DEQUEUE;
         end
         READ_WRITE:
         begin

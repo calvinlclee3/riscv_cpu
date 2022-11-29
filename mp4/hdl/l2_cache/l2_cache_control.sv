@@ -812,7 +812,7 @@ begin : next_state_logic
         end
         NO_WB_1:
         begin
-            if(pmem_resp == 1'b1)
+            if(pmem_resp == 1'b1 || (mem_write == 1'b1 && ewb_hit == 1'b1))
             begin
                 next_state = READ_WRITE;
             end

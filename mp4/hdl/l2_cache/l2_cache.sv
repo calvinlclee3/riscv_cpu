@@ -110,7 +110,7 @@ logic [255:0] ewb_dataout;
 logic [255:0] datapath_dataout;
 logic ewb_empty;
 
-logic [255:0] control_pmem_rdata;
+logic write_in_ewb;
 
 ewb ewb (
     .clk, 
@@ -144,15 +144,17 @@ always_comb begin
 
 end
 
+
+
 always_comb begin
-    control_pmem_rdata = pmem_rdata;
+    write_in_ewb = 1'b0;
     if (ewb_hit == 1'b1 && mem_write == 1'b1)
-        control_pmem_rdata = ewb_dataout;
+        write_in_ewb = 1'b1;
 end
 
 l2_cache_control control (.*);
 
-l2_cache_datapath datapath (.mem_rdata256(datapath_dataout), .pmem_wdata(), .pmem_address(datapath_pmem_address), .pmem_rdata(control_pmem_rdata), .*);
+l2_cache_datapath datapath (.mem_rdata256(datapath_dataout), .pmem_wdata(), .pmem_address(datapath_pmem_address), .*);
 
 
 endmodule : l2_cache

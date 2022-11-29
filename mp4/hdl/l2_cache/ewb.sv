@@ -53,6 +53,11 @@ always_ff @(posedge clk, posedge rst) begin
         read_ptr  <= '0;
         write_ptr <= '0;
         queue_counter <= '0;
+        for (int i = 0; i < cap; ++i)
+        begin
+            queue_data[i] <= '0;
+            queue_addr[i] <= '0;
+        end
     end
     else begin
         case ({enqueue, dequeue})

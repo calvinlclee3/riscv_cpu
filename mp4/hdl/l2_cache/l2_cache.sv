@@ -138,7 +138,7 @@ end
 always_comb begin
     pmem_address = datapath_pmem_address;
     if (pmem_write == 1'b1)
-    pmem_address = ewb_pmem_address;
+        pmem_address = ewb_pmem_address;
 
 end
 

@@ -719,8 +719,9 @@ begin : state_actions
 
         DEQUEUE:
         begin
+            if (pmem_resp == 1'b0)
             pmem_write = 1'b1;
-            if (pmem_resp == 1'b1)
+            else
             wb_ewb = 1'b1;
         end
 

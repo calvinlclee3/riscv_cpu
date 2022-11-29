@@ -746,10 +746,19 @@ begin : next_state_logic
         end
         READ_WRITE:
         begin
-            if(hit == 1'b1 || ewb_hit == 1'b1)
+            if(mem_write == 1'b1)
+            begin
+                if (hit == 1'b1)
+                begin
+                    next_state = DEFAULT;
+                end
+            end
+
+            else if (mem_read == 1'b1 && (hit == 1'b1 || ewb_hit == 1'b1))
             begin
                 next_state = DEFAULT;
             end
+
             else if(v_array_0_dataout == 1'b0 || v_array_1_dataout == 1'b0 || v_array_2_dataout == 1'b0 || v_array_3_dataout == 1'b0)
             begin
                 next_state = NO_WB_1;

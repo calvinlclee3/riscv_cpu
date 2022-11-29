@@ -574,9 +574,13 @@ begin : state_actions
         end
         NO_WB_1:
         begin
+            if (~(mem_write == 1'b1 && ewb_hit == 1'b1))
+            begin
             pmem_read = 1'b1;
             pmem_address_MUX_sel = cache_read_mem;
-            if (pmem_resp == 1'b1) 
+            end
+
+            if (pmem_resp == 1'b1 || (mem_write == 1'b1 && ewb_hit == 1'b1)) 
             begin
                 if(v_array_0_dataout == 1'b0)
                 begin

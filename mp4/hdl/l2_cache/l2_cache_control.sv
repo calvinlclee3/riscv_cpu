@@ -431,7 +431,7 @@ perf_counter #(.width(perf_counter_width)) l2miss (
 
 // endmodule : l2_cache_control
 
-logic counter;
+logic [1:0] counter;
 
 enum int unsigned {
     /* List of states */
@@ -494,7 +494,6 @@ function void set_defaults();
     tag_check = 1'b1;
     load_ewb = 1'b0;
     wb_ewb = 1'b0;
-    counter = 1'b1;
 
 
 endfunction
@@ -509,10 +508,13 @@ begin : state_actions
 
     /* Actions for each state */
     case(state)
-        DEFAULT:;
+        DEFAULT: begin
+            if (ewb_empty == 1'b0)
+                counter -= 1'b1;
+        end
         READ_WRITE:
         begin
-            
+            counter = '1; // RESET COUNTER
             if(hit)
             begin
                 mem_resp = 1'b1;
@@ -723,6 +725,7 @@ begin : state_actions
 
         DEQUEUE:
         begin
+            counter = '1; // RESET COUNTER
             if (pmem_resp == 1'b0)
             pmem_write = 1'b1;
             else
@@ -745,8 +748,8 @@ begin : next_state_logic
             if(mem_read == 1'b1 || mem_write == 1'b1)
                 next_state = READ_WRITE;
 
-            // else if (ewb_empty == 1'b0)
-            //     next_state = DEQUEUE;
+            else if (ewb_empty == 1'b0 && counter == '0)
+                next_state = DEQUEUE;
         end
         READ_WRITE:
         begin
@@ -816,7 +819,7 @@ begin : next_state_logic
 
         DEQUEUE: begin
             if (pmem_resp == 1'b1)
-            next_state = DEFAULT;
+                next_state = DEFAULT;
         end
 
     endcase

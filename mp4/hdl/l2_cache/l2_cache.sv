@@ -123,7 +123,7 @@ ewb ewb (
     .empty_o(ewb_empty),
     .valid_i(load_ewb),
     .data_o(pmem_wdata),
-    .addr_o(pmem_address),
+    .addr_o(ewb_pmem_address),
     .yumi_i(wb_ewb)
 );
 

@@ -147,7 +147,7 @@ end
 always_comb begin
     control_pmem_rdata = pmem_rdata;
     if (ewb_hit == 1'b1 && mem_write == 1'b1)
-        control_pmem_rdata = read_o;
+        control_pmem_rdata = ewb_dataout;
 end
 
 l2_cache_control control (.pmem_rdata(control_pmem_rdata), .*);

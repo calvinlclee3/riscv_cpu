@@ -110,8 +110,6 @@ logic [255:0] ewb_dataout;
 logic [255:0] datapath_dataout;
 logic ewb_empty;
 
-logic write_in_ewb;
-
 ewb ewb (
     .clk, 
     .rst, 
@@ -126,7 +124,9 @@ ewb ewb (
     .valid_i(load_ewb),
     .data_o(pmem_wdata),
     .addr_o(ewb_pmem_address),
-    .yumi_i(wb_ewb)
+    .yumi_i(wb_ewb),
+    .write_ewb_i(mem_write),
+    .replace_i(mem_wdata256)
 );
 
 always_comb begin
@@ -142,14 +142,6 @@ always_comb begin
     if (pmem_write == 1'b1)
         pmem_address = ewb_pmem_address;
 
-end
-
-
-
-always_comb begin
-    write_in_ewb = 1'b0;
-    if (ewb_hit == 1'b1 && mem_write == 1'b1)
-        write_in_ewb = 1'b1;
 end
 
 l2_cache_control control (.*);

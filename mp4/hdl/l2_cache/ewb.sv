@@ -24,6 +24,7 @@ import rv32i_types::*;
     // valid-yumi output protocol
     output logic empty_o,
     output logic [width-1:0] data_o,
+    output logic [31:0] addr_o,
     input logic yumi_i
 );
 
@@ -91,6 +92,6 @@ always_comb begin
 end
 
 assign data_o = queue_data[read_ptr];
-
+assign addr_o = queue_addr[read_ptr];
 
 endmodule : ewb

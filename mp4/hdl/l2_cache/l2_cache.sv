@@ -80,6 +80,7 @@ logic tag_array_1_load;
 logic tag_array_2_load;
 logic tag_array_3_load;
 
+logic [31:0] datapath_pmem_address;
 
 logic LRU_array_load;
 logic [2:0] LRU_array_datain;
@@ -112,7 +113,7 @@ ewb ewb (
     .clk, 
     .rst, 
     .data_i(datapath_dataout),
-    .addr_i(pmem_address),
+    .addr_i(datapath_pmem_address),
 
     .tag_check(tag_check),
     .tag_i(mem_address[31:5]),
@@ -121,6 +122,7 @@ ewb ewb (
     .empty_o(ewb_empty),
     .valid_i(load_ewb),
     .data_o(pmem_wdata),
+    .addr_o(pmem_address),
     .yumi_i(wb_ewb)
 );
 
@@ -134,7 +136,7 @@ end
 
 l2_cache_control control (.*);
 
-l2_cache_datapath datapath (.mem_rdata256(datapath_dataout), .pmem_wdata(), .*);
+l2_cache_datapath datapath (.mem_rdata256(datapath_dataout), .pmem_wdata(), .pmem_address(datapath_pmem_address), .*);
 
 
 endmodule : l2_cache

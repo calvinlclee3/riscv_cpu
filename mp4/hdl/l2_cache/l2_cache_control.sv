@@ -512,9 +512,10 @@ begin : state_actions
         DEFAULT:;
         READ_WRITE:
         begin
-            mem_resp = hit | ewb_hit;
+            
             if(hit)
             begin
+                mem_resp = 1'b1;
                 LRU_array_load = 1'b1;
                 if(way_0_hit)
                     LRU_array_datain = {1'b0, 1'b0, LRU_array_dataout[0]};
@@ -525,7 +526,9 @@ begin : state_actions
                 else if (way_3_hit)
                     LRU_array_datain = {1'b1, LRU_array_dataout[1], 1'b1};  
             end
-            else num_l2_miss_count = 1'b1;
+            else if (ewb_hit == 1'b1 && mem_read == 1'b1)
+            mem_resp = 1'b1;
+
             if(mem_read)
             begin
                 if(way_0_hit == 1'b1 && way_1_hit == 1'b0 && way_2_hit == 1'b0 && way_3_hit == 1'b0)
@@ -746,12 +749,9 @@ begin : next_state_logic
         end
         READ_WRITE:
         begin
-            if(mem_write == 1'b1)
+            if(mem_write == 1'b1 && hit == 1'b1)
             begin
-                if (hit == 1'b1)
-                begin
-                    next_state = DEFAULT;
-                end
+                next_state = DEFAULT;
             end
 
             else if (mem_read == 1'b1 && (hit == 1'b1 || ewb_hit == 1'b1))

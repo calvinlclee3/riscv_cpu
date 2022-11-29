@@ -150,7 +150,7 @@ always_comb begin
         control_pmem_rdata = ewb_dataout;
 end
 
-l2_cache_control control (.pmem_rdata(control_pmem_rdata), .*);
+l2_cache_control control (.*);
 
 l2_cache_datapath datapath (.mem_rdata256(datapath_dataout), .pmem_wdata(), .pmem_address(datapath_pmem_address), .pmem_rdata(control_pmem_rdata), .*);
 

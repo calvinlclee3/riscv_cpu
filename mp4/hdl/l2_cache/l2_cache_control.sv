@@ -526,7 +526,7 @@ begin : state_actions
                 else if (way_3_hit)
                     LRU_array_datain = {1'b1, LRU_array_dataout[1], 1'b1};  
             end
-            else if (ewb_hit == 1'b1 && mem_read == 1'b1)
+            else if (ewb_hit == 1'b1)
             mem_resp = 1'b1;
 
             if(mem_read)
@@ -574,13 +574,10 @@ begin : state_actions
         end
         NO_WB_1:
         begin
-            if (~(mem_write == 1'b1 && ewb_hit == 1'b1))
-            begin
             pmem_read = 1'b1;
             pmem_address_MUX_sel = cache_read_mem;
-            end
 
-            if (pmem_resp == 1'b1 || (mem_write == 1'b1 && ewb_hit == 1'b1)) 
+            if (pmem_resp == 1'b1) 
             begin
                 if(v_array_0_dataout == 1'b0)
                 begin
@@ -753,12 +750,7 @@ begin : next_state_logic
         end
         READ_WRITE:
         begin
-            if(mem_write == 1'b1 && hit == 1'b1)
-            begin
-                next_state = DEFAULT;
-            end
-
-            else if (mem_read == 1'b1 && (hit == 1'b1 || ewb_hit == 1'b1))
+            if(hit == 1'b1 || ewb_hit == 1'b1)
             begin
                 next_state = DEFAULT;
             end
@@ -812,7 +804,7 @@ begin : next_state_logic
         end
         NO_WB_1:
         begin
-            if(pmem_resp == 1'b1 || (mem_write == 1'b1 && ewb_hit == 1'b1))
+            if(pmem_resp == 1'b1)
             begin
                 next_state = READ_WRITE;
             end

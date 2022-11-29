@@ -81,6 +81,7 @@ logic tag_array_2_load;
 logic tag_array_3_load;
 
 logic [31:0] datapath_pmem_address;
+logic [31:0] ewb_pmem_address;
 
 logic LRU_array_load;
 logic [2:0] LRU_array_datain;
@@ -132,6 +133,13 @@ always_comb begin
         mem_rdata256 = datapath_dataout;
     else if (ewb_hit == 1'b1)
         mem_rdata256 = ewb_dataout;
+end
+
+always_comb begin
+    pmem_address = datapath_pmem_address;
+    if (pmem_write == 1'b1)
+    pmem_address = ewb_pmem_address;
+
 end
 
 l2_cache_control control (.*);

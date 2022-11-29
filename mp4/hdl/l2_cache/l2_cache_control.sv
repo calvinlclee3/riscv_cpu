@@ -819,7 +819,11 @@ begin : next_state_logic
 
         DEQUEUE: begin
             if (pmem_resp == 1'b1)
+            begin
                 next_state = DEFAULT;
+                if (mem_read == 1'b1 || mem_write == 1'b1)
+                next_state = READ_WRITE;
+            end
         end
 
     endcase

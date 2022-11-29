@@ -47,7 +47,8 @@ import rv32i_types::*;
     output logic increment_tournament_pht,
     output logic decrement_tournament_pht,
 
-    output logic global_stall
+    output logic global_stall, 
+    output logic continue_i_cache
 
 );
 
@@ -82,6 +83,7 @@ function void set_defaults();
     global_c = 1'b0;
 
     global_stall = 1'b0;
+    continue_i_cache = 1'b1;
 endfunction
 
 
@@ -104,6 +106,14 @@ always_comb
 begin
     set_defaults();
 
+    if(~instr_mem_resp)
+    begin
+        load_pc = 1'b0;
+        pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
+        global_stall = 1'b1;
+        //continue_i_cache = 1'b1;
+    end
+
     /* (Need CMP/ADDR Adder) after (Need ALU) */
     if((id_ex_out_ctrl.opcode == op_reg && arith_funct3_t'(id_ex_out_ctrl.funct3) != slt)  ||
        (id_ex_out_ctrl.opcode == op_reg && arith_funct3_t'(id_ex_out_ctrl.funct3) != sltu) ||
@@ -122,6 +132,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
 
@@ -132,6 +143,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
 
@@ -153,6 +165,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
 
@@ -163,6 +176,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
     end
@@ -180,6 +194,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
 
@@ -190,6 +205,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b1, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b1, 1'b0, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
     end
@@ -207,6 +223,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b0, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b0, 1'b1, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
         if (id_ex_out_ctrl.opcode == op_store)
@@ -216,6 +233,7 @@ begin
                 load_pc = 1'b0;
                 pipeline_load(1'b0, 1'b0, 1'b1, 1'b1);
                 pipeline_flush(1'b0, 1'b0, 1'b1, 1'b0);
+                continue_i_cache = 1'b0;
             end
         end
 
@@ -340,22 +358,13 @@ begin
         end
     end 
 
-
-    /* Instruction Cache Miss */ 
-    if(~instr_mem_resp)
-    begin
-        load_pc = 1'b0;
-        pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
-        global_stall = 1'b1;
-    end
-
     /* Data Cache Miss */
     if(data_mem_resp == 1'b0 && (ex_mem_out_ctrl.mem_read == 1'b1 || ex_mem_out_ctrl.mem_write == 1'b1))
     begin
         load_pc = 1'b0;
         pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
         global_stall = 1'b1;
-
+        continue_i_cache = 1'b0;
     end
 
 end

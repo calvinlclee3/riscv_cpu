@@ -90,7 +90,11 @@ logic decrement_tournament_pht;
 logic global_stall;
 logic num_ctrl_instr_wo_stall_count;
 logic num_correct_branch_predict_count;
+<<<<<<< HEAD
 
+=======
+//assign continue_i_cache = 1'b1;
+>>>>>>> pipelined_L1
 /****************************** DEBUG ******************************/ 
 
 rv32i_word debug_ID_PC;
@@ -338,7 +342,8 @@ stall_control_unit stall_control_unit (
     .increment_tournament_pht(increment_tournament_pht),
     .decrement_tournament_pht(decrement_tournament_pht),
 
-    .global_stall(global_stall)
+    .global_stall(global_stall),
+    .continue_i_cache(continue_i_cache)
 
 );
 
@@ -397,7 +402,9 @@ perf_counter #(.width(perf_counter_width)) pf2 (
 
 /* assign ports for I-cache */
 assign instr_read = 1'b1; // possible_error: eval later (it is possible to always read as long as we dont store the read value)
-assign instr_mem_address = if_id_in.pc;
+assign instr_mem_address = (rst == 1'b1)? 32'h0000060: pc_MUX_out;
+
+
 assign if_id_in.ir = instr_mem_rdata; //IR value from I-Cache
 
 /* assign ports for D-cache */

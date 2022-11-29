@@ -25,7 +25,10 @@ import rv32i_types::*;
     output logic empty_o,
     output logic [width-1:0] data_o,
     output logic [31:0] addr_o,
-    input logic yumi_i
+    input logic yumi_i,
+
+    input logic write_ewb_i,
+    input logic [width-1:0] replace_i
 );
 
 /******************************** Declarations *******************************/
@@ -84,6 +87,10 @@ always_comb begin
     if (tag_check == 1'b1) begin
         for (int i = 0; i < queue_counter; ++i) begin
             if (queue_addr[(i+read_ptr)%cap][31:5] == tag_i) begin
+                if (write_ewb_i == 1'b1)
+                begin
+                    queue_data[(i+read_ptr)%cap] = replace_i;
+                end
                 hit_o = 1'b1;
                 read_o = queue_data[(i+read_ptr)%cap];
             end

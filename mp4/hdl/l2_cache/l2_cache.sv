@@ -126,7 +126,9 @@ ewb ewb (
 
 always_comb begin
     mem_rdata256 = datapath_dataout;
-    if (ewb_hit == 1'b1)
+    if (hit == 1'b1)
+        mem_rdata256 = datapath_dataout;
+    else if (ewb_hit == 1'b1)
         mem_rdata256 = ewb_dataout;
 end
 

@@ -241,28 +241,28 @@ always_comb begin : state_actions
           LRU_array_datain = {1'b1, cache_pipeline_in.LRU_array_dataout[1], 1'b1};
       if(cache_pipeline_in.mem_write)
       begin
-        if(cache_pipeline_in.hit && cache_pipeline_in.way_0_hit)
+        if(cache_pipeline_in.way_0_hit)
         begin
             write_en_0_MUX_sel = cpu_write_cache;
             data_array_0_datain_MUX_sel = cpu_write_cache;
             d_array_0_load = 1'b1;
             d_array_0_datain = 1'b1;
         end
-        else if(cache_pipeline_in.hit && cache_pipeline_in.way_1_hit)
+        else if(cache_pipeline_in.way_1_hit)
         begin
             write_en_1_MUX_sel = cpu_write_cache;
             data_array_1_datain_MUX_sel = cpu_write_cache;
             d_array_1_load = 1'b1;
             d_array_1_datain = 1'b1;
         end
-        else if(cache_pipeline_in.hit && cache_pipeline_in.way_2_hit)
+        else if(cache_pipeline_in.way_2_hit)
         begin
             write_en_2_MUX_sel = cpu_write_cache;
             data_array_2_datain_MUX_sel = cpu_write_cache;
             d_array_2_load = 1'b1;
             d_array_2_datain = 1'b1;
         end
-        else if(cache_pipeline_in.hit && cache_pipeline_in.way_3_hit)
+        else if(cache_pipeline_in.way_3_hit)
         begin
             write_en_3_MUX_sel = cpu_write_cache;
             data_array_3_datain_MUX_sel = cpu_write_cache;

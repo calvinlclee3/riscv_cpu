@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Settings
-ECE411DIR=$HOME/ECE411/mp4
+ECE411DIR=$HOME/mp4
 DEFAULT_TARGET=$ECE411DIR/mp4/sim/memory.lst
 ASSEMBLER=/class/ece411/software/riscv-tools/bin/riscv32-unknown-elf-gcc
 OBJCOPY=/class/ece411/software/riscv-tools/bin/riscv32-unknown-elf-objcopy

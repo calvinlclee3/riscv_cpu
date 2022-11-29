@@ -118,7 +118,7 @@ perf_counter #(.width(perf_counter_width)) l2total
 //     .out(num_l2_miss)
 // );
 
-p_d_cache d_cache (
+cache d_cache (
 
 	.clk(clk),
 	.rst(rst),

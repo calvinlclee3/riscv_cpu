@@ -31,6 +31,8 @@ import cache_mux_types::*;
 
     input logic ewb_empty,
 
+    input logic ewb_full,
+
     /* Datapath to Control */
     input logic hit,
     input logic way_0_hit,

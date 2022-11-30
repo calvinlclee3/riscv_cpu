@@ -106,6 +106,9 @@ logic load_ewb;
 logic wb_ewb;
 logic tag_check;
 logic ewb_hit;
+
+logic ewb_full;
+
 logic [255:0] ewb_dataout;
 logic [255:0] datapath_dataout;
 logic ewb_empty;
@@ -126,7 +129,8 @@ ewb ewb (
     .addr_o(ewb_pmem_address),
     .yumi_i(wb_ewb),
     .write_ewb_i(mem_write),
-    .replace_i(mem_wdata256)
+    .replace_i(mem_wdata256),
+    .full_o(ewb_full)
 );
 
 always_comb begin

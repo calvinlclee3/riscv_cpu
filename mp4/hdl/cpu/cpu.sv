@@ -404,7 +404,7 @@ assign if_id_in.ir = instr_mem_rdata; //IR value from I-Cache
 /* assign ports for D-cache */
 assign data_read = ex_mem_out.ctrl.mem_read;
 assign data_write = ex_mem_out.ctrl.mem_write;
-assign data_mem_address = ex_mem_out.alu_out_address;
+assign data_mem_address = ex_mem_in.alu_out_address;
 assign mem_wb_in.MDR = data_mem_rdata;
 assign data_mbe = ex_mem_out.write_read_mask;
 

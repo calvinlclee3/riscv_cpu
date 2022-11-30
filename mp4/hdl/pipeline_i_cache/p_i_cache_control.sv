@@ -55,6 +55,31 @@ import cache_mux_types::*;
   output paddressmux_sel_t address_mux_sel
 );
 
+logic num_l1_miss_count;
+logic num_l1_miss_overflow;
+logic [perf_counter_width-1:0] num_l1_miss;
+
+logic num_l1_hit_count;
+logic num_l1_hit_overflow;
+logic [perf_counter_width-1:0] num_l1_hit;
+
+perf_counter #(.width(perf_counter_width)) l1miss (
+    .clk(clk),
+    .rst(rst),
+    .count(num_l1_miss_count),
+    .overflow(num_l1_miss_overflow),
+    .out(num_l1_miss)
+);
+
+perf_counter #(.width(perf_counter_width)) l1hit (
+    .clk(clk),
+    .rst(rst),
+    .count(num_l1_hit_count),
+    .overflow(num_l1_hit_overflow),
+    .out(num_l1_hit)
+);
+
+
 
 function void set_defaults();
   /* CPU memory signals */
@@ -96,6 +121,9 @@ function void set_defaults();
 
   read_array_flag = 1'b1;
 
+  num_l1_miss_count = 1'b0;
+  num_l1_hit_count = 1'b0;
+
 
 endfunction
 
@@ -127,6 +155,7 @@ always_comb begin : state_actions
       pmem_read = 1'b1;
       if (pmem_resp == 1'b1)
       begin
+        num_l1_miss_count = 1'b1;
         if(v_array_0_dataout == 1'b0)
         begin
           tag_array_0_load = 1'b1;
@@ -213,6 +242,7 @@ always_comb begin : state_actions
     if (cache_pipeline_data.hit == 1'b1 && if_id_reg_load == 1'b1)
       begin
       address_mux_sel = curr_cpu_address; //MOVED ON TO HANDLING NEXT REQUEST
+      num_l1_hit_count = 1'b1;
       mem_resp = 1'b1;
       LRU_array_load = 1'b1;
       if(cache_pipeline_data.way_0_hit)

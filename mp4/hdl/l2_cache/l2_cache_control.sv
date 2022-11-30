@@ -517,6 +517,7 @@ begin : state_actions
             counter = '1; // RESET COUNTER
             if(hit)
             begin
+                num_l2_miss_count = 1'b0;
                 mem_resp = 1'b1;
                 LRU_array_load = 1'b1;
                 if(way_0_hit)
@@ -529,7 +530,14 @@ begin : state_actions
                     LRU_array_datain = {1'b1, LRU_array_dataout[1], 1'b1};  
             end
             else if (ewb_hit == 1'b1)
-            mem_resp = 1'b1;
+            begin
+                mem_resp = 1'b1;
+                num_l2_miss_count = 1'b0;
+            end
+
+            else begin 
+                num_l2_miss_count = 1'b1;
+            end
 
             if(mem_read)
             begin

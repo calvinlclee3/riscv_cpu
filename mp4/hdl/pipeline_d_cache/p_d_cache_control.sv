@@ -271,18 +271,18 @@ always_comb begin : state_actions
         end
       end
     end
-    // else begin
-       // load_d_cache_reg = 1'b0;
-       // read_array_flag = 1'b0;
-    // end
+    else begin
+       load_d_cache_reg = 1'b0;
+       read_array_flag = 1'b0;
+    end
   end
   
   WRITE_BACK: begin
     address_mux_sel = prev_cpu_address;
-
-    if(cache_pipeline_out.LRU_array_dataout[2] == 1'b0)
+    load_d_cache_reg = 1'b0;
+    if(cache_pipeline_in.LRU_array_dataout[2] == 1'b0)
       begin
-        if(cache_pipeline_out.LRU_array_dataout[0] == 1'b0)
+        if(cache_pipeline_in.LRU_array_dataout[0] == 1'b0)
         begin
             pmem_write = 1'b1;
             dataout_MUX_sel = 2'b11;
@@ -301,7 +301,7 @@ always_comb begin : state_actions
       end
       else
       begin
-        if(cache_pipeline_out.LRU_array_dataout[1] == 1'b0)
+        if(cache_pipeline_in.LRU_array_dataout[1] == 1'b0)
         begin
             pmem_write = 1'b1;
             dataout_MUX_sel = 2'b01;

@@ -347,10 +347,7 @@ always_comb begin : next_state_logic
 
     HIT: begin
 
-      if (mem_read == 1'b0 && mem_write == 1'b0)
-        next_state = START;
-
-      else if ((cache_pipeline_out.mem_read || cache_pipeline_out.mem_write) && cache_pipeline_in.hit == 1'b0) // it will go from hit to miss when D-cache is not used
+    if ((cache_pipeline_out.mem_read || cache_pipeline_out.mem_write) && cache_pipeline_in.hit == 1'b0) // it will go from hit to miss when D-cache is not used
       next_state = MISS;
     end
 

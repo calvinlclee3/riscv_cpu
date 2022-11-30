@@ -1,6 +1,8 @@
 module stall_control_unit
 import rv32i_types::*; 
 (
+    input logic clk,
+    input logic rst,
 
     /* Cache Responses */
     input logic instr_mem_resp,

@@ -366,7 +366,7 @@ begin
     if(data_mem_resp == 1'b0 && (ex_mem_out_ctrl.mem_read == 1'b1 || ex_mem_out_ctrl.mem_write == 1'b1))
     begin
 
-        if ((id_ex_out_ctrl.opcode == op_reg || id_ex_out_ctrl.opcode == op_imm || id_ex_out_ctrl.opcode == op_lui || id_ex_out_ctrl.opcode == op_br) && (id_ex_out_ctrl.rd_id != ex_mem_out_ctrl.rd_id) && (id_ex_out_ctrl.rs1_id != ex_mem_out_ctrl.rd_id && id_ex_out_ctrl.rs2_id != ex_mem_out_ctrl.rd_id) && (mem_wb_reg_load == 1'b1))
+        if ((id_ex_out_ctrl.opcode != op_load && id_ex_out_ctrl.opcode != op_store) && (id_ex_out_ctrl.rd_id != ex_mem_out_ctrl.rd_id) && (id_ex_out_ctrl.rs1_id != ex_mem_out_ctrl.rd_id && id_ex_out_ctrl.rs2_id != ex_mem_out_ctrl.rd_id) && (mem_wb_reg_load == 1'b1))
         begin
             ex_mem_reg_load = 1'b0;
             leap = 1'b1;

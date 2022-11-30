@@ -747,7 +747,11 @@ begin : next_state_logic
     case(state)
         DEFAULT:
         begin
-            if(mem_read == 1'b1 || mem_write == 1'b1)
+
+            if (ewb_full == 1'b1)
+                next_state = DEQUEUE;
+
+            else if(mem_read == 1'b1 || mem_write == 1'b1)
                 next_state = READ_WRITE;
 
             else if (ewb_empty == 1'b0 && counter == '0)

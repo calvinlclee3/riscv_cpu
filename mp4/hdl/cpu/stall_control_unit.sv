@@ -48,7 +48,8 @@ import rv32i_types::*;
     output logic decrement_tournament_pht,
 
     output logic global_stall, 
-    output logic continue_i_cache
+    output logic continue_i_cache,
+    output logic leap
 
 );
 
@@ -84,6 +85,9 @@ function void set_defaults();
 
     global_stall = 1'b0;
     continue_i_cache = 1'b1;
+
+    leap = 1'b0;
+
 endfunction
 
 

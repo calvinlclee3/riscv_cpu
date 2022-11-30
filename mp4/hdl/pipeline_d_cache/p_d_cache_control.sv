@@ -226,7 +226,7 @@ always_comb begin : state_actions
     end
 
   HIT: begin
-    if (cache_pipeline_in.hit == 1'b1) // don't need to take care of load condition because data miss stall the whole pipeline
+    if (cache_pipeline_in.hit == 1'b1 && (mem_write == 1'b1 || mem_read == 1'b1)) // don't need to take care of load condition because data miss stall the whole pipeline
       begin
       address_mux_sel = curr_cpu_address; //MOVED ON TO HANDLING NEXT REQUEST
       mem_resp = 1'b1;

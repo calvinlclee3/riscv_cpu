@@ -226,9 +226,11 @@ always_comb begin : state_actions
     end
 
   HIT: begin
-    if (cache_pipeline_in.hit == 1'b1 && (mem_write == 1'b1 || mem_read == 1'b1)) // don't need to take care of load condition because data miss stall the whole pipeline
-      begin
+    if (mem_read == 1'b1 || mem_write == 1'b1)
       address_mux_sel = curr_cpu_address; //MOVED ON TO HANDLING NEXT REQUEST
+
+    if (cache_pipeline_in.hit == 1'b1 && (cache_pipeline_out.mem_write == 1'b1 || cache_pipeline_out.mem_read == 1'b1)) // don't need to take care of load condition because data miss stall the whole pipeline
+      begin
       mem_resp = 1'b1;
       LRU_array_load = 1'b1;
       if(cache_pipeline_in.way_0_hit)
@@ -331,7 +333,7 @@ always_comb begin : next_state_logic
 
 	case(state)
     START: begin
-      if ((mem_read || mem_write) && cache_pipeline_in.hit == 1'b0) begin
+      if ((mem_read || mem_write)) begin
         next_state = MISS;
       end
     end
@@ -345,7 +347,10 @@ always_comb begin : next_state_logic
 
     HIT: begin
 
-      if ((cache_pipeline_out.mem_read || cache_pipeline_out.mem_write) && cache_pipeline_in.hit == 1'b0) // it will go from hit to miss when D-cache is not used
+      if (mem_read == 1'b0 && mem_write == 1'b0)
+        next_state = START;
+
+      else if ((cache_pipeline_out.mem_read || cache_pipeline_out.mem_write) && cache_pipeline_in.hit == 1'b0) // it will go from hit to miss when D-cache is not used
       next_state = MISS;
     end
 

@@ -20,6 +20,19 @@ import cache_mux_types::*;
     output  logic           pmem_read,
     output  logic           pmem_write,
 
+
+    /* Control to EWB */
+    output logic tag_check,
+    output logic load_ewb,
+    output logic wb_ewb,
+
+    /* EWB to Control */
+    input logic ewb_hit,
+
+    input logic ewb_empty,
+
+    input logic ewb_full,
+
     /* Datapath to Control */
     input logic hit,
     input logic way_0_hit,
@@ -66,8 +79,6 @@ import cache_mux_types::*;
     output logic LRU_array_load,
     output logic [2:0] LRU_array_datain,
 
-    output logic memory_buffer_register_load,
-
     output dataarraymux_sel_t write_en_0_MUX_sel,
     output dataarraymux_sel_t write_en_1_MUX_sel,
     output dataarraymux_sel_t write_en_2_MUX_sel,
@@ -97,10 +108,337 @@ perf_counter #(.width(perf_counter_width)) l2miss (
 );
 
 
+// enum int unsigned {
+//     /* List of states */
+//     DEFAULT, EWB_LOAD, WRITE_BACK, COUNTDOWN, HIT_DETECT, MEM_READ, HIT_DETECT2
+// } state, next_state;
+
+// logic V;
+// logic counter;
+
+// function void set_defaults();
+
+//     /* CPU memory signals */
+//     mem_resp = 1'b0;
+
+
+//     /* Physical memory signals */
+//     pmem_read = 1'b0;
+//     pmem_write = 1'b0;
+
+//     /* Control to Datapath */
+//     v_array_0_load = 1'b0;
+//     v_array_0_datain = 1'b0;
+//     v_array_1_load = 1'b0;
+//     v_array_1_datain = 1'b0;
+//     v_array_2_load = 1'b0;
+//     v_array_2_datain = 1'b0;
+//     v_array_3_load = 1'b0;
+//     v_array_3_datain = 1'b0;
+
+//     d_array_0_load = 1'b0;
+//     d_array_0_datain = 1'b0;
+//     d_array_1_load = 1'b0;
+//     d_array_1_datain = 1'b0;
+//     d_array_2_load = 1'b0;
+//     d_array_2_datain = 1'b0;
+//     d_array_3_load = 1'b0;
+//     d_array_3_datain = 1'b0;
+
+//     tag_array_0_load = 1'b0;
+//     tag_array_1_load = 1'b0;
+//     tag_array_2_load = 1'b0;
+//     tag_array_3_load = 1'b0;
+
+//     LRU_array_load = 1'b0;
+//     LRU_array_datain = 3'b000;
+
+//     write_en_0_MUX_sel = no_write; 
+//     write_en_1_MUX_sel = no_write;
+//     write_en_2_MUX_sel = no_write; 
+//     write_en_3_MUX_sel = no_write;
+//     data_array_0_datain_MUX_sel = no_write;
+//     data_array_1_datain_MUX_sel = no_write;
+//     data_array_2_datain_MUX_sel = no_write;
+//     data_array_3_datain_MUX_sel = no_write;
+
+//     dataout_MUX_sel = 2'b00;
+
+//     pmem_address_MUX_sel = cache_read_mem;
+//     num_l2_miss_count = 1'b0;
+    
+//     V = 1'b0;
+//     tag_check = 1'b0;
+//     load_ewb = 1'b0;
+//     wb_ewb = 1'b0;
+//     counter = 1'b1;
+
+// endfunction
+
+
+
+// always_comb
+// begin : state_actions
+
+//     /* Default output assignments */
+//     set_defaults();
+
+//     /* Actions for each state */
+//     case(state)
+//         DEFAULT:;
+
+//         EWB_LOAD: begin
+//             load_ewb = 1'b1; //LOAD EWB with new write
+//             V = 1'b1; //set valid
+//             mem_resp = 1'b1; //respond that write is completed
+//             counter = 1'b1; //reset counter
+//         end
+
+//         COUNTDOWN: begin
+//             counter = (counter == '0)? '0: counter - 1;
+//             tag_check = 1'b1; //CHECK Tag hit in case of read
+//         end
+
+//         WRITE_BACK: begin
+//             pmem_write = 1'b1; //Write from Eviction buffer to memory
+//             wb_ewb = 1'b1; //Dequeue entry from Eviction buffer
+//         end
+
+//         HIT_DETECT, HIT_DETECT2: begin
+//             if (ewb_hit == 1'b1)
+//             begin //If hit in EWB
+//                 mem_resp = 1'b1;
+//             end
+
+//             else begin
+//                 mem_resp = hit;
+//                 if (hit)
+//                 begin
+//                     LRU_array_load = 1'b1;
+//                     if(way_0_hit)
+//                     begin
+//                         LRU_array_datain = {1'b0, 1'b0, LRU_array_dataout[0]};
+//                         dataout_MUX_sel = 2'b00;
+//                     end
+
+//                     else if (way_1_hit)
+//                     begin
+//                         LRU_array_datain = {1'b0, 1'b1, LRU_array_dataout[0]};
+//                         dataout_MUX_sel = 2'b01;
+
+//                     end 
+
+//                     else if (way_2_hit)
+//                     begin
+//                         LRU_array_datain = {1'b1, LRU_array_dataout[1], 1'b0};
+//                         dataout_MUX_sel = 2'b10;
+//                     end
+
+
+//                     else if (way_3_hit)
+//                     begin
+//                         LRU_array_datain = {1'b1, LRU_array_dataout[1], 1'b1};  
+//                         dataout_MUX_sel = 2'b11;
+//                     end
+//                 end
+
+//             end
+
+//         end
+
+//         MEM_READ: begin
+//             pmem_read = 1'b1;
+//             pmem_address_MUX_sel = cache_read_mem;
+//             mem_resp = hit;
+//             if (pmem_resp == 1'b1)
+//             begin
+//                 if(v_array_0_dataout == 1'b0)
+//                 begin
+//                     tag_array_0_load = 1'b1;
+//                     v_array_0_load = 1'b1;
+//                     v_array_0_datain = 1'b1;
+//                     d_array_0_load = 1'b1;
+//                     d_array_0_datain = 1'b0;
+//                     write_en_0_MUX_sel = mem_write_cache;
+//                     data_array_0_datain_MUX_sel = mem_write_cache;
+//                 end
+//                 else if(v_array_1_dataout == 1'b0)
+//                 begin
+//                     tag_array_1_load = 1'b1;
+//                     v_array_1_load = 1'b1;
+//                     v_array_1_datain = 1'b1;
+//                     d_array_1_load = 1'b1;
+//                     d_array_1_datain = 1'b0;
+//                     write_en_1_MUX_sel = mem_write_cache;
+//                     data_array_1_datain_MUX_sel = mem_write_cache;
+//                 end
+//                 else if(v_array_2_dataout == 1'b0)
+//                 begin
+//                     tag_array_2_load = 1'b1;
+//                     v_array_2_load = 1'b1;
+//                     v_array_2_datain = 1'b1;
+//                     d_array_2_load = 1'b1;
+//                     d_array_2_datain = 1'b0;
+//                     write_en_2_MUX_sel = mem_write_cache;
+//                     data_array_2_datain_MUX_sel = mem_write_cache;
+//                 end
+//                 else if(v_array_3_dataout == 1'b0)
+//                 begin
+//                     tag_array_3_load = 1'b1;
+//                     v_array_3_load = 1'b1;
+//                     v_array_3_datain = 1'b1;
+//                     d_array_3_load = 1'b1;
+//                     d_array_3_datain = 1'b0;
+//                     write_en_3_MUX_sel = mem_write_cache;
+//                     data_array_3_datain_MUX_sel = mem_write_cache;
+//                 end
+//                 else
+//                 begin
+//                     if(LRU_array_dataout[2] == 1'b0)
+//                     begin
+//                         if(LRU_array_dataout[0] == 1'b0)
+//                         begin
+//                             // Alloc way 3
+//                             tag_array_3_load = 1'b1;
+//                             v_array_3_load = 1'b1;
+//                             v_array_3_datain = 1'b1;
+//                             d_array_3_load = 1'b1;
+//                             d_array_3_datain = 1'b0;
+//                             write_en_3_MUX_sel = mem_write_cache;
+//                             data_array_3_datain_MUX_sel = mem_write_cache;
+//                         end
+//                         else
+//                         begin
+//                             // Alloc way 2
+//                             tag_array_2_load = 1'b1;
+//                             v_array_2_load = 1'b1;
+//                             v_array_2_datain = 1'b1;
+//                             d_array_2_load = 1'b1;
+//                             d_array_2_datain = 1'b0;
+//                             write_en_2_MUX_sel = mem_write_cache;
+//                             data_array_2_datain_MUX_sel = mem_write_cache;
+//                         end
+//                     end
+//                     else
+//                     begin
+//                         if(LRU_array_dataout[1] == 1'b0)
+//                         begin
+//                             // Alloc way 1
+//                             tag_array_1_load = 1'b1;
+//                             v_array_1_load = 1'b1;
+//                             v_array_1_datain = 1'b1;
+//                             d_array_1_load = 1'b1;
+//                             d_array_1_datain = 1'b0;
+//                             write_en_1_MUX_sel = mem_write_cache;
+//                             data_array_1_datain_MUX_sel = mem_write_cache;
+//                         end
+//                         else
+//                         begin
+//                             // Alloc way 0
+//                             tag_array_0_load = 1'b1;
+//                             v_array_0_load = 1'b1;
+//                             v_array_0_datain = 1'b1;
+//                             d_array_0_load = 1'b1;
+//                             d_array_0_datain = 1'b0;
+//                             write_en_0_MUX_sel = mem_write_cache;
+//                             data_array_0_datain_MUX_sel = mem_write_cache;
+//                         end  
+//                     end
+//                 end
+//             end
+//         end
+//     endcase
+// end
+
+// always_comb
+// begin : next_state_logic
+//     /* Next state information and conditions (if any)
+//      * for transitioning between states */
+
+//     next_state = state;
+
+//     case(state)
+//         DEFAULT:
+//         begin
+//             if (mem_write == 1'b1)
+//             next_state = EWB_LOAD;
+//             else if (mem_read == 1'b1)
+//             next_state = HIT_DETECT2;
+//             else if (V == 1'b1)
+//             next_state = COUNTDOWN;
+//         end
+
+//         EWB_LOAD:
+//         begin
+//             next_state = COUNTDOWN;
+//         end 
+
+//         COUNTDOWN: begin
+//             if (mem_read)
+//             next_state = HIT_DETECT;
+//             else if (~(mem_read || mem_write || counter) || mem_write)
+//             next_state = WRITE_BACK;
+//         end
+
+//         WRITE_BACK: begin
+//             if (pmem_resp == 1'b1) begin
+//                 if (mem_write == 1'b1)
+//                 next_state = EWB_LOAD;
+//                 else
+//                 next_state = DEFAULT;
+//             end
+//         end
+
+//         HIT_DETECT: begin
+//             if (ewb_hit == 1'b1 || hit == 1'b1)
+//             begin
+//                 next_state = COUNTDOWN;
+//             end
+
+//             else next_state = MEM_READ;
+
+//         end
+
+//         MEM_READ: begin
+//             if (hit == 1'b1)
+//             next_state = DEFAULT;
+//         end
+
+//         HIT_DETECT2: begin
+//             if (ewb_hit == 1'b1 || hit == 1'b1)
+//             begin
+//                 next_state = DEFAULT;
+//             end
+//             else next_state = MEM_READ;
+//         end
+
+
+    
+//     endcase
+        
+// end
+
+// always_ff @(posedge clk)
+// begin: next_state_assignment
+//     /* Assignment of next state on clock edge */
+//     if (rst)
+//     begin
+//         state <= DEFAULT;
+//     end
+//     else
+//     begin
+//         state <= next_state;
+//     end
+// end
+
+// endmodule : l2_cache_control
+
+logic [7:0] counter;
+
 enum int unsigned {
     /* List of states */
-    DEFAULT = 0, READ_WRITE = 1, NO_WB_1 = 2, NO_WB_2 = 3, 
-    WRITE_BACK = 4
+    DEFAULT, READ_WRITE, NO_WB_1,
+    WRITE_BACK, DEQUEUE
 
 } state, next_state;
 
@@ -141,8 +479,6 @@ function void set_defaults();
     LRU_array_load = 1'b0;
     LRU_array_datain = 3'b000;
 
-    memory_buffer_register_load  = 1'b0;
-
     write_en_0_MUX_sel = no_write; 
     write_en_1_MUX_sel = no_write;
     write_en_2_MUX_sel = no_write; 
@@ -157,6 +493,11 @@ function void set_defaults();
     pmem_address_MUX_sel = cache_read_mem;
     num_l2_miss_count = 1'b0;
 
+    tag_check = 1'b1;
+    load_ewb = 1'b0;
+    wb_ewb = 1'b0;
+
+
 endfunction
 
 
@@ -169,12 +510,16 @@ begin : state_actions
 
     /* Actions for each state */
     case(state)
-        DEFAULT:;
+        DEFAULT: begin
+            if (ewb_empty == 1'b0)
+                counter -= 1'b1;
+        end
         READ_WRITE:
         begin
-            mem_resp = hit;
+            counter = '1; // RESET COUNTER
             if(hit)
             begin
+                mem_resp = 1'b1;
                 LRU_array_load = 1'b1;
                 if(way_0_hit)
                     LRU_array_datain = {1'b0, 1'b0, LRU_array_dataout[0]};
@@ -185,7 +530,9 @@ begin : state_actions
                 else if (way_3_hit)
                     LRU_array_datain = {1'b1, LRU_array_dataout[1], 1'b1};  
             end
-            else num_l2_miss_count = 1'b1;
+            else if (ewb_hit == 1'b1)
+            mem_resp = 1'b1;
+
             if(mem_read)
             begin
                 if(way_0_hit == 1'b1 && way_1_hit == 1'b0 && way_2_hit == 1'b0 && way_3_hit == 1'b0)
@@ -233,75 +580,126 @@ begin : state_actions
         begin
             pmem_read = 1'b1;
             pmem_address_MUX_sel = cache_read_mem;
-            memory_buffer_register_load = 1'b1;
-        end
-        NO_WB_2:
-        begin
-            if(v_array_0_dataout == 1'b0)
+
+            if (pmem_resp == 1'b1) 
             begin
-                tag_array_0_load = 1'b1;
-                v_array_0_load = 1'b1;
-                v_array_0_datain = 1'b1;
-                d_array_0_load = 1'b1;
-                d_array_0_datain = 1'b0;
-                write_en_0_MUX_sel = mem_write_cache;
-                data_array_0_datain_MUX_sel = mem_write_cache;
+                if(v_array_0_dataout == 1'b0)
+                begin
+                    tag_array_0_load = 1'b1;
+                    v_array_0_load = 1'b1;
+                    v_array_0_datain = 1'b1;
+                    d_array_0_load = 1'b1;
+                    d_array_0_datain = 1'b0;
+                    write_en_0_MUX_sel = mem_write_cache;
+                    data_array_0_datain_MUX_sel = mem_write_cache;
+                end
+                else if(v_array_1_dataout == 1'b0)
+                begin
+                    tag_array_1_load = 1'b1;
+                    v_array_1_load = 1'b1;
+                    v_array_1_datain = 1'b1;
+                    d_array_1_load = 1'b1;
+                    d_array_1_datain = 1'b0;
+                    write_en_1_MUX_sel = mem_write_cache;
+                    data_array_1_datain_MUX_sel = mem_write_cache;
+                end
+                else if(v_array_2_dataout == 1'b0)
+                begin
+                    tag_array_2_load = 1'b1;
+                    v_array_2_load = 1'b1;
+                    v_array_2_datain = 1'b1;
+                    d_array_2_load = 1'b1;
+                    d_array_2_datain = 1'b0;
+                    write_en_2_MUX_sel = mem_write_cache;
+                    data_array_2_datain_MUX_sel = mem_write_cache;
+                end
+                else if(v_array_3_dataout == 1'b0)
+                begin
+                    tag_array_3_load = 1'b1;
+                    v_array_3_load = 1'b1;
+                    v_array_3_datain = 1'b1;
+                    d_array_3_load = 1'b1;
+                    d_array_3_datain = 1'b0;
+                    write_en_3_MUX_sel = mem_write_cache;
+                    data_array_3_datain_MUX_sel = mem_write_cache;
+                end
+                else
+                begin
+                    if(LRU_array_dataout[2] == 1'b0)
+                    begin
+                        if(LRU_array_dataout[0] == 1'b0)
+                        begin
+                            // Alloc way 3
+                            tag_array_3_load = 1'b1;
+                            v_array_3_load = 1'b1;
+                            v_array_3_datain = 1'b1;
+                            d_array_3_load = 1'b1;
+                            d_array_3_datain = 1'b0;
+                            write_en_3_MUX_sel = mem_write_cache;
+                            data_array_3_datain_MUX_sel = mem_write_cache;
+                        end
+                        else
+                        begin
+                            // Alloc way 2
+                            tag_array_2_load = 1'b1;
+                            v_array_2_load = 1'b1;
+                            v_array_2_datain = 1'b1;
+                            d_array_2_load = 1'b1;
+                            d_array_2_datain = 1'b0;
+                            write_en_2_MUX_sel = mem_write_cache;
+                            data_array_2_datain_MUX_sel = mem_write_cache;
+                        end
+                    end
+                    else
+                    begin
+                        if(LRU_array_dataout[1] == 1'b0)
+                        begin
+                            // Alloc way 1
+                            tag_array_1_load = 1'b1;
+                            v_array_1_load = 1'b1;
+                            v_array_1_datain = 1'b1;
+                            d_array_1_load = 1'b1;
+                            d_array_1_datain = 1'b0;
+                            write_en_1_MUX_sel = mem_write_cache;
+                            data_array_1_datain_MUX_sel = mem_write_cache;
+                        end
+                        else
+                        begin
+                            // Alloc way 0
+                            tag_array_0_load = 1'b1;
+                            v_array_0_load = 1'b1;
+                            v_array_0_datain = 1'b1;
+                            d_array_0_load = 1'b1;
+                            d_array_0_datain = 1'b0;
+                            write_en_0_MUX_sel = mem_write_cache;
+                            data_array_0_datain_MUX_sel = mem_write_cache;
+                        end  
+                    end
+                end
+                end
             end
-            else if(v_array_1_dataout == 1'b0)
-            begin
-                tag_array_1_load = 1'b1;
-                v_array_1_load = 1'b1;
-                v_array_1_datain = 1'b1;
-                d_array_1_load = 1'b1;
-                d_array_1_datain = 1'b0;
-                write_en_1_MUX_sel = mem_write_cache;
-                data_array_1_datain_MUX_sel = mem_write_cache;
-            end
-            else if(v_array_2_dataout == 1'b0)
-            begin
-                tag_array_2_load = 1'b1;
-                v_array_2_load = 1'b1;
-                v_array_2_datain = 1'b1;
-                d_array_2_load = 1'b1;
-                d_array_2_datain = 1'b0;
-                write_en_2_MUX_sel = mem_write_cache;
-                data_array_2_datain_MUX_sel = mem_write_cache;
-            end
-            else if(v_array_3_dataout == 1'b0)
-            begin
-                tag_array_3_load = 1'b1;
-                v_array_3_load = 1'b1;
-                v_array_3_datain = 1'b1;
-                d_array_3_load = 1'b1;
-                d_array_3_datain = 1'b0;
-                write_en_3_MUX_sel = mem_write_cache;
-                data_array_3_datain_MUX_sel = mem_write_cache;
-            end
-            else
+            
+            WRITE_BACK:
             begin
                 if(LRU_array_dataout[2] == 1'b0)
                 begin
                     if(LRU_array_dataout[0] == 1'b0)
                     begin
                         // Alloc way 3
-                        tag_array_3_load = 1'b1;
+                        load_ewb = 1'b1;
+                        dataout_MUX_sel = 2'b11;
+                        pmem_address_MUX_sel = cache_write_mem;
                         v_array_3_load = 1'b1;
-                        v_array_3_datain = 1'b1;
-                        d_array_3_load = 1'b1;
-                        d_array_3_datain = 1'b0;
-                        write_en_3_MUX_sel = mem_write_cache;
-                        data_array_3_datain_MUX_sel = mem_write_cache;
+                        v_array_3_datain = 1'b0;
                     end
                     else
                     begin
                         // Alloc way 2
-                        tag_array_2_load = 1'b1;
+                        load_ewb = 1'b1;
+                        dataout_MUX_sel = 2'b10;
+                        pmem_address_MUX_sel = cache_write_mem;
                         v_array_2_load = 1'b1;
-                        v_array_2_datain = 1'b1;
-                        d_array_2_load = 1'b1;
-                        d_array_2_datain = 1'b0;
-                        write_en_2_MUX_sel = mem_write_cache;
-                        data_array_2_datain_MUX_sel = mem_write_cache;
+                        v_array_2_datain = 1'b0;
                     end
                 end
                 else
@@ -309,73 +707,33 @@ begin : state_actions
                     if(LRU_array_dataout[1] == 1'b0)
                     begin
                         // Alloc way 1
-                        tag_array_1_load = 1'b1;
+                        load_ewb = 1'b1;
+                        dataout_MUX_sel = 2'b01;
+                        pmem_address_MUX_sel = cache_write_mem;
                         v_array_1_load = 1'b1;
-                        v_array_1_datain = 1'b1;
-                        d_array_1_load = 1'b1;
-                        d_array_1_datain = 1'b0;
-                        write_en_1_MUX_sel = mem_write_cache;
-                        data_array_1_datain_MUX_sel = mem_write_cache;
+                        v_array_1_datain = 1'b0;
                     end
                     else
                     begin
                         // Alloc way 0
-                        tag_array_0_load = 1'b1;
+                        load_ewb = 1'b1;
+                        dataout_MUX_sel = 2'b00;
+                        pmem_address_MUX_sel = cache_write_mem;
                         v_array_0_load = 1'b1;
-                        v_array_0_datain = 1'b1;
-                        d_array_0_load = 1'b1;
-                        d_array_0_datain = 1'b0;
-                        write_en_0_MUX_sel = mem_write_cache;
-                        data_array_0_datain_MUX_sel = mem_write_cache;
+                        v_array_0_datain = 1'b0;
                     end  
                 end
-            end
         end
-        WRITE_BACK:
+
+        DEQUEUE:
         begin
-            if(LRU_array_dataout[2] == 1'b0)
-            begin
-                if(LRU_array_dataout[0] == 1'b0)
-                begin
-                    // Alloc way 3
-                    pmem_write = 1'b1;
-                    dataout_MUX_sel = 2'b11;
-                    pmem_address_MUX_sel = cache_write_mem;
-                    v_array_3_load = 1'b1;
-                    v_array_3_datain = 1'b0;
-                end
-                else
-                begin
-                    // Alloc way 2
-                    pmem_write = 1'b1;
-                    dataout_MUX_sel = 2'b10;
-                    pmem_address_MUX_sel = cache_write_mem;
-                    v_array_2_load = 1'b1;
-                    v_array_2_datain = 1'b0;
-                end
-            end
+            counter = '1; // RESET COUNTER
+            if (pmem_resp == 1'b0)
+            pmem_write = 1'b1;
             else
-            begin
-                if(LRU_array_dataout[1] == 1'b0)
-                begin
-                    // Alloc way 1
-                    pmem_write = 1'b1;
-                    dataout_MUX_sel = 2'b01;
-                    pmem_address_MUX_sel = cache_write_mem;
-                    v_array_1_load = 1'b1;
-                    v_array_1_datain = 1'b0;
-                end
-                else
-                begin
-                    // Alloc way 0
-                    pmem_write = 1'b1;
-                    dataout_MUX_sel = 2'b00;
-                    pmem_address_MUX_sel = cache_write_mem;
-                    v_array_0_load = 1'b1;
-                    v_array_0_datain = 1'b0;
-                end  
-            end
+            wb_ewb = 1'b1;
         end
+
     endcase
 end
 
@@ -389,15 +747,23 @@ begin : next_state_logic
     case(state)
         DEFAULT:
         begin
-            if(mem_read == 1'b1 || mem_write == 1'b1)
+
+            if (ewb_full == 1'b1)
+                next_state = DEQUEUE;
+
+            else if(mem_read == 1'b1 || mem_write == 1'b1)
                 next_state = READ_WRITE;
+
+            else if (ewb_empty == 1'b0 && counter == '0)
+                next_state = DEQUEUE;
         end
         READ_WRITE:
         begin
-            if(hit == 1'b1)
+            if(hit == 1'b1 || ewb_hit == 1'b1)
             begin
                 next_state = DEFAULT;
             end
+
             else if(v_array_0_dataout == 1'b0 || v_array_1_dataout == 1'b0 || v_array_2_dataout == 1'b0 || v_array_3_dataout == 1'b0)
             begin
                 next_state = NO_WB_1;
@@ -449,20 +815,23 @@ begin : next_state_logic
         begin
             if(pmem_resp == 1'b1)
             begin
-                next_state = NO_WB_2;
+                next_state = READ_WRITE;
             end
-        end
-        NO_WB_2:
-        begin
-            next_state = READ_WRITE;
         end
         WRITE_BACK:
         begin
-            if(pmem_resp == 1'b1)
+            next_state = NO_WB_1;
+        end
+
+        DEQUEUE: begin
+            if (pmem_resp == 1'b1)
             begin
-                next_state = NO_WB_1;
+                next_state = DEFAULT;
+                if (mem_read == 1'b1 || mem_write == 1'b1)
+                next_state = READ_WRITE;
             end
         end
+
     endcase
 end
 
@@ -480,4 +849,5 @@ begin: next_state_assignment
 end
 
 endmodule : l2_cache_control
+
 

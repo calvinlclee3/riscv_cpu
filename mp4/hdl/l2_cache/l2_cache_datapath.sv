@@ -81,8 +81,6 @@ import cache_mux_types::*;
     // LRU array width is now 3.
     input logic [2:0] LRU_array_datain,
 
-    input logic memory_buffer_register_load,
-
     input dataarraymux_sel_t write_en_0_MUX_sel,
     input dataarraymux_sel_t write_en_1_MUX_sel,
     input dataarraymux_sel_t write_en_2_MUX_sel,
@@ -118,6 +116,8 @@ logic [s_tag-1:0] tag_array_2_dataout;
 logic [s_tag-1:0] tag_array_3_dataout;
 logic [s_tag-1:0] tag_array_dataout_MUX_out;
 logic [31:0] pmem_address_MUX_out;
+
+assign memory_buffer_register_out = pmem_rdata;
 
 assign mem_rdata256 = data_array_dataout_MUX_out;
 assign pmem_wdata = data_array_dataout_MUX_out;
@@ -232,16 +232,6 @@ l2_data_array #(.s_offset(s_offset), .s_index(s_index)) data_array [num_ways-1:0
     .dataout({data_array_3_dataout, data_array_2_dataout, data_array_1_dataout, data_array_0_dataout})
 );
 
-
-register #(.width(s_line)) memory_buffer_register(
-
-    .clk(clk),
-    .rst(rst),
-    .load(memory_buffer_register_load),
-    .in(pmem_rdata),
-    .out(memory_buffer_register_out)
-
-);
 
 always_comb begin : WRITE_EN_0_MUX
 

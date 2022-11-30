@@ -431,7 +431,7 @@ perf_counter #(.width(perf_counter_width)) l2miss (
 
 // endmodule : l2_cache_control
 
-logic [7:0] counter;
+logic [1:0] counter;
 
 enum int unsigned {
     /* List of states */

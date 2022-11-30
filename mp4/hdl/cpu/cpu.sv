@@ -402,8 +402,8 @@ assign instr_mem_address = (rst == 1'b1)? 32'h0000060: pc_MUX_out;
 assign if_id_in.ir = instr_mem_rdata; //IR value from I-Cache
 
 /* assign ports for D-cache */
-assign data_read = ex_mem_out.ctrl.mem_read;
-assign data_write = ex_mem_out.ctrl.mem_write;
+assign data_read = ex_mem_in.ctrl.mem_read;
+assign data_write = ex_mem_in.ctrl.mem_write;
 assign data_mem_address = ex_mem_in.alu_out_address;
 assign mem_wb_in.MDR = data_mem_rdata;
 assign data_mbe = ex_mem_out.write_read_mask;

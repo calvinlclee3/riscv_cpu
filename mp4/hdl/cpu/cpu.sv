@@ -318,6 +318,9 @@ mem_wb_reg mem_wb_reg (
 
 stall_control_unit stall_control_unit (
 
+    .clk,
+    .rst,
+
     /* Cache Responses */
     .instr_mem_resp(instr_mem_resp),
     .data_mem_resp(data_mem_resp),

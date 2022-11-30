@@ -277,12 +277,37 @@ ex_mem_reg ex_mem_reg (
 
 /****************************** MEMORY ******************************/ 
 
+mem_wb_pipeline_reg leapfrogged_reg;
+assign leapfrogged_reg.pc = ex_mem_in.pc;
+assign leapfrogged_reg.ir = ex_mem_in.ir;
+assign leapfrogged_reg.alu_out = ex_mem_in.alu_out;
+assign leapfrogged_reg.br_en = ex_mem_in.br_en;
+assign leapfrogged_reg.imm = ex_mem_in.imm;
+assign leapfrogged_reg.target_address = ex_mem_in.target_address;
+assign leapfrogged_reg.alu_out_address = ex_mem_in.alu_out_address;
+assign leapfrogged_reg.ctrl = ex_mem_in.ctrl;
+assign leapfrogged_reg.MDR = '0;
+assign leapfrogged_reg.mem_data_out = '0;
+assign leapfrogged_reg.write_read_mask = '0;
+
+mem_wb_pipeline_reg in_mem_wb;
+
+logic leap;
+
+always_comb begin
+    in_mem_wb = mem_wb_in;
+
+    if (leap == 1'b1)
+        in_mem_wb = leapfrogged_reg; 
+
+end
+
 mem_wb_reg mem_wb_reg (
     .clk(clk),
     .rst(rst),
     .flush(mem_wb_reg_flush),
     .load(mem_wb_reg_load),
-    .in(mem_wb_in), //come from mem + passed along values
+    .in(in_mem_wb), //come from mem + passed along values
     .out(mem_wb_out) //to wb combinational
 );
 
@@ -337,7 +362,8 @@ stall_control_unit stall_control_unit (
     .decrement_tournament_pht(decrement_tournament_pht),
 
     .global_stall(global_stall),
-    .continue_i_cache(continue_i_cache)
+    .continue_i_cache(continue_i_cache),
+    .leap(leap)
 
 );
 

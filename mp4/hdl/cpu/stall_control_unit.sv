@@ -56,6 +56,20 @@ import rv32i_types::*;
 logic local_c;
 logic global_c;
 
+logic num_leapfrog_count;
+logic num_leapfrog_overflow;
+
+logic [perf_counter_width-1:0] num_leapfrog_instr;
+
+perf_counter #(.width(perf_counter_width)) numleapfrog (
+    .clk(clk),
+    .rst(rst),
+    .count(num_leapfrog_count),
+    .overflow(num_leapfrog_overflow),
+    .out(num_leapfrog_instr)
+);
+
+
 function void set_defaults();
     load_pc = 1'b1;
 
@@ -87,6 +101,7 @@ function void set_defaults();
     continue_i_cache = 1'b1;
 
     leap = 1'b0;
+    num_leapfrog_count = 1'b0;
 
 endfunction
 
@@ -370,6 +385,7 @@ begin
         begin
             ex_mem_reg_load = 1'b0;
             leap = 1'b1;
+            num_leapfrog_count = 1'b1;
         end
 
         else begin

@@ -80,6 +80,8 @@ logic tag_array_1_load;
 logic tag_array_2_load;
 logic tag_array_3_load;
 
+logic [31:0] datapath_pmem_address;
+logic [31:0] ewb_pmem_address;
 
 logic LRU_array_load;
 logic [2:0] LRU_array_datain;
@@ -100,12 +102,55 @@ logic [1:0] dataout_MUX_sel;
 pmemaddressmux_sel_t pmem_address_MUX_sel;
 
 
+logic load_ewb;
+logic wb_ewb;
+logic tag_check;
+logic ewb_hit;
 
+logic ewb_full;
 
+logic [255:0] ewb_dataout;
+logic [255:0] datapath_dataout;
+logic ewb_empty;
+
+ewb ewb (
+    .clk, 
+    .rst, 
+    .data_i(datapath_dataout),
+    .addr_i(datapath_pmem_address),
+
+    .tag_check(tag_check),
+    .tag_i(mem_address[31:5]),
+    .hit_o(ewb_hit),
+    .read_o(ewb_dataout),
+    .empty_o(ewb_empty),
+    .valid_i(load_ewb),
+    .data_o(pmem_wdata),
+    .addr_o(ewb_pmem_address),
+    .yumi_i(wb_ewb),
+    .write_ewb_i(mem_write),
+    .replace_i(mem_wdata256),
+    .full_o(ewb_full)
+);
+
+always_comb begin
+    mem_rdata256 = datapath_dataout;
+    if (hit == 1'b1)
+        mem_rdata256 = datapath_dataout;
+    else if (ewb_hit == 1'b1)
+        mem_rdata256 = ewb_dataout;
+end
+
+always_comb begin
+    pmem_address = datapath_pmem_address;
+    if (pmem_write == 1'b1)
+        pmem_address = ewb_pmem_address;
+
+end
 
 l2_cache_control control (.*);
 
-l2_cache_datapath datapath (.*);
+l2_cache_datapath datapath (.mem_rdata256(datapath_dataout), .pmem_wdata(), .pmem_address(datapath_pmem_address), .*);
 
 
 endmodule : l2_cache

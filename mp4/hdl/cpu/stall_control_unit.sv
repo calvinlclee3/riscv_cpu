@@ -365,19 +365,14 @@ begin
     /* Data Cache Miss */
     if(data_mem_resp == 1'b0 && (ex_mem_out_ctrl.mem_read == 1'b1 || ex_mem_out_ctrl.mem_write == 1'b1))
     begin
+        if (~((id_ex_out_ctrl.opcode == op_reg || id_ex_out_ctrl.opcode == op_imm) && (id_ex_out_ctrl.rd_id != ex_mem_out_ctrl.rd_id) && (id_ex_out_ctrl.rs1_id != ex_mem_out_ctrl.rd_id && id_ex_out_ctrl.rs2_id != ex_mem_out_ctrl.rd_id)))
+        begin
         load_pc = 1'b0;
         pipeline_load(1'b0, 1'b0, 1'b0, 1'b0);
         global_stall = 1'b1;
         continue_i_cache = 1'b0;
-
-        if ((id_ex_out_ctrl.opcode == op_reg || id_ex_out_ctrl.opcode == op_imm) && (id_ex_out_ctrl.rd_id != ex_mem_out_ctrl.rd_id) && (id_ex_out_ctrl.rs1_id != ex_mem_out_ctrl.rd_id && id_ex_out_ctrl.rs2_id != ex_mem_out_ctrl.rd_id))
-        begin
-            leap = 1'b1;
-            load_pc = 1'b1;
-            pipeline_load(1'b1, 1'b1, 1'b0, 1'b1);
-            global_stall = 1'b0;
-            continue_i_cache = 1'b1;
         end
+
     end
 
 end

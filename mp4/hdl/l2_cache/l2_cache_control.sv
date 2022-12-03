@@ -512,7 +512,7 @@ begin : state_actions
     case(state)
         DEFAULT: begin
             if (ewb_empty == 1'b0)
-                counter -= 1'b1;
+                counter -= 8'b1;
         end
         READ_WRITE:
         begin

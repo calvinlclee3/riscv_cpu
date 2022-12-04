@@ -30,9 +30,9 @@ import rv32i_types::*;
 	output logic data_mem_resp
 );
 
-initial begin
- $monitor("a_pmem_address = %d\n", a_pmem_address);
-end
+// initial begin
+//  $monitor("a_pmem_address = %d\n", a_pmem_address);
+// end
 
 logic i_pmem_resp;
 logic [255:0] i_pmem_rdata;

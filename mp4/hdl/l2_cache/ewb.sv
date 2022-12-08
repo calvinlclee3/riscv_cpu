@@ -77,7 +77,6 @@ always_ff @(posedge clk) begin
             end
             default:;
         endcase
-    end
 
     if (tag_check == 1'b1)
     begin
@@ -89,6 +88,8 @@ always_ff @(posedge clk) begin
                 end
             end
         end
+    end
+
     end
 
 end

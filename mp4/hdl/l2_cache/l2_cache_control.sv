@@ -433,7 +433,7 @@ perf_counter #(.width(perf_counter_width)) l2miss (
 
 // endmodule : l2_cache_control
 
-logic [7:0] counter;
+logic [5:0] counter;
 
 enum int unsigned {
     /* List of states */
@@ -512,7 +512,7 @@ begin : state_actions
     case(state)
         DEFAULT: begin
             if (ewb_empty == 1'b0)
-                counter -= 8'b1;
+                counter -= 6'b1;
         end
         READ_WRITE:
         begin

@@ -52,7 +52,7 @@ assign enqueue = (valid_i == 1'b1) && (full_o == 1'b0);
 assign dequeue = (yumi_i == 1'b1) && (empty_o == 1'b0);
 
 /*************************** Non-Blocking Assignments ************************/
-always_ff @(posedge clk, posedge rst) begin
+always_ff @(posedge clk) begin
     if (rst) begin
         read_ptr  <= '0;
         write_ptr <= '0;

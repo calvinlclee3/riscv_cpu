@@ -162,7 +162,7 @@ always_ff @(posedge clk) begin
 always_comb begin
     hit_o = 1'b0;
     read_o = '0;
-        if (queue_addr[0][31:5] == tag_i && && queue_valid[0] == 1'b1)
+        if (queue_addr[0][31:5] == tag_i && queue_valid[0] == 1'b1)
         begin
                 read_o = queue_data[0];
                 hit_o = 1'b1;

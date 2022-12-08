@@ -2,9 +2,9 @@ module ewb
 import rv32i_types::*;
 #(
     width = 256,
-    index = 5, 
+    index = 3, 
     tag = 24, 
-    cap = 32
+    cap = 8
 )
 (
     input logic clk,
@@ -35,18 +35,19 @@ import rv32i_types::*;
 // Need memory to hold queued data
 logic [width-1:0] queue_data [cap];
 logic [31:0] queue_addr [cap];
+logic queue_valid [cap];
 
 // Pointers which point to the read and write ends of the queue
 logic [index-1:0] read_ptr, write_ptr, read_ptr_next, write_ptr_next;
 logic [index:0] queue_counter;
 
-assign write_ptr_next = ({27'b0, write_ptr} == cap-1)? '0: write_ptr + 5'b1;
-assign read_ptr_next = ({27'b0, read_ptr} == cap-1)? '0: read_ptr + 5'b1;
+assign write_ptr_next = ({29'b0, write_ptr} == cap-1)? '0: write_ptr + 3'b1;
+assign read_ptr_next = ({29'b0, read_ptr} == cap-1)? '0: read_ptr + 3'b1;
 
 // Helper logic
 logic enqueue, dequeue;
 
-assign full_o = ({26'b0, queue_counter} == cap)? 1'b1: 1'b0;
+assign full_o = ({28'b0, queue_counter} == cap)? 1'b1: 1'b0;
 assign empty_o = (queue_counter == '0)? 1'b1: 1'b0;
 assign enqueue = (valid_i == 1'b1) && (full_o == 1'b0);
 assign dequeue = (yumi_i == 1'b1) && (empty_o == 1'b0);
@@ -61,50 +62,154 @@ always_ff @(posedge clk) begin
         begin
             queue_data[i] <= '0;
             queue_addr[i] <= '0;
+            queue_valid[i] <= '0;
         end
     end
     else begin
         case ({enqueue, dequeue})
             2'b01: begin : dequeue_case
+                queue_valid[read_ptr] <= 1'b0;
                 read_ptr <= read_ptr_next;
-                queue_counter <= queue_counter - 6'b1;
+                queue_counter <= queue_counter - 4'b1;
             end
             2'b10: begin : enqueue_case
                 queue_data[write_ptr] <= data_i;
                 queue_addr[write_ptr] <= addr_i;
+                queue_valid[write_ptr] <= 1'b1;
                 write_ptr <= write_ptr_next;
-                queue_counter <= queue_counter + 6'b1;
+                queue_counter <= queue_counter + 4'b1;
             end
             default:;
         endcase
 
-    if (tag_check == 1'b1)
-    begin
-        for (int i = 0; i < {26'b0, queue_counter}; ++i) begin
-            if (queue_addr[(i+read_ptr)%cap][31:5] == tag_i) begin
+//queue_data[(i+read_ptr)%cap] <= replace_i;
+        if (queue_addr[0][31:5] == tag_i)
+        begin
                 if (write_ewb_i == 1'b1)
                 begin
-                    queue_data[(i+read_ptr)%cap] <= replace_i;
+                    queue_data[0] <= replace_i;
+                    queue_valid[0] <= 1'b1;
                 end
+        end
+
+        else if (queue_addr[1][31:5] == tag_i) begin
+            if (write_ewb_i == 1'b1)
+            begin
+                queue_data[1] <= replace_i;
+                queue_valid[1] <= 1'b1;
+            end
+
+        end
+
+        else if (queue_addr[2][31:5] == tag_i) begin
+            if (write_ewb_i == 1'b1)
+            begin
+                queue_data[2] <= replace_i;
+                queue_valid[2] <= 1'b1;
+            end
+
+        end
+
+
+        else if (queue_addr[3][31:5] == tag_i) begin
+            if (write_ewb_i == 1'b1)
+            begin
+                queue_data[3] <= replace_i;
+                queue_valid[3] <= 1'b1;
+            end
+
+        end
+
+        else if (queue_addr[4][31:5] == tag_i) begin
+            if (write_ewb_i == 1'b1)
+            begin
+                queue_data[4] <= replace_i;
+                queue_valid[4] <= 1'b1;
             end
         end
-    end
+
+        else if (queue_addr[5][31:5] == tag_i) begin
+            if (write_ewb_i == 1'b1)
+            begin
+                queue_data[5] <= replace_i;
+                queue_valid[5] <= 1'b1;
+            end
+
+        end
+
+        else if (queue_addr[6][31:5] == tag_i) begin
+            if (write_ewb_i == 1'b1)
+            begin
+                queue_data[6] <= replace_i;
+                queue_valid[6] <= 1'b1;
+            end
+        end
+        
+        else if (queue_addr[7][31:5] == tag_i) begin
+            if (write_ewb_i == 1'b1)
+            begin
+                queue_data[7] <= replace_i;
+                queue_valid[7] <= 1'b1;
+            end
+
+        end
+
 
     end
 
-end
+    end
 
 always_comb begin
     hit_o = 1'b0;
     read_o = '0;
-    if (tag_check == 1'b1) begin
-        for (int i = 0; i < {26'b0, queue_counter}; ++i) begin
-            if (queue_addr[(i+read_ptr)%cap][31:5] == tag_i) begin
+        if (queue_addr[0][31:5] == tag_i && && queue_valid[0] == 1'b1)
+        begin
+                read_o = queue_data[0];
                 hit_o = 1'b1;
-                read_o = queue_data[(i+read_ptr)%cap];
-            end
+                
         end
-    end
+
+        else if (queue_addr[1][31:5] == tag_i && queue_valid[1] == 1'b1) begin
+            read_o = queue_data[1];
+            hit_o = 1'b1;
+
+        end
+
+        else if (queue_addr[2][31:5] == tag_i && queue_valid[2] == 1'b1) begin
+            read_o = queue_data[2];
+            hit_o = 1'b1;
+
+        end
+
+
+        else if (queue_addr[3][31:5] == tag_i && queue_valid[3] == 1'b1) begin
+            read_o = queue_data[3];
+            hit_o = 1'b1;
+
+        end
+
+        else if (queue_addr[4][31:5] == tag_i && queue_valid[4] == 1'b1) begin
+            read_o = queue_data[4];
+            hit_o = 1'b1;
+        end
+
+        else if (queue_addr[5][31:5] == tag_i && queue_valid[5] == 1'b1) begin
+            read_o = queue_data[5];
+            hit_o = 1'b1;
+
+        end
+
+        else if (queue_addr[6][31:5] == tag_i && queue_valid[6] == 1'b1) begin
+            read_o = queue_data[6];
+            hit_o = 1'b1;
+
+        end
+        
+        else if (queue_addr[7][31:5] == tag_i && queue_valid[7] == 1'b1) begin
+            read_o = queue_data[7];
+            hit_o = 1'b1;
+
+        end
 end
 
 assign data_o = queue_data[read_ptr];

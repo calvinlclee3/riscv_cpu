@@ -51,7 +51,7 @@ read_saif -input ../sim/dump.fsdb.saif -instance mp4_tb/dut
 
 set_max_area 500000 -ignore_tns
 set clk_name $design_clock_pin
-create_clock -period 10 -name my_clk $clk_name
+create_clock -period 5.5 -name my_clk $clk_name
 set_dont_touch_network [get_clocks my_clk]
 set_fix_hold [get_clocks my_clk]
 set_clock_uncertainty 0.1 [get_clocks my_clk]

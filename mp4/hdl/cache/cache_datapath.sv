@@ -25,16 +25,16 @@ module cache_datapath (
 );
 
 logic [255:0] line_in, line_out;
-logic [23:0] address_tag, tag_out;
-logic [2:0]  index;
+logic [22:0] address_tag, tag_out;
+logic [3:0]  index;
 logic [31:0] mask;
 logic valid_out;
 
 always_comb begin
-  address_tag = mem_address[31:8];
-  index = mem_address[7:5];
+  address_tag = mem_address[31:9];
+  index = mem_address[8:5];
   hit = valid_out && (tag_out == address_tag);
-  pmem_address = (dirty_out) ? {tag_out, mem_address[7:0]} : mem_address;
+  pmem_address = (dirty_out) ? {tag_out, mem_address[8:0]} : mem_address;
   mem_rdata = line_out;
   pmem_wdata = line_out;
 
@@ -55,7 +55,7 @@ always_comb begin
 end
 
 data_array DM_cache (clk, rst, mask, index, index, line_in, line_out);
-array #(24) tag (clk, rst, tag_load, index, index, address_tag, tag_out);
+array #(23) tag (clk, rst, tag_load, index, index, address_tag, tag_out);
 array #(1) valid (clk, rst, valid_load, index, index, 1'b1, valid_out);
 array #(1) dirty (clk, rst, dirty_load, index, index, dirty_in, dirty_out);
 

@@ -533,6 +533,8 @@ begin : state_actions
             else if (ewb_hit == 1'b1)
             mem_resp = 1'b1;
 
+            else num_l2_miss_count = 1'b1;
+
             if(mem_read)
             begin
                 if(way_0_hit == 1'b1 && way_1_hit == 1'b0 && way_2_hit == 1'b0 && way_3_hit == 1'b0)
